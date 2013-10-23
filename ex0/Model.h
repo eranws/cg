@@ -19,6 +19,9 @@ class Model {
 	
 	GLuint _vao, _vbo;
 
+	// Program handle:
+	GLuint program;
+
 	// Attribute handle:
 	GLint _posAttrib;
 	
@@ -37,8 +40,11 @@ public:
 	virtual ~Model();
 
 public:
+	void loadData();
+
+public:
 	void init();
-	
+
 public:
 	void draw();
 	

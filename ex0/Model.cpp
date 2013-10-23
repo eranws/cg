@@ -22,7 +22,7 @@
 #define SHADERS_DIR "shaders/"
 
 Model::Model() :
-_vao(0), _vbo(0), numberOfVertices(100)
+_vao(0), _vbo(0), _program(0), numberOfVertices(100)
 {
 
 }
@@ -35,6 +35,54 @@ Model::~Model()
 		glDeleteBuffers(1, &_vbo);
 }
 
+void Model::loadData()
+{
+	// Initialize vertices buffer and transfer it to OpenGL
+		{
+			const int precision = numberOfVertices;
+
+			const float PI = 3.14159265358979323846;
+			float step = 2 * PI / precision;
+			float* vertices = new float[precision * 4];
+			const float relativeSize = 0.6; // circle size relative to the window
+
+			for(unsigned int i = 0; i < precision; ++i)
+			{
+				vertices[i*4 + 0] = cosf(i * step);
+				vertices[i*4 + 1] = sinf(i * step);
+				vertices[i*4 + 0] = cosf(i * step) * relativeSize;
+				vertices[i*4 + 1] = sinf(i * step) * relativeSize;
+
+				vertices[i*4 + 2] = 0.0f;
+				vertices[i*4 + 3] = 1.0f;
+			}
+
+			// Create and bind the object's Vertex Array Object:
+			glGenVertexArrays(1, &_vao);
+			glBindVertexArray(_vao);
+
+			// Create and load vertex data into a Vertex Buffer Object:
+			glGenBuffers(1, &_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * precision * 4, vertices, GL_STATIC_DRAW);
+
+			// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
+
+			// Obtain attribute handles:
+			_posAttrib = glGetAttribLocation(_program, "position");
+			glEnableVertexAttribArray(_posAttrib);
+			glVertexAttribPointer(_posAttrib, // attribute handle
+								  4,          // number of scalars per vertex
+								  GL_FLOAT,   // scalar type
+								  GL_FALSE,
+								  0,
+								  0);
+
+			// Unbind vertex array:
+			glBindVertexArray(0);
+		}
+}
+
 void Model::init()
 {
 	programManager::sharedInstance()
@@ -42,55 +90,12 @@ void Model::init()
 				   SHADERS_DIR "ChekersShader.vert",
 				   SHADERS_DIR "ChekersShader.frag");
 
-	GLuint program = programManager::sharedInstance().programWithID("default");
+	_program = programManager::sharedInstance().programWithID("default");
 		
 	// Obtain uniform variable handles:
-	_fillColorUV  = glGetUniformLocation(program, "fillColor");
+	_fillColorUV  = glGetUniformLocation(_program, "fillColor");
 
-	// Initialize vertices buffer and transfer it to OpenGL
-	{
-		const int precision = numberOfVertices;
-
-		const float PI = 3.14159265358979323846;
-		float step = 2 * PI / precision;
-		float* vertices = new float[precision * 4];
-		const float relativeSize = 0.6; // circle size relative to the window
-	
-		for(unsigned int i = 0; i < precision; ++i)
-		{
-			vertices[i*4 + 0] = cosf(i * step);
-			vertices[i*4 + 1] = sinf(i * step);
-			vertices[i*4 + 0] = cosf(i * step) * relativeSize;
-			vertices[i*4 + 1] = sinf(i * step) * relativeSize;
-
-			vertices[i*4 + 2] = 0.0f;
-			vertices[i*4 + 3] = 1.0f;
-		}
-		
-		// Create and bind the object's Vertex Array Object:
-		glGenVertexArrays(1, &_vao);
-		glBindVertexArray(_vao);
-		
-		// Create and load vertex data into a Vertex Buffer Object:
-		glGenBuffers(1, &_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * precision * 4, vertices, GL_STATIC_DRAW);
-		
-		// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
-
-		// Obtain attribute handles:
-		_posAttrib = glGetAttribLocation(program, "position");
-		glEnableVertexAttribArray(_posAttrib);
-		glVertexAttribPointer(_posAttrib, // attribute handle
-							  4,          // number of scalars per vertex
-							  GL_FLOAT,   // scalar type
-							  GL_FALSE,
-							  0,
-							  0);
-		
-		// Unbind vertex array:
-		glBindVertexArray(0);
-	}
+	loadData();
 }
 
 void Model::draw()
