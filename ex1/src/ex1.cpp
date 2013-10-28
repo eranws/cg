@@ -61,7 +61,7 @@ void timer(int value) ;
 
 int     g_nFPS = 0, g_nFrames = 0;              // FPS and FPS Counter
 int     g_dwLastFPS = 0;                        // Last FPS Check Time
-bool    g_startAnimation = false;
+bool    isAnimating = false;
 bool    g_duringAnimation = false;
 
 // A global variable for our model (a better practice would be to use a singletone that holds all model):
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	//start animation
-	g_startAnimation = true;
+	isAnimating = true;
 
 	// Start events/drawing loop
 	glutMainLoop();
@@ -178,9 +178,7 @@ void keyboard(unsigned char key, int x, int y)
             // For use in a future exercise
             break;
         case KEY_ANIMATE:
-            if (!g_duringAnimation) {
-                g_startAnimation = true;
-            }
+        	isAnimating = !isAnimating;
             break;
         case KEY_QUIT:
         case KEY_ESC:
@@ -240,17 +238,14 @@ void motion(int x, int y)
 
 void timer(int value) {
     /* Set the timer to be called again in X milli - seconds. */
-    if (g_startAnimation)
+    if (isAnimating)
 	{
-        value = 0;
-        g_duringAnimation = true;
-        g_startAnimation = false;
+		_model.update();
     }
 
-    glutTimerFunc(5, timer, ++value);   // uint millis int value
+    glutTimerFunc(20, timer, ++value);   // uint millis int value
     
-    if (g_duringAnimation) {
-		_model.update();
+    if (isAnimating) {
         glutPostRedisplay();
     }
 }

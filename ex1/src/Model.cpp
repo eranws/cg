@@ -68,11 +68,11 @@ void Model::init()
 {
 	programManager::sharedInstance()
 	.createProgram("default",
-				   SHADERS_DIR "TranslateShader.vert",
-				   SHADERS_DIR "CheckeredShader.frag");
+			SHADERS_DIR "TranslateShader.vert",
+			SHADERS_DIR "CheckeredShader.frag");
 
 	GLuint program = programManager::sharedInstance().programWithID("default");
-		
+
 	// Obtain uniform variable handles:
 	_fillColorUV  = glGetUniformLocation(program, "fillColor");
 	_uniTrans = glGetUniformLocation(program, "trans");
@@ -94,12 +94,12 @@ void Model::init()
 		_posAttrib = glGetAttribLocation(program, "position");
 		glEnableVertexAttribArray(_posAttrib);
 		glVertexAttribPointer(_posAttrib, // attribute handle
-							  4,          // number of scalars per vertex
-							  GL_FLOAT,   // scalar type
-							  GL_FALSE,
-							  0,
-							  0);
-		
+				4,          // number of scalars per vertex
+				GL_FLOAT,   // scalar type
+				GL_FALSE,
+				0,
+				0);
+
 		// Unbind vertex array:
 		glBindVertexArray(0);
 	}
@@ -141,33 +141,48 @@ void Model::draw()
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, _numVertices);
 	}
-	
+
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
-	
+
 	// Cleanup, not strictly necessary
 	glUseProgram(0);
 }
 
 void Model::resize(int width, int height)
 {
-    _width	= width;
-    _height = height;
-    _offsetX = 0;
-    _offsetY = 0;
-    //change number of vertices according to window size, minimum is one vertex, max is 50
-    _numVertices = std::min(50, std::min(width, height));
-    genCircleVertices();
+	_width	= width;
+	_height = height;
+	_offsetX = 0;
+	_offsetY = 0;
+	//change number of vertices according to window size, minimum is one vertex, max is 50
+	_numVertices = std::min(50, std::min(width, height));
+	genCircleVertices();
 }
 
 void Model::mouse(int button, int state, int x, int y)
 {
-	Ball b(x,y,this);
-	_balls.push_back(b);
+	glm::vec2 pos(x, y);
+	bool isClear = true; //check if we didn't hit any other ball
+	for (size_t i=0; i<_balls.size();i++)
+	{
+		float dist = glm::distance(pos, _balls[i].pos);
+		if (dist <= _balls[i].radius)
+		{
+			isClear = false;
+		}
+	}
+
+	if (isClear)
+	{
+		_balls.push_back(Ball(x,y,this));
+	}
+
 }
 
 void Model::update()
 {
+	// update positions
 	for (size_t i=0; i<_balls.size();i++)
 	{
 		_balls[i].update();
@@ -182,13 +197,18 @@ void Model::update()
 		{
 			if (i==j) continue;
 			float dist = glm::distance(_balls[i].pos, _balls[j].pos);
-			if (dist <= _balls[i].initialRadius + _balls[j].initialRadius)
+
+			float tempRadius = minRadius;
+
+			if (dist < _balls[i].initialRadius + _balls[j].initialRadius)
 			{
-				float tempRadius = dist - _balls[j].radius;
-				if (tempRadius < minRadius)
-				{
-					minRadius = tempRadius;
-				}
+				tempRadius = (dist - _balls[j].radius + _balls[i].radius) / 2;
+			}
+
+			// update radius
+			if (tempRadius < minRadius)
+			{
+				minRadius = tempRadius;
 			}
 		}
 		minRads[i] = minRadius;
@@ -196,8 +216,9 @@ void Model::update()
 
 	for (size_t i=0; i<_balls.size();i++)
 	{
-		_balls[i].radius = minRads[i];
+		_balls[i].setRadius(minRads[i]);
 	}
+
 
 
 

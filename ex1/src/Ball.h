@@ -29,8 +29,10 @@ struct Ball {
 	//The radius of the ball
 	GLfloat radius;
 	GLfloat initialRadius;
+	void setRadius(float radius);
 
 	static const GLfloat DEFAULT_RAD = 50;
+
 
 	//The position of the ball
 	glm::vec2 pos;

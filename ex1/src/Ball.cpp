@@ -71,3 +71,16 @@ void Ball::update()
 
 	pos += dir;
 }
+
+
+void Ball::setRadius(float r)
+{
+	// check boundaries so we won't expand ball out of the window frame
+	// we add also dir to avoid jittering caused from resize and translation
+	r = std::min(r, _model->getWidth() - pos.x + dir.x);
+	r = std::min(r, pos.x - dir.x);
+	r = std::min(r, _model->getHeight() - pos.y + dir.y);
+	r = std::min(r, pos.y - dir.y);
+
+	radius = r;
+}
