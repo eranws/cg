@@ -1,0 +1,7 @@
+*~
+.cproject
+.project
+*.tar
+*.zip
+*.o
+.metadata/
