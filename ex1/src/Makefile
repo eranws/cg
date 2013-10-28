@@ -31,10 +31,10 @@ HDRS	=  	ex1.h		\
 		Ball.h
 
 # list EXTRAS (shaders, etc.)
-EXTRAS =	shaders/CheckeredShader.frag \
-		shaders/TranslateShader.vert
-		Readme.txt
-		Makefile
+EXTRAS =	shaders/CheckeredShader.frag	\
+		shaders/TranslateShader.vert	\
+		Readme.txt			\
+		Makefile			\
 
 # compiler 
 CC	= g++
