@@ -20,7 +20,7 @@ class Model {
 	GLuint _vao, _vbo;
 
 	// Program handle:
-	GLuint program;
+	GLuint _program;
 
 	// Attribute handle:
 	GLint _posAttrib;

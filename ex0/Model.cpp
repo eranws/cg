@@ -38,60 +38,62 @@ Model::~Model()
 void Model::loadData()
 {
 	// Initialize vertices buffer and transfer it to OpenGL
-		{
-			const int precision = numberOfVertices;
 
-			const float PI = 3.14159265358979323846;
-			float step = 2 * PI / precision;
-			float* vertices = new float[precision * 4];
-			const float relativeSize = 0.6; // circle size relative to the window
+	const int precision = numberOfVertices;
 
-			for(unsigned int i = 0; i < precision; ++i)
-			{
-				vertices[i*4 + 0] = cosf(i * step);
-				vertices[i*4 + 1] = sinf(i * step);
-				vertices[i*4 + 0] = cosf(i * step) * relativeSize;
-				vertices[i*4 + 1] = sinf(i * step) * relativeSize;
+	const float PI = 3.14159265358979323846;
+	float step = 2 * PI / precision;
+	float* vertices = new float[precision * 4];
+	const float relativeSize = 0.6; // circle size relative to the window
 
-				vertices[i*4 + 2] = 0.0f;
-				vertices[i*4 + 3] = 1.0f;
-			}
+	for(unsigned int i = 0; i < precision; ++i)
+	{
+		vertices[i*4 + 0] = cosf(i * step);
+		vertices[i*4 + 1] = sinf(i * step);
+		vertices[i*4 + 0] = cosf(i * step) * relativeSize;
+		vertices[i*4 + 1] = sinf(i * step) * relativeSize;
 
-			// Create and bind the object's Vertex Array Object:
-			glGenVertexArrays(1, &_vao);
-			glBindVertexArray(_vao);
+		vertices[i*4 + 2] = 0.0f;
+		vertices[i*4 + 3] = 1.0f;
+	}
 
-			// Create and load vertex data into a Vertex Buffer Object:
-			glGenBuffers(1, &_vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * precision * 4, vertices, GL_STATIC_DRAW);
+	// Create and bind the object's Vertex Array Object:
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
 
-			// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
+	// Create and load vertex data into a Vertex Buffer Object:
+	glGenBuffers(1, &_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * precision * 4, vertices, GL_STATIC_DRAW);
 
-			// Obtain attribute handles:
-			_posAttrib = glGetAttribLocation(_program, "position");
-			glEnableVertexAttribArray(_posAttrib);
-			glVertexAttribPointer(_posAttrib, // attribute handle
-								  4,          // number of scalars per vertex
-								  GL_FLOAT,   // scalar type
-								  GL_FALSE,
-								  0,
-								  0);
+	delete[] vertices;
 
-			// Unbind vertex array:
-			glBindVertexArray(0);
-		}
+	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
+
+	// Obtain attribute handles:
+	_posAttrib = glGetAttribLocation(_program, "position");
+	glEnableVertexAttribArray(_posAttrib);
+	glVertexAttribPointer(_posAttrib, // attribute handle
+			4,          // number of scalars per vertex
+			GL_FLOAT,   // scalar type
+			GL_FALSE,
+			0,
+			0);
+
+	// Unbind vertex array:
+	glBindVertexArray(0);
+
 }
 
 void Model::init()
 {
 	programManager::sharedInstance()
 	.createProgram("default",
-				   SHADERS_DIR "ChekersShader.vert",
-				   SHADERS_DIR "ChekersShader.frag");
+			SHADERS_DIR "ChekersShader.vert",
+			SHADERS_DIR "ChekersShader.frag");
 
 	_program = programManager::sharedInstance().programWithID("default");
-		
+
 	// Obtain uniform variable handles:
 	_fillColorUV  = glGetUniformLocation(_program, "fillColor");
 
@@ -113,20 +115,25 @@ void Model::draw()
 
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
-	
+
 	glDrawArrays(GL_TRIANGLE_FAN, 0, numberOfVertices); //for some reason GL_POLYGON didn't work...
-	
+
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
-	
+
 	// Cleanup, not strictly necessary
 	glUseProgram(0);
 }
 
 void Model::resize(int width, int height)
 {
-    _width	= width;
-    _height = height;
-    _offsetX = 0;
-    _offsetY = 0;
+	_width	= width;
+	_height = height;
+	_offsetX = 0;
+	_offsetY = 0;
+
+	int r = std::min(_width, _height);
+	numberOfVertices = r / 5;
+	loadData();
+
 }

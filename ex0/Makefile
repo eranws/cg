@@ -9,12 +9,23 @@
 #
 ##################################################################
 
-EXEC = 
+EXEC = ex0
+LOGIN = eranws
+ID = 300489960
 
 # list of all the sources files
 SRCS	=  	ex0.cpp		\
 		Model.cpp 	\
 		ShaderIO.cpp	\
+
+# list of all the headers files
+HDRS	=  	ex0.h		\
+		Model.h 	\
+		ShaderIO.h	\
+
+EXTRAS =	shaders/ChekersShader.frag \
+		shaders/ChekersShader.vert
+
 			
 # compiler 
 CC	= g++
@@ -79,10 +90,8 @@ $(APP) : $(OBJS)
 
 $(OBJS) : $(SRCS)
 
-
-tar:
-	tar cvf $(EXEC).tar Makefile $(SRCS) $(HDRS) README
-	
+zip:
+	zip $(EXEC)_$(ID)_$(LOGIN).zip Makefile $(SRCS) $(HDRS) $(EXTRAS) Readme.txt
 
 .PHONY:
 clean :
