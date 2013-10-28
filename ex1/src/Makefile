@@ -19,13 +19,13 @@ ID2 = 302514401
 
 
 # list of all the sources files
-SRCS	=  	ex0.cpp		\
+SRCS	=  	ex1.cpp		\
 		Model.cpp 	\
 		ShaderIO.cpp	\
-        	Ball.cpp \
+		Ball.cpp \
 
 # list of all the headers files
-HDRS	=  	ex0.h		\
+HDRS	=  	ex1.h		\
 		Model.h 	\
 		ShaderIO.h	\
 		Ball.h
@@ -33,8 +33,9 @@ HDRS	=  	ex0.h		\
 # list EXTRAS (shaders, etc.)
 EXTRAS =	shaders/CheckeredShader.frag \
 		shaders/TranslateShader.vert
+		Readme.txt
+		Makefile
 
-			
 # compiler 
 CC	= g++
 
@@ -52,15 +53,13 @@ ifdef DBG
 		-O0		\
 		-g3		\
 		-Wno-deprecated
-					
-						
+
 else
 
 	CFLAGS = 		\
 		-Wall		\
 		-DNDEBUG    \
 		-O2
-				 
 endif
 
 
@@ -102,11 +101,10 @@ run: $(APP)
 	$(APP)
 
 zip:
-	zip $(EXEC)_$(ID1)_$(LOGIN1)_$(ID2)_$(LOGIN2).zip Makefile $(SRCS) $(HDRS) $(EXTRAS) Readme.txt
+	zip $(EXEC)_$(ID1)_$(LOGIN1)_$(ID2)_$(LOGIN2).zip $(SRCS) $(HDRS) $(EXTRAS)
 
 tar:
 	tar cvf $(EXEC).tar Makefile $(SRCS) $(HDRS) README
-	
 
 .PHONY:
 clean :
