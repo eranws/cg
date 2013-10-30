@@ -31,45 +31,46 @@ float randf()
 
 Ball::Ball(int xPos, int yPos, const Model* model)
 {
-	pos.x = xPos;
-	pos.y = yPos;
+	_pos.x = xPos;
+	_pos.y = yPos;
 
 	_model = model;
 
-	color = glm::vec3(randf(), randf(), randf());
-	dir = glm::normalize(glm::vec2(randf()*2 - 1, randf()*2 - 1));
+	_color = glm::vec3(randf(), randf(), randf());
+	_dir = glm::normalize(glm::vec2(randf()*2 - 1, randf()*2 - 1));
 
-	initialRadius = DEFAULT_RAD;
+	_initialRadius = DEFAULT_RAD;
 
 	// checking boundary conditions
-	initialRadius = std::min(initialRadius, pos.x);
-	initialRadius = std::min(initialRadius, pos.y);
-	initialRadius = std::min(initialRadius, _model->getWidth() - pos.x);
-	initialRadius = std::min(initialRadius, _model->getHeight() - pos.y);
+	_initialRadius = std::min(_initialRadius, _pos.x);
+	_initialRadius = std::min(_initialRadius, _pos.y);
+	_initialRadius = std::min(_initialRadius, _model->getWidth() - _pos.x);
+	_initialRadius = std::min(_initialRadius, _model->getHeight() - _pos.y);
 
 	// check with other balls
 	for (size_t j=0; j<_model->_balls.size();j++)
 	{
-		float dist = glm::distance(pos, _model->_balls[j].pos);
-		initialRadius = std::min(initialRadius, dist);
+		float dist = glm::distance(_pos, _model->_balls[j]._pos);
+		_initialRadius = std::min(_initialRadius, dist);
 	}
 
 
+	_radius = _initialRadius;
 
-	radius = initialRadius;
 }
 
 
 void Ball::update()
 {
-	if(pos.x + radius >= _model->getWidth() || pos.x - radius <= 0) {
-		dir.x *= -1;
+	if(_pos.x + _radius >= _model->getWidth() || _pos.x - _radius <= 0) {
+		_dir.x *= -1;
 	}
-	if(pos.y + radius >= _model->getHeight() || pos.y - radius <= 0) {
-		dir.y *= -1;
+	if(_pos.y + _radius >= _model->getHeight() || _pos.y - _radius <= 0) {
+		_dir.y *= -1;
 	}
 
-	pos += dir;
+	_pos += glm::vec2(_dir.x * 3, _dir.y * 3);
+//	_pos += _dir;
 }
 
 
@@ -77,10 +78,10 @@ void Ball::setRadius(float r)
 {
 	// check boundaries so we won't expand ball out of the window frame
 	// we add also dir to avoid jittering caused from resize and translation
-	r = std::min(r, _model->getWidth() - pos.x + dir.x);
-	r = std::min(r, pos.x - dir.x);
-	r = std::min(r, _model->getHeight() - pos.y + dir.y);
-	r = std::min(r, pos.y - dir.y);
+	r = std::min(r, _model->getWidth() - _pos.x + _dir.x);
+	r = std::min(r, _pos.x - _dir.x);
+	r = std::min(r, _model->getHeight() - _pos.y + _dir.y);
+	r = std::min(r, _pos.y - _dir.y);
 
-	radius = r;
+	_radius = r;
 }

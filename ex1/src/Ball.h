@@ -24,21 +24,21 @@ struct Ball {
 	void update();
 
 	//The color of the ball
-	glm::vec3 color;
+	glm::vec3 _color;
 
 	//The radius of the ball
-	GLfloat radius;
-	GLfloat initialRadius;
+	GLfloat _radius;
+	GLfloat _initialRadius;
 	void setRadius(float radius);
 
-	static const GLfloat DEFAULT_RAD = 50;
+	static const GLfloat DEFAULT_RAD = 30;
 
 
 	//The position of the ball
-	glm::vec2 pos;
+	glm::vec2 _pos;
 
 	//Moving direction of the ball (velocity)
-	glm::vec2 dir;
+	glm::vec2 _dir;
 
 	//The model
 	const Model* _model;

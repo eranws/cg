@@ -65,7 +65,7 @@ bool    isAnimating = false;
 bool    g_duringAnimation = false;
 
 // A global variable for our model (a better practice would be to use a singletone that holds all model):
-Model _model;
+Model _model(WINDOW_SIZE, WINDOW_SIZE);
 
 /** main function */
 int main(int argc, char* argv[])

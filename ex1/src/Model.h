@@ -23,6 +23,7 @@
 
 #define DEFAULT_VERTICES_NUM 40
 #define PI 3.14159265
+#define LIGHT_SOURCE 300.0, 300.0
 
 class Ball;
 class Model {
@@ -34,23 +35,27 @@ class Model {
 	
 	// Uniform handle:
 	GLint _fillColorUV;
-	GLint _uniTrans;
+	GLint _transformUV;
+	GLint _centerUV;
+	GLint _lightSourceUV;
+	GLint _radiusUV;
 	
+	//number of vertices in the circle, not including center and last perimeter vertex (i.e total number of vertices - 2)
+	int _numVertices;
+
 	// View port frame:
 	float _width, _height, _offsetX, _offsetY;
 
 	//circle vertices, including center and perimeter vertices.
 	float* _vertices;
 
-	//number of vertices in the circle, not including center and last perimeter vertex (i.e total number of vertices - 2)
-	int _numVertices;
 
 	//Balls array
 	std::vector <Ball> _balls;
 	friend class Ball;
 
 public:
-	Model();
+	Model(float w, float h);
 
 	virtual ~Model();
 

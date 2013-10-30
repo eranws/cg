@@ -22,8 +22,8 @@
 
 #define SHADERS_DIR "shaders/"
 
-Model::Model() :
-_vao(0), _vbo(0),_numVertices(DEFAULT_VERTICES_NUM)
+Model::Model(float w, float h) :
+_vao(0), _vbo(0),_numVertices(DEFAULT_VERTICES_NUM), _width(w), _height(h)
 {
 
 }
@@ -69,13 +69,16 @@ void Model::init()
 	programManager::sharedInstance()
 	.createProgram("default",
 			SHADERS_DIR "TranslateShader.vert",
-			SHADERS_DIR "CheckeredShader.frag");
+			SHADERS_DIR "LightShader.frag");
 
 	GLuint program = programManager::sharedInstance().programWithID("default");
 
 	// Obtain uniform variable handles:
 	_fillColorUV  = glGetUniformLocation(program, "fillColor");
-	_uniTrans = glGetUniformLocation(program, "trans");
+	_transformUV = glGetUniformLocation(program, "transform");
+	_centerUV  = glGetUniformLocation(program, "ballCenter");
+	_lightSourceUV  = glGetUniformLocation(program, "lightSource");
+	_radiusUV = glGetUniformLocation(program, "radius");
 
 	// Initialize vertices buffer and transfer it to OpenGL
 	{
@@ -100,8 +103,8 @@ void Model::init()
 				0,
 				0);
 
-		// Unbind vertex array:
 		glBindVertexArray(0);
+		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, 300.0, 300.0);
 	}
 }
 
@@ -110,7 +113,7 @@ glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 	glm::vec2 res = pos;
 	res.x = 2 * (res.x / _width) - 1.f;
 	res.y = 2 * (res.y / _height) - 1.f;
-	res.y *= -1; // y axis is pointing upwards
+//	res.y *= -1; // y axis is pointing upwards
 	return res;
 
 }
@@ -130,14 +133,19 @@ void Model::draw()
 	for (size_t i=0; i<_balls.size();i++)
 	{
 		Ball& ball = _balls[i];
-		glUniform4f(_fillColorUV, ball.color.r, ball.color.g, ball.color.b, 1.0);
 
-		glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(2 * ball.radius / _width, 2 * ball.radius / _height, 0));
-		glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(getScreenUnitCoordinates(ball.pos), 0));
+		glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(2 * ball._radius / _width, 2 * ball._radius / _height, 0));
+		glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(getScreenUnitCoordinates(ball._pos), 0));
 
 		glm::mat4 transform = tr * sc;
 
-		glUniformMatrix4fv(_uniTrans, 1, GL_FALSE, glm::value_ptr(transform));
+		glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
+
+		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
+		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
+		glUniform1f(_radiusUV, ball._radius);
+		glUniform2f(_lightSourceUV, LIGHT_SOURCE);
+
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, _numVertices);
 	}
@@ -158,16 +166,18 @@ void Model::resize(int width, int height)
 	//change number of vertices according to window size, minimum is one vertex, max is 50
 	_numVertices = std::min(50, std::min(width, height));
 	genCircleVertices();
+
+//
 }
 
 void Model::mouse(int button, int state, int x, int y)
 {
-	glm::vec2 pos(x, y);
+	glm::vec2 pos(x, _height - y);
 	bool isClear = true; //check if we didn't hit any other ball
 	for (size_t i=0; i<_balls.size();i++)
 	{
-		float dist = glm::distance(pos, _balls[i].pos);
-		if (dist <= _balls[i].radius)
+		float dist = glm::distance(pos, _balls[i]._pos);
+		if (dist <= _balls[i]._radius)
 		{
 			isClear = false;
 		}
@@ -175,7 +185,7 @@ void Model::mouse(int button, int state, int x, int y)
 
 	if (isClear)
 	{
-		_balls.push_back(Ball(x,y,this));
+		_balls.push_back(Ball(pos.x, pos.y, this));
 	}
 
 }
@@ -192,17 +202,17 @@ void Model::update()
 	// check for collisions
 	for (size_t i=0; i<_balls.size();i++)
 	{
-		float minRadius = _balls[i].initialRadius;
+		float minRadius = _balls[i]._initialRadius;
 		for (size_t j=0; j<_balls.size();j++)
 		{
 			if (i==j) continue;
-			float dist = glm::distance(_balls[i].pos, _balls[j].pos);
+			float dist = glm::distance(_balls[i]._pos, _balls[j]._pos);
 
 			float tempRadius = minRadius;
 
-			if (dist < _balls[i].initialRadius + _balls[j].initialRadius)
+			if (dist < _balls[i]._initialRadius + _balls[j]._initialRadius)
 			{
-				tempRadius = (dist - _balls[j].radius + _balls[i].radius) / 2;
+				tempRadius = (dist - _balls[j]._radius + _balls[i]._radius) / 2;
 			}
 
 			// update radius
@@ -218,8 +228,4 @@ void Model::update()
 	{
 		_balls[i].setRadius(minRads[i]);
 	}
-
-
-
-
 }
