@@ -23,7 +23,7 @@
 
 #define DEFAULT_VERTICES_NUM 40
 #define PI 3.14159265
-#define LIGHT_SOURCE1 200.0, 2000.0
+#define LIGHT_SOURCE1 200.0, 200.0
 #define LIGHT_SOURCE2 400.0, 400.0
 
 class Ball;
