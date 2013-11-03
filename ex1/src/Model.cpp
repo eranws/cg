@@ -15,6 +15,9 @@
 #include <GL/gl.h>
 #endif
 
+
+#include <stdlib.h>
+
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -221,7 +224,7 @@ void Model::update()
 				minRadius = tempRadius;
 			}
 		}
-		minRads[i] = minRadius;
+		minRads[i] = std::max(minRadius, 1.0f);
 	}
 
 	for (size_t i=0; i<_balls.size();i++)

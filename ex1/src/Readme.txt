@@ -1,0 +1,33 @@
+eranws 300489960
+ilansh 302514401
+
+Implementation:
+---
+We've used ex0 model to generate a circle, but in each draw() function call we passed the position argument to the vertex shader.
+
+The Ball struct holds all the data relevant to each ball, as well as the rules how to update it when it moves and collides with other balls and walls.
+
+When two balls collide, each ball shrinks its size to the average point of where their both radii won't collide.
+
+Files sent:
+---
+Readme.txt - this file
+
+shaders/LightShader.frag
+shaders/TranslateShader.vert
+
+Ball.cpp
+Ball.h
+
+ShaderIO.cpp
+Model.cpp
+ex1.h
+ShaderIO.h
+Model.h
+Makefile
+ex1.cpp
+
+
+website used:
+---
+http://open.gl/

@@ -50,7 +50,7 @@ Ball::Ball(int xPos, int yPos, const Model* model)
 	// check with other balls
 	for (size_t j=0; j<_model->_balls.size();j++)
 	{
-		float dist = glm::distance(_pos, _model->_balls[j]._pos);
+		float dist = glm::distance(_pos, _model->_balls[j]._pos) - _model->_balls[j]._radius;
 		_initialRadius = std::min(_initialRadius, dist);
 	}
 
@@ -70,7 +70,6 @@ void Ball::update()
 	}
 
 	_pos += glm::vec2(_dir.x * 3, _dir.y * 3);
-//	_pos += _dir;
 }
 
 
