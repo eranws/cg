@@ -80,7 +80,8 @@ void Model::init()
 	_fillColorUV  = glGetUniformLocation(program, "fillColor");
 	_transformUV = glGetUniformLocation(program, "transform");
 	_centerUV  = glGetUniformLocation(program, "ballCenter");
-	_lightSourceUV  = glGetUniformLocation(program, "lightSource");
+	_lightSource1UV  = glGetUniformLocation(program, "lightSource1");
+	_lightSource2UV  = glGetUniformLocation(program, "lightSource2");
 	_radiusUV = glGetUniformLocation(program, "radius");
 
 	// Initialize vertices buffer and transfer it to OpenGL
@@ -107,7 +108,7 @@ void Model::init()
 				0);
 
 		glBindVertexArray(0);
-		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, 300.0, 300.0);
+		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, _width / 2, _height / 2);
 	}
 }
 
@@ -116,7 +117,6 @@ glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 	glm::vec2 res = pos;
 	res.x = 2 * (res.x / _width) - 1.f;
 	res.y = 2 * (res.y / _height) - 1.f;
-//	res.y *= -1; // y axis is pointing upwards
 	return res;
 
 }
@@ -147,7 +147,8 @@ void Model::draw()
 		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
 		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
 		glUniform1f(_radiusUV, ball._radius);
-		glUniform2f(_lightSourceUV, LIGHT_SOURCE);
+		glUniform2f(_lightSource1UV, LIGHT_SOURCE1);
+		glUniform2f(_lightSource1UV, LIGHT_SOURCE2);
 
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, _numVertices);

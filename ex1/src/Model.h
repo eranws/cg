@@ -23,7 +23,9 @@
 
 #define DEFAULT_VERTICES_NUM 40
 #define PI 3.14159265
-#define LIGHT_SOURCE 300.0, 300.0
+#define LIGHT_SOURCE1 200.0, 2000.0
+#define LIGHT_SOURCE2 400.0, 400.0
+#define LIGHT_SOURCE_STEP 2 * PI / 360
 
 class Ball;
 class Model {
@@ -37,7 +39,8 @@ class Model {
 	GLint _fillColorUV;
 	GLint _transformUV;
 	GLint _centerUV;
-	GLint _lightSourceUV;
+	GLint _lightSource1UV;
+	GLint _lightSource2UV;
 	GLint _radiusUV;
 	
 	//number of vertices in the circle, not including center and last perimeter vertex (i.e total number of vertices - 2)
@@ -53,6 +56,9 @@ class Model {
 	//Balls array
 	std::vector <Ball> _balls;
 	friend class Ball;
+
+	glm::vec2 _lightPosition1;
+	glm::vec2 _lightPosition2;
 
 public:
 	Model(float w, float h);

@@ -29,6 +29,17 @@ float randf()
 	return ((float) rand() / RAND_MAX);
 }
 
+glm::vec3 genColor() {
+	glm::vec3 color;
+	while (true) {
+		color = glm::vec3(randf(), randf(), randf());
+		if(color[0] > MIN_COLOR || color[1] > MIN_COLOR || color[2] > MIN_COLOR) {
+			break;
+		}
+	}
+	return color;
+}
+
 Ball::Ball(int xPos, int yPos, const Model* model)
 {
 	_pos.x = xPos;
@@ -36,7 +47,7 @@ Ball::Ball(int xPos, int yPos, const Model* model)
 
 	_model = model;
 
-	_color = glm::vec3(randf(), randf(), randf());
+	_color = genColor();
 	_dir = glm::normalize(glm::vec2(randf()*2 - 1, randf()*2 - 1));
 
 	_initialRadius = DEFAULT_RAD;

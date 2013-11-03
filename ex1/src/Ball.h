@@ -16,6 +16,8 @@
 
 #include <glm/glm.hpp>
 
+#define MIN_COLOR 0.7
+
 class Model;
 
 struct Ball {
