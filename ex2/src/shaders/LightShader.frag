@@ -3,6 +3,7 @@
 uniform vec4 fillColor;
 out vec4 outColor;
 vec4 whiteFill = vec4(1.0, 1.0, 1.0, 1.0);
+in vec4 color;
 
 
 
@@ -14,8 +15,7 @@ void main()
 	//float distFromCenter1  = distance(lightCenter1, gl_FragCoord.xy);
 	//float distFromCenter2  = distance(lightCenter2, gl_FragCoord.xy);
 	//float intensity1 = min(distFromCenter1, distFromCenter2) / (radius / 3);
-	outColor = whiteFill;
-	
+	outColor =  color;
 }
 
 	
