@@ -58,7 +58,7 @@ void Model::genCircleVertices()
 		}
 	}
 
-	printf("vao size: %d\n", temp.size());
+	//printf("vao size: %d\n", temp.size());
 
 /*
 	temp.clear();
@@ -150,6 +150,9 @@ void Model::init(const char* meshFile)
 	_lightSource2UV  = glGetUniformLocation(program, "lightSource2");
 	_radiusUV = glGetUniformLocation(program, "radius");
 
+	//_projectionUV = glGetUniformLocation(program, "projection");
+
+
 
 
 	// Initialize vertices buffer and transfer it to OpenGL
@@ -184,21 +187,11 @@ void Model::init(const char* meshFile)
 	}
 
 
-	////////////// code in test... not working
 
 
-	float xval = 8;
-	float yval = 5;
+//	glm::lookAt(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glm::perspective(50.0, 1.0, 3.0, 7.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 5.0,
-	          0.0, 0.0, 0.0,
-	          0.0, 1.0, 0.0);
-
+	_x = _y = 0;
 
 
 
@@ -228,12 +221,23 @@ void Model::draw()
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
-	//		glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(2 * ball._radius / _width, 2 * ball._radius / _height, 0));
 
-			glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(1, 0.5, 2));
-			glm::mat4 transform = tr;
-	//
-			glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
+	glm::mat4 projection =
+			glm::perspective(45.0f, 1.0f, 0.1f, 100.f);
+//glm::perspective(50, 1, 1, 10);
+
+	glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
+
+//	glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(1, 2 * (_y / _height - 0.5), 10 + 5 * (_x / _width - 0.5) ));
+
+	glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(0, 0, 5 * (_x / _width - 0.5) ));
+
+	glm::mat4 transform = projection * tr * sc;
+	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
+
+	//glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(projection));
+
+
 	//
 	//		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
 	//		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
@@ -262,6 +266,9 @@ void Model::resize(int width, int height)
 
 void Model::mouse(int button, int state, int x, int y)
 {
+	_x = x;
+	_y = y;
+
 	//	glm::vec2 pos(x, _height - y);
 	//	bool isClear = true; //check if we didn't hit any other ball
 	//	for (size_t i=0; i<_balls.size();i++)

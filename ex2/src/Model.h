@@ -44,6 +44,9 @@ class Model {
 	GLint _lightSource2UV;
 	GLint _radiusUV;
 
+	GLint _projectionUV;
+
+
 	// View port frame:
 	float _width, _height, _offsetX, _offsetY;
 
@@ -53,6 +56,8 @@ class Model {
 	typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 	MyMesh _mesh;
+
+	float _x, _y;
 
 
 public:
