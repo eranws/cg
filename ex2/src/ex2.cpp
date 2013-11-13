@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     glutInitWindowSize(WINDOW_SIZE, WINDOW_SIZE);
     glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
     glEnable(GL_DEPTH_TEST);
-    glutCreateWindow("CG Ex1");
+    glutCreateWindow("CG Ex2");
 
 	// Initialize GLEW
     glewExperimental = GL_TRUE;

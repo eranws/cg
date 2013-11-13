@@ -21,14 +21,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
-//#include "Ball.h"
-
-
-
 #define SHADERS_DIR "shaders/"
 
 Model::Model(float w, float h) :
-_vao(0), _vbo(0),_numVertices(DEFAULT_VERTICES_NUM), _width(w), _height(h)
+_vao(0), _vbo(0), _width(w), _height(h)
 {
 
 }
@@ -43,30 +39,52 @@ Model::~Model()
 }
 
 
-//Generate the circle vertices by assigning a (x,y) position for each vertex
-//This function is called at init, and also at resize.
-//When resizing the function allocates a new float array for the vertices,
-//and deletes the old one.
+
 void Model::genCircleVertices()
 {
-	float* tempVertices = new float[_numVertices * 4];
 
-	const float step = 2 * PI / (_numVertices - 1);
-
-	for(int i = 0; i < _numVertices; i++)
+	std::vector<float> temp;
+	temp.reserve(_mesh.n_faces() * 3 * 4);
+	// iterate on all faces
+	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
 	{
-		float angle = i * step;
-		tempVertices[i * 4] = cos(angle);
-		tempVertices[i * 4 + 1] = sin(angle);
-
-		tempVertices[i * 4 + 2] = 0.0f;
-		tempVertices[i * 4 + 3] = 1.00f;
+		// circulate around the current face
+		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
+		{
+			temp.push_back(_mesh.point(fv_it.handle())[0]);
+			temp.push_back(_mesh.point(fv_it.handle())[1]);
+			temp.push_back(_mesh.point(fv_it.handle())[2]);
+			temp.push_back(1.0f);
+		}
 	}
+
+	printf("vao size: %d\n", temp.size());
+
+/*
+	temp.clear();
+	for (int i=0; i<_mesh.n_faces(); i++)
+	{
+		temp.push_back(0.0);
+		temp.push_back(0.0);
+		temp.push_back(0.5);
+		temp.push_back(1.0);
+
+		temp.push_back(0.0);
+		temp.push_back(0.5);
+		temp.push_back(0.5);
+		temp.push_back(1.0);
+
+		temp.push_back(0.5);
+		temp.push_back(0.0);
+		temp.push_back(0.5);
+		temp.push_back(1.0);
+	}
+*/
+
 
 
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
-	glBufferData(GL_ARRAY_BUFFER, _numVertices * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
-	delete[] tempVertices;
+	glBufferData(GL_ARRAY_BUFFER, temp.size() * sizeof(float), temp.data(), GL_STATIC_DRAW);
 }
 
 
@@ -104,30 +122,6 @@ void Model::computeCenterAndBoundingBox()
 }
 
 
-/**
-This function count how many vertices a face has
-*/
-void Model::faceValenceCounter()
-{
-	/* Face iterator */
-	MyMesh::FaceIter fIter;
-	/*In order to get information about a certain face (or edge or vertex) you need to get
-	the handle for this entity. */
-	/* once you have this handle you get ask the mesh object to give you information or to
-	do something (nice) for you.*/
-	MyMesh::FaceHandle faceH;
-	for (fIter = _mesh.faces_begin();fIter != _mesh.faces_end(); ++fIter)
-	{
-		/* In this case we use the handle to get the index of the face and the number of
-		vertices that this face has. */
-		faceH = fIter.handle();
-		std::cout <<"face #"<<faceH.idx()<<" has "<< _mesh.valence(faceH)<<" vertices"<< std::endl;
-	}
-}
-
-
-
-
 void Model::loadMesh(const char* fileName) {
 	if (!OpenMesh::IO::read_mesh(_mesh, fileName))
 	{
@@ -137,7 +131,6 @@ void Model::loadMesh(const char* fileName) {
 	printf("number of vertices is %d\n", _mesh.n_vertices());
 	printf("number of faces is %d\n", _mesh.n_faces());
 	printf("number of edges is %d\n", _mesh.n_edges());
-
 }
 
 void Model::init(const char* meshFile)
@@ -157,6 +150,8 @@ void Model::init(const char* meshFile)
 	_lightSource2UV  = glGetUniformLocation(program, "lightSource2");
 	_radiusUV = glGetUniformLocation(program, "radius");
 
+
+
 	// Initialize vertices buffer and transfer it to OpenGL
 	{
 		// Create and bind the object's Vertex Array Object:
@@ -168,10 +163,11 @@ void Model::init(const char* meshFile)
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 		//generate vertices to create the circle
-//		genCircleVertices();
+
 		loadMesh(meshFile);
+		genCircleVertices();
 		computeCenterAndBoundingBox();
-//		faceValenceCounter();
+		//		faceValenceCounter();
 
 		// Obtain attribute handles:
 		_posAttrib = glGetAttribLocation(program, "position");
@@ -186,6 +182,26 @@ void Model::init(const char* meshFile)
 		glBindVertexArray(0);
 		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, _width / 2, _height / 2);
 	}
+
+
+	////////////// code in test... not working
+
+
+	float xval = 8;
+	float yval = 5;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glm::perspective(50.0, 1.0, 3.0, 7.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0.0, 0.0, 5.0,
+	          0.0, 0.0, 0.0,
+	          0.0, 1.0, 0.0);
+
+
+
+
 }
 
 glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
@@ -200,7 +216,9 @@ glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 
 void Model::draw()
 {
-	// Set the program to be used in subsequent lines:
+
+
+		// Set the program to be used in subsequent lines:
 	GLuint program = programManager::sharedInstance().programWithID("default");
 	glUseProgram(program);
 
@@ -209,26 +227,23 @@ void Model::draw()
 
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
-//	for (size_t i=0; i<_balls.size();i++)
-//	{
-//		Ball& ball = _balls[i];
-//
-//		glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(2 * ball._radius / _width, 2 * ball._radius / _height, 0));
-//		glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(getScreenUnitCoordinates(ball._pos), 0));
-//
-//		glm::mat4 transform = tr * sc;
-//
-//		glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
-//
-//		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
-//		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
-//		glUniform1f(_radiusUV, ball._radius);
-//		glUniform2f(_lightSource1UV, LIGHT_SOURCE1);
-//		glUniform2f(_lightSource1UV, LIGHT_SOURCE2);
-//
-//
-//		glDrawArrays(GL_TRIANGLE_FAN, 0, _numVertices);
-//	}
+
+	//		glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(2 * ball._radius / _width, 2 * ball._radius / _height, 0));
+
+			glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(1, 0.5, 2));
+			glm::mat4 transform = tr;
+	//
+			glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
+	//
+	//		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
+	//		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
+	//		glUniform1f(_radiusUV, ball._radius);
+	//		glUniform2f(_lightSource1UV, LIGHT_SOURCE1);
+	//		glUniform2f(_lightSource1UV, LIGHT_SOURCE2);
+	//
+	//
+	glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
+	//	}
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
@@ -243,69 +258,64 @@ void Model::resize(int width, int height)
 	_height = height;
 	_offsetX = 0;
 	_offsetY = 0;
-	//change number of vertices according to window size, minimum is one vertex, max is 50
-	_numVertices = std::min(50, std::min(width, height));
-	genCircleVertices();
-
-//
 }
 
 void Model::mouse(int button, int state, int x, int y)
 {
-//	glm::vec2 pos(x, _height - y);
-//	bool isClear = true; //check if we didn't hit any other ball
-//	for (size_t i=0; i<_balls.size();i++)
-//	{
-//		float dist = glm::distance(pos, _balls[i]._pos);
-//		if (dist <= _balls[i]._radius)
-//		{
-//			isClear = false;
-//		}
-//	}
-//
-//	if (isClear)
-//	{
-////		_balls.push_back(Ball(pos.x, pos.y, this));
-//	}
+	//	glm::vec2 pos(x, _height - y);
+	//	bool isClear = true; //check if we didn't hit any other ball
+	//	for (size_t i=0; i<_balls.size();i++)
+	//	{
+	//		float dist = glm::distance(pos, _balls[i]._pos);
+	//		if (dist <= _balls[i]._radius)
+	//		{
+	//			isClear = false;
+	//		}
+	//	}
+	//
+	//	if (isClear)
+	//	{
+	////		_balls.push_back(Ball(pos.x, pos.y, this));
+	//	}
 
 }
 
 void Model::update()
 {
-//	// update positions
-//	for (size_t i=0; i<_balls.size();i++)
-//	{
-//		_balls[i].update();
-//	}
-//
-//	std::vector<float> minRads(_balls.size());
-//	// check for collisions
-//	for (size_t i=0; i<_balls.size();i++)
-//	{
-//		float minRadius = _balls[i]._initialRadius;
-//		for (size_t j=0; j<_balls.size();j++)
-//		{
-//			if (i==j) continue;
-//			float dist = glm::distance(_balls[i]._pos, _balls[j]._pos);
-//
-//			float tempRadius = minRadius;
-//
-//			if (dist < _balls[i]._initialRadius + _balls[j]._initialRadius)
-//			{
-//				tempRadius = (dist - _balls[j]._radius + _balls[i]._radius) / 2;
-//			}
-//
-//			// update radius
-//			if (tempRadius < minRadius)
-//			{
-//				minRadius = tempRadius;
-//			}
-//		}
-//		minRads[i] = std::max(minRadius, 1.0f);
-//	}
-//
-//	for (size_t i=0; i<_balls.size();i++)
-//	{
-//		_balls[i].setRadius(minRads[i]);
-//	}
+	//	// update positions
+	//	for (size_t i=0; i<_balls.size();i++)
+	//	{
+	//		_balls[i].update();
+	//	}
+	//
+	//	std::vector<float> minRads(_balls.size());
+	//	// check for collisions
+	//	for (size_t i=0; i<_balls.size();i++)
+	//	{
+	//		float minRadius = _balls[i]._initialRadius;
+	//		for (size_t j=0; j<_balls.size();j++)
+	//		{
+	//			if (i==j) continue;
+	//			float dist = glm::distance(_balls[i]._pos, _balls[j]._pos);
+	//
+	//			float tempRadius = minRadius;
+	//
+	//			if (dist < _balls[i]._initialRadius + _balls[j]._initialRadius)
+	//			{
+	//				tempRadius = (dist - _balls[j]._radius + _balls[i]._radius) / 2;
+	//			}
+	//
+	//			// update radius
+	//			if (tempRadius < minRadius)
+	//			{
+	//				minRadius = tempRadius;
+	//			}
+	//		}
+	//		minRads[i] = std::max(minRadius, 1.0f);
+	//	}
+	//
+	//	for (size_t i=0; i<_balls.size();i++)
+	//	{
+	//		_balls[i].setRadius(minRads[i]);
+	//	}
 }

@@ -18,7 +18,7 @@
 #include <math.h>
 #include <vector>
 #include <glm/glm.hpp>
-//#include "Ball.h"
+
 #include "OpenMesh/Core/IO/MeshIO.hh"
 #include "OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh"
 
@@ -43,9 +43,6 @@ class Model {
 	GLint _lightSource1UV;
 	GLint _lightSource2UV;
 	GLint _radiusUV;
-
-	//number of vertices in the circle, not including center and last perimeter vertex (i.e total number of vertices - 2)
-	int _numVertices;
 
 	// View port frame:
 	float _width, _height, _offsetX, _offsetY;
