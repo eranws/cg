@@ -6,6 +6,6 @@ out vec4 color;
 uniform mat4 transform;
 
 void main() {
-	color = position;//vec4(1.0, 0.0, 0.0, 1.0);
+	color = (position + 1) / 2;//vec4(1.0, 0.0, 0.0, 1.0);
     gl_Position = transform * position;
 }

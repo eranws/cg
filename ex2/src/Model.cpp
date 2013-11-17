@@ -40,48 +40,83 @@ Model::~Model()
 
 
 
-void Model::genCircleVertices()
+void Model::genModelVertices()
 {
+
+//	std::vector<float> vertices;
+//	vertices.reserve(_mesh.n_vertices() * 4);
+//	// iterate on all faces
+//
+//	for (MyMesh::VertexIter v_it=_mesh.vertices_begin(); v_it != _mesh.vertices_end(); ++v_it)
+//	{
+//		vertices.push_back(_mesh.point(v_it.handle())[0]);
+//		vertices.push_back(_mesh.point(v_it.handle())[1]);
+//		vertices.push_back(_mesh.point(v_it.handle())[2]);
+//		vertices.push_back(1.0f);
+//	}
+//
+//	struct face_indices_t
+//	{
+//		face_indices_t() {
+//
+//		}
+//		GLuint a,b,c;
+//	};
+//	int i = 0;
+//
+//	std::vector<face_indices_t> faces(_mesh.n_faces());
+//	faces.reserve(_mesh.n_faces());
+//	for (MyMesh::FaceIter f_it = _mesh.faces_begin(); f_it != _mesh.faces_end(); ++f_it)
+//	{
+//		MyMesh::ConstFaceVertexIter cfv_it = _mesh.cfv_iter(f_it.handle());
+//		face_indices_t face;
+//		face.a = cfv_it.handle().idx();
+//		++cfv_it;
+//		face.b = cfv_it.handle().idx();
+//		++cfv_it;
+//		face.c = cfv_it.handle().idx();
+//		faces[i++] = face;
+//	}
+//
+//	glGenBuffers(1, &_ebo);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t)*faces.size(), &(faces[0]), GL_STATIC_DRAW);
+
 
 	std::vector<float> temp;
 	temp.reserve(_mesh.n_faces() * 3 * 4);
-	// iterate on all faces
+
+	std::vector<float> v;
+	v.push_back(fabs(_lowerLeft[0]));
+	v.push_back(fabs(_lowerLeft[1]));
+	v.push_back(fabs(_lowerLeft[2]));
+
+	v.push_back(fabs(_upperRight[0]));
+	v.push_back(fabs(_upperRight[1]));
+	v.push_back(fabs(_upperRight[2]));
+
+	float maxV = *std::max_element(v.begin(), v.end());
+
+	std::cout << "(_lowerLeft[0])" << (_lowerLeft[0]) << std::endl;
+
+	std::cout << "maxV" << maxV << v[0] << v[1] << v[2] << v[3] << std::endl;
+
 	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
 	{
 		// circulate around the current face
 		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
 		{
-			temp.push_back(_mesh.point(fv_it.handle())[0]);
-			temp.push_back(_mesh.point(fv_it.handle())[1]);
-			temp.push_back(_mesh.point(fv_it.handle())[2]);
+			MyMesh::Point p = _mesh.point(fv_it.handle());
+			// normalize each point
+			p -= _center; // center of mass
+			p /= maxV;
+
+			temp.push_back(p[0]);
+			temp.push_back(p[1]);
+			temp.push_back(p[2]);
 			temp.push_back(1.0f);
 		}
 	}
-
-	//printf("vao size: %d\n", temp.size());
-
-/*
-	temp.clear();
-	for (int i=0; i<_mesh.n_faces(); i++)
-	{
-		temp.push_back(0.0);
-		temp.push_back(0.0);
-		temp.push_back(0.5);
-		temp.push_back(1.0);
-
-		temp.push_back(0.0);
-		temp.push_back(0.5);
-		temp.push_back(0.5);
-		temp.push_back(1.0);
-
-		temp.push_back(0.5);
-		temp.push_back(0.0);
-		temp.push_back(0.5);
-		temp.push_back(1.0);
-	}
-*/
-
-
 
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
 	glBufferData(GL_ARRAY_BUFFER, temp.size() * sizeof(float), temp.data(), GL_STATIC_DRAW);
@@ -96,28 +131,29 @@ void Model::computeCenterAndBoundingBox()
 	MyMesh::VertexIter vertexIter;
 	/* This is the specific class used to store the geometrical position of the vertices of
 	the mesh */
-	MyMesh::Point p(0,0,0), center(0,0,0);
+	MyMesh::Point p(0,0,0);
 	const float fm = std::numeric_limits<float>::max();
-	MyMesh::Point lowerLeft(fm, fm, fm);
-	MyMesh::Point upperRight(0,0,0);
+	_lowerLeft = MyMesh::Point(fm, fm, fm);
+	_upperRight = MyMesh::Point(0,0,0);
 	/* number of vertices in the _mesh */
 	int vNum = _mesh.n_vertices();
 	vertexIter = _mesh.vertices_begin();
-	lowerLeft = upperRight = _mesh.point(vertexIter);
+	_lowerLeft = _upperRight = _mesh.point(vertexIter);
 	/* This is how to go over all the vertices in the _mesh */
 	for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter){
 		/* this is how to get the point associated with the vertex */
 		p = _mesh.point(vertexIter);
-		center += p;
+		_center += p;
 		for (int i = 0; i < 3; i++) {
-			lowerLeft[i] = std::min(lowerLeft[i], p[i]);
-			upperRight[i] = std::max(upperRight[i], p[i]);
+			_lowerLeft[i] = std::min(_lowerLeft[i], p[i]);
+			_upperRight[i] = std::max(_upperRight[i], p[i]);
 		}
 	}
-	center /= (double)vNum;
-	std::cout <<"center of object "<< center<< std::endl;
-	std::cout <<"lower left corner of object "<< lowerLeft<<std::endl;
-	std::cout <<"upper right corner of object "<< upperRight<<std::endl;
+	_center /= (double)vNum;
+	std::cout <<"center of object "<< _center<< std::endl;
+	std::cout <<"lower left corner of object "<< _lowerLeft << std::endl;
+	std::cout <<"upper right corner of object "<< _upperRight << std::endl;
+
 
 }
 
@@ -168,8 +204,9 @@ void Model::init(const char* meshFile)
 		//generate vertices to create the circle
 
 		loadMesh(meshFile);
-		genCircleVertices();
 		computeCenterAndBoundingBox();
+		genModelVertices();
+
 		//		faceValenceCounter();
 
 		// Obtain attribute handles:
@@ -228,11 +265,11 @@ void Model::draw()
 
 	glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
 
-//	glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(1, 2 * (_y / _height - 0.5), 10 + 5 * (_x / _width - 0.5) ));
+	glm::mat4 ro = glm::rotate(glm::mat4(), 45.f, glm::vec3(1, 1, 1) );
 
 	glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(0, 0, 5 * (_x / _width - 0.5) ));
 
-	glm::mat4 transform = projection * tr * sc;
+	glm::mat4 transform = projection * tr * ro * sc;
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
 
 	//glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(projection));

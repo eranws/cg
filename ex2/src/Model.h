@@ -31,7 +31,7 @@
 class Ball;
 class Model {
 
-	GLuint _vao, _vbo;
+	GLuint _vao, _vbo, _ebo;
 
 	// Attribute handle:
 	GLint _posAttrib;
@@ -59,6 +59,8 @@ class Model {
 
 	float _x, _y;
 
+	MyMesh::Point _center, _lowerLeft, _upperRight;
+
 
 public:
 	Model(float w, float h);
@@ -73,7 +75,7 @@ public:
 
 	void resize(int width, int height);
 
-	void genCircleVertices();
+	void genModelVertices();
 
 	void mouse(int button, int state, int x, int y);
 
