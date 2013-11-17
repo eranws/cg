@@ -24,9 +24,12 @@
 #define SHADERS_DIR "shaders/"
 
 Model::Model(float w, float h) :
-_vao(0), _vbo(0), _width(w), _height(h)
+_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL)
 {
-
+	for (int i=0; i<3; i++)
+	{
+		_mouseFlags[i] = false;
+	}
 }
 
 Model::~Model()
@@ -43,44 +46,44 @@ Model::~Model()
 void Model::genModelVertices()
 {
 
-//	std::vector<float> vertices;
-//	vertices.reserve(_mesh.n_vertices() * 4);
-//	// iterate on all faces
-//
-//	for (MyMesh::VertexIter v_it=_mesh.vertices_begin(); v_it != _mesh.vertices_end(); ++v_it)
-//	{
-//		vertices.push_back(_mesh.point(v_it.handle())[0]);
-//		vertices.push_back(_mesh.point(v_it.handle())[1]);
-//		vertices.push_back(_mesh.point(v_it.handle())[2]);
-//		vertices.push_back(1.0f);
-//	}
-//
-//	struct face_indices_t
-//	{
-//		face_indices_t() {
-//
-//		}
-//		GLuint a,b,c;
-//	};
-//	int i = 0;
-//
-//	std::vector<face_indices_t> faces(_mesh.n_faces());
-//	faces.reserve(_mesh.n_faces());
-//	for (MyMesh::FaceIter f_it = _mesh.faces_begin(); f_it != _mesh.faces_end(); ++f_it)
-//	{
-//		MyMesh::ConstFaceVertexIter cfv_it = _mesh.cfv_iter(f_it.handle());
-//		face_indices_t face;
-//		face.a = cfv_it.handle().idx();
-//		++cfv_it;
-//		face.b = cfv_it.handle().idx();
-//		++cfv_it;
-//		face.c = cfv_it.handle().idx();
-//		faces[i++] = face;
-//	}
-//
-//	glGenBuffers(1, &_ebo);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t)*faces.size(), &(faces[0]), GL_STATIC_DRAW);
+	//	std::vector<float> vertices;
+	//	vertices.reserve(_mesh.n_vertices() * 4);
+	//	// iterate on all faces
+	//
+	//	for (MyMesh::VertexIter v_it=_mesh.vertices_begin(); v_it != _mesh.vertices_end(); ++v_it)
+	//	{
+	//		vertices.push_back(_mesh.point(v_it.handle())[0]);
+	//		vertices.push_back(_mesh.point(v_it.handle())[1]);
+	//		vertices.push_back(_mesh.point(v_it.handle())[2]);
+	//		vertices.push_back(1.0f);
+	//	}
+	//
+	//	struct face_indices_t
+	//	{
+	//		face_indices_t() {
+	//
+	//		}
+	//		GLuint a,b,c;
+	//	};
+	//	int i = 0;
+	//
+	//	std::vector<face_indices_t> faces(_mesh.n_faces());
+	//	faces.reserve(_mesh.n_faces());
+	//	for (MyMesh::FaceIter f_it = _mesh.faces_begin(); f_it != _mesh.faces_end(); ++f_it)
+	//	{
+	//		MyMesh::ConstFaceVertexIter cfv_it = _mesh.cfv_iter(f_it.handle());
+	//		face_indices_t face;
+	//		face.a = cfv_it.handle().idx();
+	//		++cfv_it;
+	//		face.b = cfv_it.handle().idx();
+	//		++cfv_it;
+	//		face.c = cfv_it.handle().idx();
+	//		faces[i++] = face;
+	//	}
+	//
+	//	glGenBuffers(1, &_ebo);
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+	//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t)*faces.size(), &(faces[0]), GL_STATIC_DRAW);
 
 
 	std::vector<float> temp;
@@ -96,10 +99,6 @@ void Model::genModelVertices()
 	v.push_back(fabs(_upperRight[2]));
 
 	float maxV = *std::max_element(v.begin(), v.end());
-
-	std::cout << "(_lowerLeft[0])" << (_lowerLeft[0]) << std::endl;
-
-	std::cout << "maxV" << maxV << v[0] << v[1] << v[2] << v[3] << std::endl;
 
 	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
 	{
@@ -207,8 +206,6 @@ void Model::init(const char* meshFile)
 		computeCenterAndBoundingBox();
 		genModelVertices();
 
-		//		faceValenceCounter();
-
 		// Obtain attribute handles:
 		_posAttrib = glGetAttribLocation(program, "position");
 		glEnableVertexAttribArray(_posAttrib);
@@ -223,15 +220,8 @@ void Model::init(const char* meshFile)
 		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, _width / 2, _height / 2);
 	}
 
-
-
-
-//	glm::lookAt(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
 	_x = _y = 0;
-
-
-
+	resetMatrices();
 }
 
 glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
@@ -243,33 +233,35 @@ glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 
 }
 
+void Model::resetMatrices()
+{
+	_projectionMat = glm::perspective(35.f, float(_width)/float(_height), 0.1f/*OBJECT_DEPTH - OBJECT_B_RAD*/, OBJECT_DEPTH + OBJECT_B_RAD);
+	_translateMat = glm::translate(glm::mat4(), glm::vec3(0, 0, -OBJECT_DEPTH));
+	_rotationMat =  glm::mat4(1.0f);
+	_rotateBaseMat = _rotationMat;
+
+	_scale = 0.3;
+	_scaleBase = 0.3;
+
+	_translateBase = glm::vec2(0,0);
+}
 
 void Model::draw()
 {
 
 
-		// Set the program to be used in subsequent lines:
+	// Set the program to be used in subsequent lines:
 	GLuint program = programManager::sharedInstance().programWithID("default");
 	glUseProgram(program);
 
-	GLenum polygonMode = GL_FILL;   // Also try using GL_FILL and GL_POINT
-	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+	glPolygonMode(GL_FRONT_AND_BACK, _glPolygonMode);
 
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
+	glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(_scale, _scale, _scale));
 
-	glm::mat4 projection =
-			glm::perspective(45.0f, 1.0f, 0.1f, 100.f);
-//glm::perspective(50, 1, 1, 10);
-
-	glm::mat4 sc = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
-
-	glm::mat4 ro = glm::rotate(glm::mat4(), 45.f, glm::vec3(1, 1, 1) );
-
-	glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(0, 0, 5 * (_x / _width - 0.5) ));
-
-	glm::mat4 transform = projection * tr * ro * sc;
+	glm::mat4 transform  =_projectionMat * _translateMat * _rotationMat * scaleMat;
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
 
 	//glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(projection));
@@ -301,65 +293,131 @@ void Model::resize(int width, int height)
 	_offsetY = 0;
 }
 
+void Model::changePolygonMode()
+{
+	if(_glPolygonMode == GL_FILL)
+	{
+		std::cout << "line" << std::endl;
+		_glPolygonMode = GL_LINE;
+	}
+	else
+	{
+		_glPolygonMode = GL_FILL;
+	}
+}
+
+
+glm::vec2 Model::normalizeScreenCoordninates(glm::vec2 v)
+{
+	v.x /= _width;
+	v.y /= _height;
+	v.y = -v.y;
+
+	return v;
+}
+
+glm::vec3 arcBall(glm::vec2 v)
+{
+	float z;
+	if (glm::length(v) > 1)
+	{
+		z = 0;
+	}
+	else
+	{
+		z = std::sqrt(1 - v.x*v.x - v.y*v.y);
+	}
+
+	return glm::vec3(v.x, v.y, z);
+
+}
+void Model::rotate(int x, int y)
+{
+	glm::vec2 p = glm::vec2(x, y);
+	//int dRotate = _rotate - y;
+	glm::vec3 v1 = arcBall(normalizeScreenCoordninates(_xyRotate));
+	glm::vec3 v2 = arcBall(normalizeScreenCoordninates(p));
+
+	glm::vec3 dir = glm::normalize(glm::cross(v1, v2));
+//	float s = glm::length(v1) * glm::length(v2);
+	float s = 100 * 2 * glm::acos(glm::dot(v1, v2));
+
+
+	_rotationMat = glm::rotate(_rotateBaseMat, s, dir);
+
+}
+
+void Model::scale(int y)
+{
+	int dy = _yScale - y;
+	_scale = _scaleBase * (1 + dy / _height);
+
+}
+
+void Model::translate(int x, int y)
+{
+	glm::vec2 dxy = _xyTranslate - glm::vec2(x, y);
+
+	_translate = _translateBase - normalizeScreenCoordninates(dxy);
+	_translateMat = glm::translate(glm::mat4(), glm::vec3(_translate, -OBJECT_DEPTH));
+}
+
+
+void Model::setFlag(int button, int x, int y)
+{
+	if(button == GLUT_LEFT_BUTTON)
+	{
+		_xyRotate = glm::vec2(x, y);
+		_mouseFlags[GLUT_LEFT_BUTTON] = true;
+	}
+	if (button == GLUT_MIDDLE_BUTTON)
+	{
+		_yScale = y;
+		_mouseFlags[GLUT_MIDDLE_BUTTON] = true;
+	}
+	if (button == GLUT_RIGHT_BUTTON)
+	{
+		_xyTranslate = glm::vec2(x, y);
+		_mouseFlags[GLUT_RIGHT_BUTTON] = true;
+	}
+}
+
+void Model::resetFlag(int button)
+{
+	if (button == GLUT_LEFT_BUTTON)
+	{
+		_rotateBaseMat = _rotationMat;
+	}
+	else if (button == GLUT_MIDDLE_BUTTON)
+	{
+		_scaleBase = _scale;
+	}
+	else if (button == GLUT_RIGHT_BUTTON)
+	{
+		_translateBase = _translate;
+	}
+
+	_mouseFlags[button] = false;
+}
+
+void Model::motion(int x, int y)
+{
+	if (_mouseFlags[GLUT_LEFT_BUTTON])
+	{
+		rotate(x, y);
+	}
+	else if (_mouseFlags[GLUT_MIDDLE_BUTTON])
+	{
+		scale(y);
+	}
+	else if (_mouseFlags[GLUT_RIGHT_BUTTON])
+	{
+		translate(x, y);
+	}
+}
+
 void Model::mouse(int button, int state, int x, int y)
 {
 	_x = x;
 	_y = y;
-
-	//	glm::vec2 pos(x, _height - y);
-	//	bool isClear = true; //check if we didn't hit any other ball
-	//	for (size_t i=0; i<_balls.size();i++)
-	//	{
-	//		float dist = glm::distance(pos, _balls[i]._pos);
-	//		if (dist <= _balls[i]._radius)
-	//		{
-	//			isClear = false;
-	//		}
-	//	}
-	//
-	//	if (isClear)
-	//	{
-	////		_balls.push_back(Ball(pos.x, pos.y, this));
-	//	}
-
-}
-
-void Model::update()
-{
-	//	// update positions
-	//	for (size_t i=0; i<_balls.size();i++)
-	//	{
-	//		_balls[i].update();
-	//	}
-	//
-	//	std::vector<float> minRads(_balls.size());
-	//	// check for collisions
-	//	for (size_t i=0; i<_balls.size();i++)
-	//	{
-	//		float minRadius = _balls[i]._initialRadius;
-	//		for (size_t j=0; j<_balls.size();j++)
-	//		{
-	//			if (i==j) continue;
-	//			float dist = glm::distance(_balls[i]._pos, _balls[j]._pos);
-	//
-	//			float tempRadius = minRadius;
-	//
-	//			if (dist < _balls[i]._initialRadius + _balls[j]._initialRadius)
-	//			{
-	//				tempRadius = (dist - _balls[j]._radius + _balls[i]._radius) / 2;
-	//			}
-	//
-	//			// update radius
-	//			if (tempRadius < minRadius)
-	//			{
-	//				minRadius = tempRadius;
-	//			}
-	//		}
-	//		minRads[i] = std::max(minRadius, 1.0f);
-	//	}
-	//
-	//	for (size_t i=0; i<_balls.size();i++)
-	//	{
-	//		_balls[i].setRadius(minRads[i]);
-	//	}
 }

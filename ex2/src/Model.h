@@ -50,6 +50,8 @@ class Model {
 	// View port frame:
 	float _width, _height, _offsetX, _offsetY;
 
+	GLenum _glPolygonMode;
+
 	//circle vertices, including center and perimeter vertices.
 	float* _vertices;
 
@@ -61,6 +63,20 @@ class Model {
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
+	glm::mat4 _projectionMat, _rotationMat, _translateMat;
+
+	int _yScale;
+	float _scale;
+	float _scaleBase;
+
+	glm::vec2 _xyTranslate, _xyRotate;
+	glm::vec2 _translate;
+	glm::vec2 _translateBase;
+	glm::mat4 _rotateBaseMat;
+
+	static const float OBJECT_DEPTH = 5;
+	static const float OBJECT_B_RAD = 2;
+	bool _mouseFlags[3];
 
 public:
 	Model(float w, float h);
@@ -68,8 +84,6 @@ public:
 	virtual ~Model();
 
 	void init(const char* meshFile);
-
-	void update();
 
 	void draw();
 
@@ -82,12 +96,23 @@ public:
 	float getWidth() const {return _width;}
 	float getHeight() const {return _height;}
 	glm::vec2 getScreenUnitCoordinates(glm::vec2 pos);
+	glm::vec2 normalizeScreenCoordninates(glm::vec2 v);
 
 	void loadMesh(const char* fileName);
 
 	void computeCenterAndBoundingBox();
 
-	void faceValenceCounter();
+	void changePolygonMode();
+
+	void resetMatrices();
+
+	void scale(int y);
+	void translate(int x, int y);
+	void rotate(int x, int y);
+
+	void setFlag(int button, int x, int y);
+	void resetFlag(int button);
+	void motion(int x, int y);
 };
 
 #endif /* defined(__ex0__Model__) */
