@@ -63,7 +63,10 @@ class Model {
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
-	glm::mat4 _projectionMat, _rotationMat, _translateMat;
+	glm::mat4 _projectionMat, _viewMat, _displaceMat, _rotationMat, _translateMat;
+	float _fov;
+	float _fovBase;
+
 
 	int _yScale;
 	float _scale;
@@ -75,7 +78,7 @@ class Model {
 	glm::mat4 _rotateBaseMat;
 
 	static const float OBJECT_DEPTH = 5;
-	static const float OBJECT_B_RAD = 2;
+	static const float OBJECT_B_RAD = 3;
 	bool _mouseFlags[3];
 
 public:
@@ -90,8 +93,6 @@ public:
 	void resize(int width, int height);
 
 	void genModelVertices();
-
-	void mouse(int button, int state, int x, int y);
 
 	float getWidth() const {return _width;}
 	float getHeight() const {return _height;}

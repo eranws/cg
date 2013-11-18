@@ -217,39 +217,39 @@ void Model::init(const char* meshFile)
 				0);
 
 		glBindVertexArray(0);
-		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, _width / 2, _height / 2);
 	}
 
-	_x = _y = 0;
 	resetMatrices();
 }
 
 glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 {
-	glm::vec2 res = pos;
-	res.x = 2 * (res.x / _width) - 1.f;
-	res.y = 2 * (res.y / _height) - 1.f;
-	return res;
+	pos.x = 2 * (pos.x / _width) - 1.f;
+	pos.y = 2 * (pos.y / _height) - 1.f;
+	pos.y = -pos.y;
+	return pos;
 
 }
 
 void Model::resetMatrices()
 {
-	_projectionMat = glm::perspective(35.f, float(_width)/float(_height), 0.1f/*OBJECT_DEPTH - OBJECT_B_RAD*/, OBJECT_DEPTH + OBJECT_B_RAD);
-	_translateMat = glm::translate(glm::mat4(), glm::vec3(0, 0, -OBJECT_DEPTH));
+	_fov = 35.0f;
+	_fovBase = _fov;
+	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	_viewMat = glm::lookAt(glm::vec3(0, 0, OBJECT_DEPTH), glm::vec3(),glm::vec3(0,1,0));
+
+	_translateMat = glm::mat4(1.0f);
 	_rotationMat =  glm::mat4(1.0f);
 	_rotateBaseMat = _rotationMat;
 
-	_scale = 0.3;
-	_scaleBase = 0.3;
+	_scale = 0.8f;
+	_scaleBase = _scale;
 
 	_translateBase = glm::vec2(0,0);
 }
 
 void Model::draw()
 {
-
-
 	// Set the program to be used in subsequent lines:
 	GLuint program = programManager::sharedInstance().programWithID("default");
 	glUseProgram(program);
@@ -259,24 +259,11 @@ void Model::draw()
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
-	glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(_scale, _scale, _scale));
+	glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(_scale, _scale, _scale));
 
-	glm::mat4 transform  =_projectionMat * _translateMat * _rotationMat * scaleMat;
+	glm::mat4 transform  = _projectionMat *  _viewMat * _rotationMat *  _translateMat * scaleMat;
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
-
-	//glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(projection));
-
-
-	//
-	//		glUniform4f(_fillColorUV, ball._color.r, ball._color.g, ball._color.b, 1.0);
-	//		glUniform2f(_centerUV, ball._pos.x, ball._pos.y);
-	//		glUniform1f(_radiusUV, ball._radius);
-	//		glUniform2f(_lightSource1UV, LIGHT_SOURCE1);
-	//		glUniform2f(_lightSource1UV, LIGHT_SOURCE2);
-	//
-	//
 	glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
-	//	}
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
@@ -297,7 +284,6 @@ void Model::changePolygonMode()
 {
 	if(_glPolygonMode == GL_FILL)
 	{
-		std::cout << "line" << std::endl;
 		_glPolygonMode = GL_LINE;
 	}
 	else
@@ -332,24 +318,15 @@ glm::vec3 arcBall(glm::vec2 v)
 }
 void Model::rotate(int x, int y)
 {
-	glm::vec2 p1 = normalizeScreenCoordninates(glm::vec2(x, y));
-	glm::vec2 p2 = normalizeScreenCoordninates(_xyRotate);
-
-	p1.x = p1.x * 2 - 1;
-	p1.y = p1.y * 2 - 1;
-	p1.y = -p1.y;
-
-	p2.x = p2.x * 2 - 1;
-	p2.y = p2.y * 2 - 1;
-	p2.y = -p2.y;
+	glm::vec2 p1 = getScreenUnitCoordinates(glm::vec2(x, y));
+	glm::vec2 p2 = getScreenUnitCoordinates(_xyRotate);
 
 	glm::vec3 v1 = arcBall(p1);
 	glm::vec3 v2 = arcBall(p2);
 
 	glm::vec3 dir = glm::normalize(glm::cross(v2, v1));
-	//float s = glm::length(v1) * glm::length(v2);
 	float s = glm::acos(glm::dot(v1, v2));
-	s*=100;
+	s *= 100;
 
 	_rotationMat = glm::rotate(_rotateBaseMat, s, dir);
 
@@ -358,18 +335,16 @@ void Model::rotate(int x, int y)
 void Model::scale(int y)
 {
 	int dy = _yScale - y;
-	_scale = _scaleBase * (1 + dy / _height);
-
+	_fov = _fovBase * (1 + dy / _height);
+	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 }
 
 void Model::translate(int x, int y)
 {
-	glm::vec2 dxy = _xyTranslate - glm::vec2(x, y);
-	glm::vec2 ndxy = normalizeScreenCoordninates(dxy);
-	ndxy.y = -ndxy.y;
+	glm::vec2 dxy = getScreenUnitCoordinates(_xyTranslate) - getScreenUnitCoordinates(glm::vec2(x, y));
 
-	_translate = _translateBase - ndxy;
-	_translateMat = glm::translate(glm::mat4(), glm::vec3(_translate, -OBJECT_DEPTH));
+	_translate = _translateBase - dxy;
+	_translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(_translate, 0));
 }
 
 
@@ -380,12 +355,12 @@ void Model::setFlag(int button, int x, int y)
 		_xyRotate = glm::vec2(x, y);
 		_mouseFlags[GLUT_LEFT_BUTTON] = true;
 	}
-	if (button == GLUT_MIDDLE_BUTTON)
+	else if (button == GLUT_MIDDLE_BUTTON)
 	{
 		_yScale = y;
 		_mouseFlags[GLUT_MIDDLE_BUTTON] = true;
 	}
-	if (button == GLUT_RIGHT_BUTTON)
+	else if (button == GLUT_RIGHT_BUTTON)
 	{
 		_xyTranslate = glm::vec2(x, y);
 		_mouseFlags[GLUT_RIGHT_BUTTON] = true;
@@ -401,6 +376,7 @@ void Model::resetFlag(int button)
 	else if (button == GLUT_MIDDLE_BUTTON)
 	{
 		_scaleBase = _scale;
+		_fovBase = _fov;
 	}
 	else if (button == GLUT_RIGHT_BUTTON)
 	{
@@ -424,10 +400,4 @@ void Model::motion(int x, int y)
 	{
 		translate(x, y);
 	}
-}
-
-void Model::mouse(int button, int state, int x, int y)
-{
-	_x = x;
-	_y = y;
 }
