@@ -38,7 +38,6 @@ Model::~Model()
 		glDeleteVertexArrays(1, &_vao);
 	if (_vbo != 0)
 		glDeleteBuffers(1, &_vbo);
-	delete _vertices;
 }
 
 
@@ -243,7 +242,7 @@ void Model::resetMatrices()
 	_rotateBaseMat = _rotationMat;
 
 	_scale = 0.8f;
-	_scaleBase = _scale;
+	_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(_scale, _scale, _scale));
 
 	_translateBase = glm::vec2(0,0);
 }
@@ -259,9 +258,7 @@ void Model::draw()
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
-	glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(_scale, _scale, _scale));
-
-	glm::mat4 transform  = _projectionMat *  _viewMat * _rotationMat *  _translateMat * scaleMat;
+	glm::mat4 transform  = _projectionMat *  _viewMat * _rotationMat *  _translateMat * _scaleMat;
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
 	glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 
@@ -375,7 +372,6 @@ void Model::resetFlag(int button)
 	}
 	else if (button == GLUT_MIDDLE_BUTTON)
 	{
-		_scaleBase = _scale;
 		_fovBase = _fov;
 	}
 	else if (button == GLUT_RIGHT_BUTTON)

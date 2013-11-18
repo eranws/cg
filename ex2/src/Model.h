@@ -63,7 +63,7 @@ class Model {
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
-	glm::mat4 _projectionMat, _viewMat, _displaceMat, _rotationMat, _translateMat;
+	glm::mat4 _projectionMat, _viewMat, _rotationMat, _translateMat, _scaleMat;
 	float _fov;
 	float _fovBase;
 
