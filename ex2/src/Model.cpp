@@ -311,7 +311,6 @@ glm::vec2 Model::normalizeScreenCoordninates(glm::vec2 v)
 {
 	v.x /= _width;
 	v.y /= _height;
-	v.y = -v.y;
 
 	return v;
 }
@@ -333,15 +332,24 @@ glm::vec3 arcBall(glm::vec2 v)
 }
 void Model::rotate(int x, int y)
 {
-	glm::vec2 p = glm::vec2(x, y);
-	//int dRotate = _rotate - y;
-	glm::vec3 v1 = arcBall(normalizeScreenCoordninates(_xyRotate));
-	glm::vec3 v2 = arcBall(normalizeScreenCoordninates(p));
+	glm::vec2 p1 = normalizeScreenCoordninates(glm::vec2(x, y));
+	glm::vec2 p2 = normalizeScreenCoordninates(_xyRotate);
 
-	glm::vec3 dir = glm::normalize(glm::cross(v1, v2));
-//	float s = glm::length(v1) * glm::length(v2);
-	float s = 100 * 2 * glm::acos(glm::dot(v1, v2));
+	p1.x = p1.x * 2 - 1;
+	p1.y = p1.y * 2 - 1;
+	p1.y = -p1.y;
 
+	p2.x = p2.x * 2 - 1;
+	p2.y = p2.y * 2 - 1;
+	p2.y = -p2.y;
+
+	glm::vec3 v1 = arcBall(p1);
+	glm::vec3 v2 = arcBall(p2);
+
+	glm::vec3 dir = glm::normalize(glm::cross(v2, v1));
+	//float s = glm::length(v1) * glm::length(v2);
+	float s = glm::acos(glm::dot(v1, v2));
+	s*=100;
 
 	_rotationMat = glm::rotate(_rotateBaseMat, s, dir);
 
@@ -357,8 +365,10 @@ void Model::scale(int y)
 void Model::translate(int x, int y)
 {
 	glm::vec2 dxy = _xyTranslate - glm::vec2(x, y);
+	glm::vec2 ndxy = normalizeScreenCoordninates(dxy);
+	ndxy.y = -ndxy.y;
 
-	_translate = _translateBase - normalizeScreenCoordninates(dxy);
+	_translate = _translateBase - ndxy;
 	_translateMat = glm::translate(glm::mat4(), glm::vec3(_translate, -OBJECT_DEPTH));
 }
 
