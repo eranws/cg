@@ -240,10 +240,7 @@ void Model::resetMatrices()
 	_translateMat = glm::mat4(1.0f);
 	_rotationMat =  glm::mat4(1.0f);
 
-	_scale = 0.8f;
-	_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(_scale, _scale, _scale));
-
-	_translateBase = glm::vec2(0,0);
+	_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(MODEL_SCALE));
 }
 
 void Model::draw()
@@ -312,8 +309,8 @@ glm::vec3 arcBall(glm::vec2 v)
 	}
 
 	return glm::vec3(v.x, v.y, z);
-
 }
+
 void Model::rotate(int x, int y)
 {
 	glm::vec2 p1 = getScreenUnitCoordinates(_xyRotate);

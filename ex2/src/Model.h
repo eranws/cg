@@ -63,19 +63,15 @@ class Model {
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
+
+	static const float MODEL_SCALE = 0.8f;
 	glm::mat4 _projectionMat, _viewMat, _rotationMat, _translateMat, _modelMat, _scaleMat;
+
 	float _fov;
 	float _fovBase;
 
-
 	int _yScale;
-	float _scale;
-	float _scaleBase;
-
 	glm::vec2 _xyTranslate, _xyRotate;
-	glm::vec2 _translate;
-	glm::vec2 _translateBase;
-	glm::mat4 _rotateBaseMat;
 
 	static const float OBJECT_DEPTH = 5;
 	static const float OBJECT_B_RAD = 3;
