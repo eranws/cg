@@ -254,7 +254,7 @@ void Model::draw()
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
-	glm::mat4 transform  = _projectionMat * _viewMat * _modelMat * _rotationMat *  _translateMat * _scaleMat;
+	glm::mat4 transform  = _projectionMat *  _translateMat * _viewMat  * _rotationMat * _modelMat * _scaleMat;
 
 
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
@@ -363,7 +363,7 @@ void Model::resetFlag(int button)
 {
 	if (button == GLUT_LEFT_BUTTON)
 	{
-		_modelMat *= _rotationMat;
+		_modelMat = _rotationMat * _modelMat;
 		_rotationMat = glm::mat4();
 	}
 	else if (button == GLUT_MIDDLE_BUTTON)
@@ -372,7 +372,7 @@ void Model::resetFlag(int button)
 	}
 	else if (button == GLUT_RIGHT_BUTTON)
 	{
-		_modelMat *= _translateMat;
+		_modelMat = _translateMat * _modelMat;
 		_translateMat = glm::mat4();
 	}
 
