@@ -38,6 +38,7 @@
 #define KEY_RESET           ('r') // Key used to reset the applied TX's	      //
 #define KEY_RELOAD          ('l') // Key used to reload the shaders 	      //
 #define KEY_WIREFRAME       ('w') // Key used to toggle wireframe rendering   //
+#define KEY_PERSPECTIVE     ('p') // Key used to toggle ortho/perspect view   //
 
 /** display callback */
 void display(void);
@@ -182,11 +183,15 @@ void keyboard(unsigned char key, int x, int y)
 	case KEY_ANIMATE:
 		isAnimating = !isAnimating;
 		break;
+	case KEY_PERSPECTIVE:
+		_model.changeViewMode();
+		break;
 	case KEY_QUIT:
 	case KEY_ESC:
 		// Terminate the program:
 		exit(RC_OK);
 		break;
+
 	default:
 		std::cerr << "Key " << lower_key << " undefined\n";
 		break;
@@ -211,11 +216,11 @@ void mouse(int button, int state, int x, int y)
 {
 	if (state == GLUT_DOWN)
 	{
-		_model.setFlag(button, x, y);
+		_model.setMouseFlag(button, x, y);
 	}
 	else if (state == GLUT_UP)
 	{
-		_model.resetFlag(button);
+		_model.resetMouseFlag(button);
 	}
 }
 

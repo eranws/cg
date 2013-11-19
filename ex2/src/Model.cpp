@@ -24,7 +24,7 @@
 #define SHADERS_DIR "shaders/"
 
 Model::Model(float w, float h) :
-_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL)
+_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE)
 {
 	for (int i=0; i<3; i++)
 	{
@@ -236,11 +236,25 @@ void Model::resetMatrices()
 	_fovBase = _fov;
 	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 	_viewMat = glm::lookAt(glm::vec3(0, 0, OBJECT_DEPTH), glm::vec3(),glm::vec3(0,1,0));
-	_modelMat = glm::mat4(1.0f);
-	_translateMat = glm::mat4(1.0f);
-	_rotationMat =  glm::mat4(1.0f);
+	_modelMat = glm::mat4();
+	_translateMat = glm::mat4();
+	_rotationMat =  glm::mat4();
 
-	_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(MODEL_SCALE));
+	_scaleMat = glm::scale(glm::mat4(), glm::vec3(MODEL_SCALE));
+}
+
+void Model::changeViewMode()
+{
+	if(_viewMode == ORTHOGONAL)
+	{
+		_viewMode = PERSPECTIVE;
+		_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	}
+	else
+	{
+		_viewMode = ORTHOGONAL;
+		_projectionMat = glm::ortho(-1.f, 1.f, -1.f, 1.f, OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	}
 }
 
 void Model::draw()
@@ -311,19 +325,20 @@ glm::vec3 arcBall(glm::vec2 v)
 	return glm::vec3(v.x, v.y, z);
 }
 
+
 void Model::rotate(int x, int y)
 {
+
 	glm::vec2 p1 = getScreenUnitCoordinates(_xyRotate);
-	glm::vec2 p2 = getScreenUnitCoordinates(glm::vec2(x, y));
+	glm::vec2 p2 = getScreenUnitCoordinates(glm::vec2(x,y));
 
 	glm::vec3 v1 = arcBall(p1);
 	glm::vec3 v2 = arcBall(p2);
 
 	glm::vec3 dir = glm::normalize(glm::cross(v1, v2));
-	float s = glm::acos(glm::dot(v1, v2));
-	s *= 100;
+	float angle =  2 * glm::degrees(glm::acos(glm::dot(v1, v2)));
 
-	_rotationMat = glm::rotate(glm::mat4(), s, dir);
+	_rotationMat = glm::rotate(glm::mat4(), angle, dir);
 }
 
 void Model::scale(int y)
@@ -337,10 +352,11 @@ void Model::translate(int x, int y)
 {
 	glm::vec2 dxy = getScreenUnitCoordinates(glm::vec2(x, y)) - getScreenUnitCoordinates(_xyTranslate);
 	_translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(dxy, 0));
+//	_center += MyMesh::Point(x,y);
 }
 
 
-void Model::setFlag(int button, int x, int y)
+void Model::setMouseFlag(int button, int x, int y)
 {
 	if(button == GLUT_LEFT_BUTTON)
 	{
@@ -359,7 +375,7 @@ void Model::setFlag(int button, int x, int y)
 	}
 }
 
-void Model::resetFlag(int button)
+void Model::resetMouseFlag(int button)
 {
 	if (button == GLUT_LEFT_BUTTON)
 	{

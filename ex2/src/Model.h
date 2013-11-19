@@ -25,8 +25,6 @@
 
 #define DEFAULT_VERTICES_NUM 40
 #define PI 3.14159265
-#define LIGHT_SOURCE1 200.0, 200.0
-#define LIGHT_SOURCE2 400.0, 400.0
 
 class Ball;
 class Model {
@@ -64,7 +62,7 @@ class Model {
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
 
-	static const float MODEL_SCALE = 0.8f;
+	static const float MODEL_SCALE = 0.45f;
 	glm::mat4 _projectionMat, _viewMat, _rotationMat, _translateMat, _modelMat, _scaleMat;
 
 	float _fov;
@@ -73,9 +71,16 @@ class Model {
 	int _yScale;
 	glm::vec2 _xyTranslate, _xyRotate;
 
-	static const float OBJECT_DEPTH = 5;
-	static const float OBJECT_B_RAD = 3;
+	static const float OBJECT_DEPTH = 3;
+	static const float OBJECT_B_RAD = 2;
 	bool _mouseFlags[3];
+
+	enum viewMode{
+		ORTHOGONAL, PERSPECTIVE
+	};
+
+	viewMode _viewMode;
+
 
 public:
 	Model(float w, float h);
@@ -107,9 +112,12 @@ public:
 	void translate(int x, int y);
 	void rotate(int x, int y);
 
-	void setFlag(int button, int x, int y);
-	void resetFlag(int button);
+	void setMouseFlag(int button, int x, int y);
+	void resetMouseFlag(int button);
 	void motion(int x, int y);
+
+	void changeViewMode();
+
 };
 
 #endif /* defined(__ex0__Model__) */
