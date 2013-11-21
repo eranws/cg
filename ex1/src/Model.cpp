@@ -76,13 +76,6 @@ void Model::init()
 
 	GLuint program = programManager::sharedInstance().programWithID("default");
 
-	// Obtain uniform variable handles:
-	_fillColorUV  = glGetUniformLocation(program, "fillColor");
-	_transformUV = glGetUniformLocation(program, "transform");
-	_centerUV  = glGetUniformLocation(program, "ballCenter");
-	_lightSource1UV  = glGetUniformLocation(program, "lightSource1");
-	_lightSource2UV  = glGetUniformLocation(program, "lightSource2");
-	_radiusUV = glGetUniformLocation(program, "radius");
 
 	// Initialize vertices buffer and transfer it to OpenGL
 	{
@@ -106,6 +99,8 @@ void Model::init()
 				GL_FALSE,
 				0,
 				0);
+
+
 
 		glBindVertexArray(0);
 		mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, _width / 2, _height / 2);
@@ -171,7 +166,7 @@ void Model::resize(int width, int height)
 	_numVertices = std::min(50, std::min(width, height));
 	genCircleVertices();
 
-//
+	//
 }
 
 void Model::mouse(int button, int state, int x, int y)

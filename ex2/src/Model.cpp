@@ -24,9 +24,10 @@
 #define SHADERS_DIR "shaders/"
 
 Model::Model(float w, float h) :
-_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _numCircleVertices(10)
+_vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
+_width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _numCircleVertices(50)
 {
-	for (int i=0; i<3; i++)
+	for (int i=0; i < 3; i++)
 	{
 		_mouseFlags[i] = false;
 	}
@@ -38,53 +39,16 @@ Model::~Model()
 		glDeleteVertexArrays(1, &_vao);
 	if (_vbo != 0)
 		glDeleteBuffers(1, &_vbo);
+	if (_vaoCircle != 0)
+		glDeleteVertexArrays(1, &_vaoCircle);
+	if (_vboCircle != 0)
+		glDeleteBuffers(1, &_vboCircle);
 }
 
 
 
 void Model::genModelVertices()
 {
-
-	//	std::vector<float> vertices;
-	//	vertices.reserve(_mesh.n_vertices() * 4);
-	//	// iterate on all faces
-	//
-	//	for (MyMesh::VertexIter v_it=_mesh.vertices_begin(); v_it != _mesh.vertices_end(); ++v_it)
-	//	{
-	//		vertices.push_back(_mesh.point(v_it.handle())[0]);
-	//		vertices.push_back(_mesh.point(v_it.handle())[1]);
-	//		vertices.push_back(_mesh.point(v_it.handle())[2]);
-	//		vertices.push_back(1.0f);
-	//	}
-	//
-	//	struct face_indices_t
-	//	{
-	//		face_indices_t() {
-	//
-	//		}
-	//		GLuint a,b,c;
-	//	};
-	//	int i = 0;
-	//
-	//	std::vector<face_indices_t> faces(_mesh.n_faces());
-	//	faces.reserve(_mesh.n_faces());
-	//	for (MyMesh::FaceIter f_it = _mesh.faces_begin(); f_it != _mesh.faces_end(); ++f_it)
-	//	{
-	//		MyMesh::ConstFaceVertexIter cfv_it = _mesh.cfv_iter(f_it.handle());
-	//		face_indices_t face;
-	//		face.a = cfv_it.handle().idx();
-	//		++cfv_it;
-	//		face.b = cfv_it.handle().idx();
-	//		++cfv_it;
-	//		face.c = cfv_it.handle().idx();
-	//		faces[i++] = face;
-	//	}
-	//
-	//	glGenBuffers(1, &_ebo);
-	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-	//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t)*faces.size(), &(faces[0]), GL_STATIC_DRAW);
-
-
 	std::vector<float> temp;
 	temp.reserve(_mesh.n_faces() * 3 * 4);
 
@@ -122,23 +86,23 @@ void Model::genModelVertices()
 
 void Model::genCircleVertices()
 {
-	float* tempVertices = new float[_numCircleVertices * 4];
+	float* tempVertices = new float[_numCircleVertices * 2 * 4];
 
 	const float step = 2 * PI / (_numCircleVertices - 1);
 
-	for(int i = 0; i < _numCircleVertices; i++)
+	for(int i = 0; i < _numCircleVertices * 2; i++)
 	{
 		float angle = i * step;
-		tempVertices[i * 4] = cos(angle);
-		tempVertices[i * 4 + 1] = sin(angle);
+		tempVertices[i * 4] = cosf(angle) * CIRCLE_RADIUS;
+		tempVertices[i * 4 + 1] = sinf(angle) * CIRCLE_RADIUS;
 
-		tempVertices[i * 4 + 2] = 0.0f;
+		tempVertices[i * 4 + 2] = 0;
 		tempVertices[i * 4 + 3] = 1.00f;
 	}
 
 
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
-	glBufferData(GL_ARRAY_BUFFER, _numCircleVertices * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _numCircleVertices * 2 * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
 	delete[] tempVertices;
 }
 
@@ -170,11 +134,17 @@ void Model::computeCenterAndBoundingBox()
 		}
 	}
 	_center /= (double)vNum;
-	std::cout <<"center of object "<< _center<< std::endl;
-	std::cout <<"lower left corner of object "<< _lowerLeft << std::endl;
-	std::cout <<"upper right corner of object "<< _upperRight << std::endl;
 
-
+//	std::vector<float> v;
+//	v.push_back(fabs(_lowerLeft[0]));
+//	v.push_back(fabs(_lowerLeft[1]));
+//	v.push_back(fabs(_lowerLeft[2]));
+//
+//	v.push_back(fabs(_upperRight[0]));
+//	v.push_back(fabs(_upperRight[1]));
+//	v.push_back(fabs(_upperRight[2]));
+//
+//	_modelScale = CIRCLE_RADIUS / (*std::max_element(v.begin(), v.end()));
 }
 
 
@@ -184,34 +154,57 @@ void Model::loadMesh(const char* fileName) {
 		// if we didn't make it, exit...
 		fprintf(stderr, "Error loading mesh, Aborting.\n");
 	}
-	printf("number of vertices is %d\n", _mesh.n_vertices());
-	printf("number of faces is %d\n", _mesh.n_faces());
-	printf("number of edges is %d\n", _mesh.n_edges());
 }
 
 void Model::init(const char* meshFile)
 {
 	programManager::sharedInstance()
 	.createProgram("default",
-			SHADERS_DIR "TranslateShader.vert",
-			SHADERS_DIR "LightShader.frag");
+			SHADERS_DIR "ModelShader.vert",
+			SHADERS_DIR "ModelShader.frag");
+
+
+	programManager::sharedInstance()
+		.createProgram("circle",
+			SHADERS_DIR "CircleShader.vert",
+			SHADERS_DIR "CircleShader.frag");
 
 	GLuint program = programManager::sharedInstance().programWithID("default");
+	GLuint programCircle = programManager::sharedInstance().programWithID("circle");
 
-	// Obtain uniform variable handles:
-	_fillColorUV  = glGetUniformLocation(program, "fillColor");
-	_transformUV = glGetUniformLocation(program, "transform");
-	_centerUV  = glGetUniformLocation(program, "ballCenter");
-	_lightSource1UV  = glGetUniformLocation(program, "lightSource1");
-	_lightSource2UV  = glGetUniformLocation(program, "lightSource2");
-	_radiusUV = glGetUniformLocation(program, "radius");
-
-	//_projectionUV = glGetUniformLocation(program, "projection");
 
 
 
 
 	// Initialize vertices buffer and transfer it to OpenGL
+
+	// Initialize Circle
+	{
+		// Create and bind the object's Vertex Array Object:
+		glGenVertexArrays(1, &_vaoCircle);
+		glBindVertexArray(_vaoCircle);
+
+		// Create and load vertex data into a Vertex Buffer Object:
+		glGenBuffers(1, &_vboCircle);
+		glBindBuffer(GL_ARRAY_BUFFER, _vboCircle);
+
+		//generate vertices to create the circle
+		genCircleVertices();
+
+		// Obtain attribute handles:
+		_posAttribCircle = glGetAttribLocation(programCircle, "position");
+		glEnableVertexAttribArray(_posAttribCircle);
+		glVertexAttribPointer(_posAttribCircle, // attribute handle
+				4,          // number of scalars per vertex
+				GL_FLOAT,   // scalar type
+				GL_FALSE,
+				0,
+				0);
+
+		glBindVertexArray(0);
+	}
+
+	// Initialize Model
 	{
 		// Create and bind the object's Vertex Array Object:
 		glGenVertexArrays(1, &_vao);
@@ -227,6 +220,12 @@ void Model::init(const char* meshFile)
 		computeCenterAndBoundingBox();
 		genModelVertices();
 
+
+		// Obtain uniform variable handles:
+		_transformUV = glGetUniformLocation(program, "transform");
+		_lowerLeftUV = glGetUniformLocation(program, "lowerLeft");
+		_upperRightUV = glGetUniformLocation(program, "upperRight");
+
 		// Obtain attribute handles:
 		_posAttrib = glGetAttribLocation(program, "position");
 		glEnableVertexAttribArray(_posAttrib);
@@ -238,9 +237,11 @@ void Model::init(const char* meshFile)
 				0);
 
 		glBindVertexArray(0);
+
+		resetMatrices();
 	}
 
-	resetMatrices();
+
 }
 
 glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
@@ -254,7 +255,7 @@ glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
 
 void Model::resetMatrices()
 {
-	_fov = 35.0f;
+	_fov = INITIAL_FOV;
 	_fovBase = _fov;
 	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 	_viewMat = glm::lookAt(glm::vec3(0, 0, OBJECT_DEPTH), glm::vec3(),glm::vec3(0,1,0));
@@ -309,6 +310,8 @@ void Model::draw()
 
 
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
+	glUniform3f(_lowerLeftUV, _lowerLeft[0], _lowerLeft[1], _lowerLeft[2]);
+	glUniform3f(_upperRightUV, _upperRight[0], _upperRight[1], _upperRight[2]);
 	glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 
 	// Unbind the Vertex Array object
@@ -318,12 +321,26 @@ void Model::draw()
 	glUseProgram(0);
 }
 
+void Model::draw2D()
+{
+
+	GLuint program = programManager::sharedInstance().programWithID("circle");
+		glUseProgram(program);
+
+	glBindVertexArray(_vaoCircle);
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawArrays(GL_LINES, 0, _numCircleVertices * 4);
+
+	// Unbind the Vertex Array object
+	glBindVertexArray(0);
+
+}
+
+
 void Model::resize(int width, int height)
 {
 	_width	= width;
 	_height = height;
-	_offsetX = 0;
-	_offsetY = 0;
 	updateProjectionMatrix();
 }
 
@@ -360,17 +377,13 @@ glm::vec3 Model::arcBall(glm::vec2 v)
 		z = std::sqrt(1 - glm::dot(v,v));
 	}
 
-//	std::cout << v.x << " " << v.y << " " << z << std::endl;
-
 	return glm::vec3(v.x, v.y, z);
 }
 
 
 void Model::rotate(int x, int y)
 {
-
-	//TODO:!!!!!! IF MODEL BECOMES VERY LARGE, ROTATE BECOMES REVERSED!!!
-	glm::vec2 p1 = getScreenUnitCoordinates(_xyRotate);
+	glm::vec2 p1 = getScreenUnitCoordinates(_xyRotateBase);
 	glm::vec2 p2 = getScreenUnitCoordinates(glm::vec2(x,y));
 
 	p1 *= (1/CIRCLE_RADIUS);
@@ -388,25 +401,25 @@ void Model::rotate(int x, int y)
 
 void Model::scale(int y)
 {
-	int dy = _yScale - y;
+	int dy = _yScaleBase - y;
 	_fov = _fovBase * (1 + dy / _height);
-	if (_fov > 150.f)
+	if (_fov > MAX_FOV)
 	{
-		_fov = 150.f;
+		_fov = MAX_FOV;
 	}
-	if (_fov < 10.f)
+	if (_fov < MIN_FOV)
 	{
-		_fov = 10.f;
+		_fov = MIN_FOV;
 	}
 
-	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	updateProjectionMatrix();
 }
 
 void Model::translate(int x, int y)
 {
-	glm::vec2 dxy = getScreenUnitCoordinates(glm::vec2(x, y)) - getScreenUnitCoordinates(_xyTranslate);
+	glm::vec2 dxy = getScreenUnitCoordinates(glm::vec2(x, y)) - getScreenUnitCoordinates(_xyTranslateBase);
 	_translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(dxy, 0));
-//	_center += MyMesh::Point(x,y);
+	//	_center += MyMesh::Point(x,y);
 }
 
 
@@ -414,20 +427,20 @@ void Model::setMouseFlag(int button, int x, int y)
 {
 	if(button == GLUT_LEFT_BUTTON)
 	{
-		_xyRotate = glm::vec2(x, y);
-		if (glm::length(getScreenUnitCoordinates(_xyRotate)) < CIRCLE_RADIUS)
+		_xyRotateBase = glm::vec2(x, y);
+		if (glm::length(getScreenUnitCoordinates(_xyRotateBase)) < CIRCLE_RADIUS)
 		{
 			_mouseFlags[GLUT_LEFT_BUTTON] = true;
 		}
 	}
 	else if (button == GLUT_MIDDLE_BUTTON)
 	{
-		_yScale = y;
+		_yScaleBase = y;
 		_mouseFlags[GLUT_MIDDLE_BUTTON] = true;
 	}
 	else if (button == GLUT_RIGHT_BUTTON)
 	{
-		_xyTranslate = glm::vec2(x, y);
+		_xyTranslateBase = glm::vec2(x, y);
 		_mouseFlags[GLUT_RIGHT_BUTTON] = true;
 	}
 }

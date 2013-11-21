@@ -129,8 +129,13 @@ void display(void)
 	// Clear the screen buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glEnable(GL_DEPTH_TEST);
 	// Let the model to draw itself...
 	_model.draw();
+
+	//glDisable(GL_DEPTH_TEST);
+	_model.draw2D();
+
 
 	// Swap those buffers so someone will actually see the results... //
 	glutSwapBuffers();

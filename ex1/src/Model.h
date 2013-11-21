@@ -33,15 +33,8 @@ class Model {
 
 	// Attribute handle:
 	GLint _posAttrib;
-	
-	// Uniform handle:
-	GLint _fillColorUV;
-	GLint _transformUV;
-	GLint _centerUV;
-	GLint _lightSource1UV;
-	GLint _lightSource2UV;
-	GLint _radiusUV;
-	
+	GLint _posAttribCircle;
+
 	//number of vertices in the circle, not including center and last perimeter vertex (i.e total number of vertices - 2)
 	int _numVertices;
 
