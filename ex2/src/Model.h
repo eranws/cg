@@ -29,7 +29,7 @@
 class Ball;
 class Model {
 
-	GLuint _vao, _vbo, _ebo;
+	GLuint _vao, _vbo, _vao2, _vbo2;
 
 	// Attribute handle:
 	GLint _posAttrib;
@@ -61,10 +61,10 @@ class Model {
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
 
-
 	static const float MODEL_SCALE = 0.45f;
 	glm::mat4 _projectionMat, _viewMat, _rotationMat, _translateMat, _modelMat, _scaleMat;
 
+	static const float CIRCLE_RADIUS = 0.8f;
 	float _fov;
 	float _fovBase;
 
@@ -80,6 +80,8 @@ class Model {
 	};
 
 	viewMode _viewMode;
+
+	int _numCircleVertices;
 
 
 public:
@@ -111,12 +113,16 @@ public:
 	void scale(int y);
 	void translate(int x, int y);
 	void rotate(int x, int y);
+	glm::vec3 arcBall(glm::vec2 v);
 
 	void setMouseFlag(int button, int x, int y);
 	void resetMouseFlag(int button);
 	void motion(int x, int y);
 
-	void changeViewMode();
+	void toggleProjectionMode();
+	void updateProjectionMatrix();
+
+	void genCircleVertices();
 
 };
 

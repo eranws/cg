@@ -184,7 +184,7 @@ void keyboard(unsigned char key, int x, int y)
 		isAnimating = !isAnimating;
 		break;
 	case KEY_PERSPECTIVE:
-		_model.changeViewMode();
+		_model.toggleProjectionMode();
 		break;
 	case KEY_QUIT:
 	case KEY_ESC:

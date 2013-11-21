@@ -24,7 +24,7 @@
 #define SHADERS_DIR "shaders/"
 
 Model::Model(float w, float h) :
-_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE)
+_vao(0), _vbo(0), _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _numCircleVertices(10)
 {
 	for (int i=0; i<3; i++)
 	{
@@ -118,6 +118,28 @@ void Model::genModelVertices()
 
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
 	glBufferData(GL_ARRAY_BUFFER, temp.size() * sizeof(float), temp.data(), GL_STATIC_DRAW);
+}
+
+void Model::genCircleVertices()
+{
+	float* tempVertices = new float[_numCircleVertices * 4];
+
+	const float step = 2 * PI / (_numCircleVertices - 1);
+
+	for(int i = 0; i < _numCircleVertices; i++)
+	{
+		float angle = i * step;
+		tempVertices[i * 4] = cos(angle);
+		tempVertices[i * 4 + 1] = sin(angle);
+
+		tempVertices[i * 4 + 2] = 0.0f;
+		tempVertices[i * 4 + 3] = 1.00f;
+	}
+
+
+	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
+	glBufferData(GL_ARRAY_BUFFER, _numCircleVertices * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
+	delete[] tempVertices;
 }
 
 
@@ -243,17 +265,32 @@ void Model::resetMatrices()
 	_scaleMat = glm::scale(glm::mat4(), glm::vec3(MODEL_SCALE));
 }
 
-void Model::changeViewMode()
+void Model::toggleProjectionMode()
 {
 	if(_viewMode == ORTHOGONAL)
 	{
 		_viewMode = PERSPECTIVE;
-		_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 	}
 	else
 	{
 		_viewMode = ORTHOGONAL;
-		_projectionMat = glm::ortho(-1.f, 1.f, -1.f, 1.f, OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	}
+	updateProjectionMatrix();
+
+}
+
+void Model::updateProjectionMatrix()
+{
+	if(_viewMode == PERSPECTIVE)
+	{
+		_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
+	}
+	else
+	{
+		float ty = tanf(glm::radians(_fov / 2)) * 2;
+		float tx = ty * float(_width)/float(_height);
+
+		_projectionMat = glm::ortho(-tx, tx, -ty, ty, OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 	}
 }
 
@@ -287,6 +324,7 @@ void Model::resize(int width, int height)
 	_height = height;
 	_offsetX = 0;
 	_offsetY = 0;
+	updateProjectionMatrix();
 }
 
 void Model::changePolygonMode()
@@ -310,7 +348,7 @@ glm::vec2 Model::normalizeScreenCoordninates(glm::vec2 v)
 	return v;
 }
 
-glm::vec3 arcBall(glm::vec2 v)
+glm::vec3 Model::arcBall(glm::vec2 v)
 {
 	float z;
 	if (glm::length(v) > 1)
@@ -319,8 +357,10 @@ glm::vec3 arcBall(glm::vec2 v)
 	}
 	else
 	{
-		z = std::sqrt(1 - v.x*v.x - v.y*v.y);
+		z = std::sqrt(1 - glm::dot(v,v));
 	}
+
+//	std::cout << v.x << " " << v.y << " " << z << std::endl;
 
 	return glm::vec3(v.x, v.y, z);
 }
@@ -329,14 +369,19 @@ glm::vec3 arcBall(glm::vec2 v)
 void Model::rotate(int x, int y)
 {
 
+	//TODO:!!!!!! IF MODEL BECOMES VERY LARGE, ROTATE BECOMES REVERSED!!!
 	glm::vec2 p1 = getScreenUnitCoordinates(_xyRotate);
 	glm::vec2 p2 = getScreenUnitCoordinates(glm::vec2(x,y));
+
+	p1 *= (1/CIRCLE_RADIUS);
+	p2 *= (1/CIRCLE_RADIUS);
+
 
 	glm::vec3 v1 = arcBall(p1);
 	glm::vec3 v2 = arcBall(p2);
 
 	glm::vec3 dir = glm::normalize(glm::cross(v1, v2));
-	float angle =  2 * glm::degrees(glm::acos(glm::dot(v1, v2)));
+	float angle =  2 * glm::degrees(glm::acos(glm::dot(glm::normalize(v1), glm::normalize(v2))));
 
 	_rotationMat = glm::rotate(glm::mat4(), angle, dir);
 }
@@ -345,6 +390,15 @@ void Model::scale(int y)
 {
 	int dy = _yScale - y;
 	_fov = _fovBase * (1 + dy / _height);
+	if (_fov > 150.f)
+	{
+		_fov = 150.f;
+	}
+	if (_fov < 10.f)
+	{
+		_fov = 10.f;
+	}
+
 	_projectionMat = glm::perspective(_fov, float(_width)/float(_height), OBJECT_DEPTH - OBJECT_B_RAD, OBJECT_DEPTH + OBJECT_B_RAD);
 }
 
@@ -361,7 +415,10 @@ void Model::setMouseFlag(int button, int x, int y)
 	if(button == GLUT_LEFT_BUTTON)
 	{
 		_xyRotate = glm::vec2(x, y);
-		_mouseFlags[GLUT_LEFT_BUTTON] = true;
+		if (glm::length(getScreenUnitCoordinates(_xyRotate)) < CIRCLE_RADIUS)
+		{
+			_mouseFlags[GLUT_LEFT_BUTTON] = true;
+		}
 	}
 	else if (button == GLUT_MIDDLE_BUTTON)
 	{
