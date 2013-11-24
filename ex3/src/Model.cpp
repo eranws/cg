@@ -25,7 +25,7 @@
 
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
-_width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _numCircleVertices(50)
+_width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50)
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -145,6 +145,20 @@ void Model::loadMesh(const char* fileName) {
 	}
 }
 
+void Model::computeNormals()
+{
+	_mesh.request_face_normals();
+	_mesh.request_vertex_normals();
+	_mesh.update_normals();
+
+//	glm::vec3 v = _mesh.normal(fH);
+//	glm::vec3 v = _mesh.normal(vH);
+
+	_mesh.release_vertex_normals();
+	_mesh.release_face_normals();
+
+}
+
 void Model::init(const char* meshFile)
 {
 	programManager::sharedInstance()
@@ -208,6 +222,8 @@ void Model::init(const char* meshFile)
 		loadMesh(meshFile);
 		computeCenterAndBoundingBox();
 		genModelVertices();
+		computeNormals();
+
 
 
 		// Obtain uniform variable handles:
@@ -465,3 +481,16 @@ void Model::motion(int x, int y)
 		translate(x, y);
 	}
 }
+
+void Model::toggleNormalMode()
+{
+	if (_normalMode == NORMAL_FACE)
+	{
+		_normalMode = NORMAL_VERTEX;
+	}
+	else
+	{
+		_normalMode = NORMAL_FACE;
+	}
+}
+

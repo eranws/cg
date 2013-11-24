@@ -39,6 +39,11 @@
 #define KEY_RELOAD          ('l') // Key used to reload the shaders 	      //
 #define KEY_WIREFRAME       ('w') // Key used to toggle wireframe rendering   //
 #define KEY_PERSPECTIVE     ('p') // Key used to toggle ortho/perspect view   //
+#define KEY_DECREASE_SHINE	('-')
+#define KEY_INCREASE_SHINE	('=')
+#define KEY_NORMAL_EST_MODE	('n')
+
+
 
 /** display callback */
 void display(void);
@@ -196,6 +201,28 @@ void keyboard(unsigned char key, int x, int y)
 		// Terminate the program:
 		exit(RC_OK);
 		break;
+
+	case KEY_DECREASE_SHINE:
+		_model.decreaseShine();
+		break;
+	case KEY_INCREASE_SHINE:
+		_model.increaseShine();
+		break;
+
+	case '1':
+		_model.setShadingMode(Model::SHADING_PHONG);
+		break;
+	case '2':
+		_model.setShadingMode(Model::SHADING_GOURAUD);
+		break;
+	case '3':
+		_model.setShadingMode(Model::SHADING_RGB);
+		break;
+
+	case KEY_NORMAL_EST_MODE:
+		_model.toggleNormalMode();
+		break;
+
 
 	default:
 		std::cerr << "Key " << lower_key << " undefined\n";

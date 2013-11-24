@@ -27,8 +27,15 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 class Model {
 
+public:
+	enum shadingMode{
+		SHADING_PHONG, SHADING_GOURAUD, SHADING_RGB
+	};
 
-//	float _modelScale;
+private:
+
+
+	//	float _modelScale;
 	static const float INITIAL_FOV = 35.f;
 	static const float MAX_FOV = 150.f;
 	static const float MIN_FOV = 10.f;
@@ -64,8 +71,45 @@ class Model {
 	enum viewMode{
 		ORTHOGONAL, PERSPECTIVE
 	};
-
 	viewMode _viewMode;
+
+
+	enum normalMode{
+		NORMAL_FACE, NORMAL_VERTEX
+	};
+	normalMode _normalMode;
+
+	shadingMode _shadingMode;
+
+	struct LightParams {
+		LightParams() :
+			specExp(200.0), // Shininess (can be changed dynamically by the user)
+			ambientColor(glm::vec3(1.0, 1.0, 1.0)),
+			lightColor1(glm::vec3(1.0, 0.9, 0.7)), // Light 1 color
+			lightColor2(glm::vec3(0.6, 0.6, 1.0)), // Light 2 color
+			highColor(glm::vec3(1.0, 1.0, 1.0)), // Specular color
+			ka(0.1), // Ambient color
+			kd(glm::vec3(0.3, 0.3, 0.3)), // Specularity coefficient
+			ks(0.3), // Diffuse
+			light_position1(glm::vec3(  3.0, 2.0, 1.0)), // First light position
+			light_position2(glm::vec3( -3.0, 0.0, 1.0)) // Second light position
+		{
+		}
+
+		float specExp;
+		glm::vec3 ambientColor;
+		glm::vec3 lightColor1;
+		glm::vec3 lightColor2;
+		glm::vec3 highColor;
+		float ka;
+		glm::vec3 kd;
+		float ks;
+		glm::vec3 light_position1;
+		glm::vec3 light_position2;
+	};
+
+	LightParams lightParams;
+
 
 	int _numCircleVertices;
 
@@ -111,6 +155,14 @@ public:
 	void updateProjectionMatrix();
 
 	void genCircleVertices();
+
+	void computeNormals();
+
+	void decreaseShine(){} //TODO
+	void increaseShine(){} //TODO
+
+	void setShadingMode(shadingMode mode){_shadingMode = mode;}
+	void toggleNormalMode();
 
 };
 
