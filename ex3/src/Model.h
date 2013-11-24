@@ -22,7 +22,7 @@
 #include "OpenMesh/Core/IO/MeshIO.hh"
 #include "OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh"
 
-#define PI 3.14159265
+#define PI 3.14159265359
 typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 class Model {
@@ -156,7 +156,7 @@ public:
 
 	void genCircleVertices();
 
-	void computeNormals();
+	void computeFaceNormals();
 
 	void decreaseShine(){} //TODO
 	void increaseShine(){} //TODO

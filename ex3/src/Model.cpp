@@ -25,7 +25,8 @@
 
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
-_width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE), _normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50)
+_width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
+_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50)
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -49,8 +50,8 @@ Model::~Model()
 
 void Model::genModelVertices()
 {
-	std::vector<float> temp;
-	temp.reserve(_mesh.n_faces() * 3 * 4);
+	std::vector<float> vertices;
+	vertices.reserve(_mesh.n_faces() * 3 * 4);
 
 	std::vector<float> v;
 	v.push_back(fabs(_lowerLeft[0]));
@@ -60,6 +61,8 @@ void Model::genModelVertices()
 	v.push_back(fabs(_upperRight[0]));
 	v.push_back(fabs(_upperRight[1]));
 	v.push_back(fabs(_upperRight[2]));
+
+
 
 	float maxV = *std::max_element(v.begin(), v.end());
 
@@ -73,36 +76,60 @@ void Model::genModelVertices()
 			p -= _center; // center of mass
 			p /= maxV;
 
-			temp.push_back(p[0]);
-			temp.push_back(p[1]);
-			temp.push_back(p[2]);
-			temp.push_back(1.0f);
+			vertices.push_back(p[0]);
+			vertices.push_back(p[1]);
+			vertices.push_back(p[2]);
+			vertices.push_back(1.0f);
 		}
 	}
 
+	_lowerLeft /= maxV;
+	_lowerLeft *= CIRCLE_RADIUS;
+	_upperRight /= maxV;
+	_upperRight *= CIRCLE_RADIUS;
+
+	float upperRightOffset = glm::length(glm::vec3(CIRCLE_RADIUS - _upperRight[0], CIRCLE_RADIUS - _upperRight[1], CIRCLE_RADIUS - _upperRight[2]));
+	float lowerLeftOffset = glm::length(glm::vec3(CIRCLE_RADIUS + _lowerLeft[0], CIRCLE_RADIUS + _lowerLeft[1], CIRCLE_RADIUS + _lowerLeft[2]));
+	float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
+	//normalize to arcBall radius:
+	for (size_t i = 0; i < vertices.size() / 4; i++)
+	{
+		if (glm::length(glm::vec3(vertices[i * 4], vertices[i * 4 + 1], vertices[i * 4 + 2])) < CIRCLE_RADIUS)
+		{
+			vertices[i * 4] *= (1 + arcballNormalizeOffset);
+			vertices[i * 4 + 1] *= (1 + arcballNormalizeOffset);
+			vertices[i * 4 + 2] *= (1 + arcballNormalizeOffset);
+		}
+	}
+
+//	_lowerLeft *= (1 + arcballNormalizeOffset);
+//	_upperRight *= (1 + arcballNormalizeOffset);
+	std::cout << _lowerLeft[0] <<"," << _lowerLeft[1] <<","<< _lowerLeft[2] << std::endl;
+	std::cout << _upperRight[0] <<"," << _upperRight[1] <<","<< _upperRight[2] << std::endl;
+
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
-	glBufferData(GL_ARRAY_BUFFER, temp.size() * sizeof(float), temp.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float) + _mesh.n_faces() * 4 * sizeof(float), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
 }
 
 void Model::genCircleVertices()
 {
-	float* tempVertices = new float[_numCircleVertices * 2 * 4];
+	float* tempVertices = new float[_numCircleVertices * 4];
 
-	const float step = 2 * PI / (_numCircleVertices - 1);
+	const float step = (2.0 * PI) / (_numCircleVertices - 1);
 
-	for(int i = 0; i < _numCircleVertices * 2; i++)
+	for(int i = 0; i < _numCircleVertices; i++)
 	{
 		float angle = i * step;
 		tempVertices[i * 4] = cosf(angle) * CIRCLE_RADIUS;
 		tempVertices[i * 4 + 1] = sinf(angle) * CIRCLE_RADIUS;
 
 		tempVertices[i * 4 + 2] = 0;
-		tempVertices[i * 4 + 3] = 1.00f;
+		tempVertices[i * 4 + 3] = 1.f;
 	}
 
-
 	// Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
-	glBufferData(GL_ARRAY_BUFFER, _numCircleVertices * 2 * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _numCircleVertices * 4 * sizeof(float), tempVertices, GL_STATIC_DRAW);
 	delete[] tempVertices;
 }
 
@@ -145,17 +172,34 @@ void Model::loadMesh(const char* fileName) {
 	}
 }
 
-void Model::computeNormals()
+void Model::computeFaceNormals()
 {
-	_mesh.request_face_normals();
-	_mesh.request_vertex_normals();
-	_mesh.update_normals();
-
-//	glm::vec3 v = _mesh.normal(fH);
-//	glm::vec3 v = _mesh.normal(vH);
-
-	_mesh.release_vertex_normals();
-	_mesh.release_face_normals();
+//	_mesh.request_face_normals();
+//	_mesh.request_vertex_normals();
+//	_mesh.update_normals();
+//
+//	std::vector<float> faceNormals;
+//
+//	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
+//	{
+//		// circulate around the current face
+//		glm::vec3 face_normal = _mesh.normal(h_it);
+//		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
+//		{
+//			MyMesh::Point p = _mesh.point(fv_it.handle());
+//			// normalize each point
+//
+//			faceNormals.push_back(p[0]);
+//			faceNormals.push_back(p[1]);
+//			faceNormals.push_back(p[2]);
+//			faceNormals.push_back(1.0f);
+//		}
+//	}
+//
+//	_mesh.release_vertex_normals();
+//	_mesh.release_face_normals();
+//
+//	glBufferSubData(GL_ARRAY_BUFFER, 0, faceNormals.size() * sizeof(float), faceNormals.data());
 
 }
 
@@ -222,7 +266,7 @@ void Model::init(const char* meshFile)
 		loadMesh(meshFile);
 		computeCenterAndBoundingBox();
 		genModelVertices();
-		computeNormals();
+		computeFaceNormals();
 
 
 
@@ -329,8 +373,7 @@ void Model::draw2D()
 		glUseProgram(program);
 
 	glBindVertexArray(_vaoCircle);
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_LINES, 0, _numCircleVertices * 4);
+	glDrawArrays(GL_LINE_LOOP, 0, _numCircleVertices);
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
@@ -420,7 +463,6 @@ void Model::translate(int x, int y)
 {
 	glm::vec2 dxy = getScreenUnitCoordinates(glm::vec2(x, y)) - getScreenUnitCoordinates(_xyTranslateBase);
 	_translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(dxy, 0));
-	//	_center += MyMesh::Point(x,y);
 }
 
 
