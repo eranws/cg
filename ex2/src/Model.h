@@ -39,7 +39,7 @@ class Model {
 
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle;
-	GLint _transformUV, _lowerLeftUV, _upperRightUV;
+	GLint _transformUV;
 
 	// View port frame:
 	float _width, _height;

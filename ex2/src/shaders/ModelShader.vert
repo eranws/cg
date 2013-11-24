@@ -10,9 +10,7 @@ uniform vec3 upperRight;
 void main() {
 
 	
-	color = (position * 3 + 1) / 2;
-//	color = (position + 1) / 2;
-//	color = (position + (-1) * vec4(lowerLeft, 0.0)) / (vec4(upperRight, 1.0) - vec4(lowerLeft, 1.0));
+	color = (position + 1) / 2;
     gl_Position = transform * position;
    	 
 }

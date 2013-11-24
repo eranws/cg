@@ -134,17 +134,6 @@ void Model::computeCenterAndBoundingBox()
 		}
 	}
 	_center /= (double)vNum;
-
-//	std::vector<float> v;
-//	v.push_back(fabs(_lowerLeft[0]));
-//	v.push_back(fabs(_lowerLeft[1]));
-//	v.push_back(fabs(_lowerLeft[2]));
-//
-//	v.push_back(fabs(_upperRight[0]));
-//	v.push_back(fabs(_upperRight[1]));
-//	v.push_back(fabs(_upperRight[2]));
-//
-//	_modelScale = CIRCLE_RADIUS / (*std::max_element(v.begin(), v.end()));
 }
 
 
@@ -223,8 +212,6 @@ void Model::init(const char* meshFile)
 
 		// Obtain uniform variable handles:
 		_transformUV = glGetUniformLocation(program, "transform");
-		_lowerLeftUV = glGetUniformLocation(program, "lowerLeft");
-		_upperRightUV = glGetUniformLocation(program, "upperRight");
 
 		// Obtain attribute handles:
 		_posAttrib = glGetAttribLocation(program, "position");
@@ -310,8 +297,6 @@ void Model::draw()
 
 
 	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
-	glUniform3f(_lowerLeftUV, _lowerLeft[0], _lowerLeft[1], _lowerLeft[2]);
-	glUniform3f(_upperRightUV, _upperRight[0], _upperRight[1], _upperRight[2]);
 	glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 
 	// Unbind the Vertex Array object
