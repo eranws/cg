@@ -42,7 +42,7 @@ private:
 	static const float CIRCLE_RADIUS = 0.8f;
 	static const float MODEL_SCALE = 0.45;
 
-	GLuint _vao, _vbo, _vaoCircle, _vboCircle;
+	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle;
 
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle;
@@ -108,11 +108,15 @@ private:
 		glm::vec3 light_position2;
 	};
 
+	struct face_indices_t
+	{
+		GLuint a,b,c;
+	};
+
 	LightParams lightParams;
 
 
 	int _numCircleVertices;
-
 
 public:
 	Model(float w, float h);
