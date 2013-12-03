@@ -419,6 +419,7 @@ void Model::draw2D()
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
+	glUseProgram(0);
 
 }
 
@@ -597,6 +598,9 @@ void Model::setShadingMode(Model::shadingMode mode)
 		break;
 
 	}
+	glUseProgram(0);
 	bindAttributes(_program);
+	glUseProgram(_program);
+
 
 }
