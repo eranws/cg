@@ -30,8 +30,8 @@ HDRS	=  	ex3.h		\
 
 # list EXTRAS (shaders, etc.)
 EXTRAS =	\
-		shaders/CircleShader.frag	\
-		shaders/CircleShader.vert	\
+		shaders/RgbShader.frag	\
+		shaders/RgbShader.vert	\
 		shaders/ModelShader.frag	\
 		shaders/ModelShader.vert	\
 		Readme.txt			\

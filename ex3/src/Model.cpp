@@ -297,11 +297,6 @@ void Model::init(const char* meshFile)
 		genModelVertices();
 		computeFaceNormals();
 
-
-		bindAttributes(_programRgb);
-		bindAttributes(_programGu);
-		bindAttributes(_programPhong);
-
 		setShadingMode(Model::SHADING_RGB);
 
 		glBindVertexArray(0);
@@ -316,7 +311,8 @@ void Model::init(const char* meshFile)
 void Model::bindAttributes(GLuint program)
 {
 	// Obtain uniform variable handles:
-	_transformUV = glGetUniformLocation(program, "transform");
+	_modelViewUV = glGetUniformLocation(program, "modelView");
+	_projectionUV = glGetUniformLocation(program, "projection");
 
 	// Obtain attribute handles:
 	_posAttrib = glGetAttribLocation(program, "position");
@@ -399,10 +395,12 @@ void Model::draw()
 	// Draw using the state stored in the Vertex Array object:
 	glBindVertexArray(_vao);
 
-	glm::mat4 transform  = _projectionMat *  _translateMat * _viewMat  * _rotationMat * _modelMat * _scaleMat;
+	glm::mat4 modelView  = _translateMat * _viewMat  * _rotationMat * _modelMat * _scaleMat;
+
+	glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(_projectionMat));
+	glUniformMatrix4fv(_modelViewUV, 1, GL_FALSE, glm::value_ptr(modelView));
 
 
-	glUniformMatrix4fv(_transformUV, 1, GL_FALSE, glm::value_ptr(transform));
 	glDrawElements(GL_TRIANGLES, _mesh.n_faces() * 3, GL_UNSIGNED_INT, NULL);
 
 	// Unbind the Vertex Array object
@@ -599,4 +597,6 @@ void Model::setShadingMode(Model::shadingMode mode)
 		break;
 
 	}
+	bindAttributes(_program);
+
 }

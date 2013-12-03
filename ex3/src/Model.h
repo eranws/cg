@@ -49,7 +49,7 @@ private:
 
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle, _normalAttrib;
-	GLint _transformUV;
+	GLint _modelViewUV, _projectionUV;
 
 	// View port frame:
 	float _width, _height;
