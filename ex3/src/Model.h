@@ -42,10 +42,13 @@ private:
 	static const float CIRCLE_RADIUS = 0.8f;
 	static const float MODEL_SCALE = 0.45;
 
-	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle;
+	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo;
+
+	GLuint _program, _programRgb, _programGu, _programPhong, _programCircle;
+	void bindAttributes(GLuint program);
 
 	// Attribute handle:
-	GLint _posAttrib, _posAttribCircle;
+	GLint _posAttrib, _posAttribCircle, _normalAttrib;
 	GLint _transformUV;
 
 	// View port frame:
@@ -165,7 +168,7 @@ public:
 	void decreaseShine(){} //TODO
 	void increaseShine(){} //TODO
 
-	void setShadingMode(shadingMode mode){_shadingMode = mode;}
+	void setShadingMode(shadingMode mode);
 	void toggleNormalMode();
 
 };

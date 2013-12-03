@@ -67,26 +67,34 @@ void Model::genModelVertices()
 	float maxV = *std::max_element(v.begin(), v.end());
 
 
-	std::vector<glm::vec4> vertices(_mesh.n_vertices());
+	std::vector<glm::vec4> vertices(_mesh.n_vertices() * 2);
+
+	_mesh.request_vertex_normals();
+	_mesh.update_normals();
 
 	size_t i = 0;
 	MyMesh::Point p;
 	for (MyMesh::VertexIter vertexIter = _mesh.vertices_begin();
-		 vertexIter != _mesh.vertices_end();
-		 ++vertexIter)
+			vertexIter != _mesh.vertices_end();
+			++vertexIter)
 	{
 		p = _mesh.point(vertexIter.handle());
 		glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
 		vertices[i++] = position;
+		MyMesh::Normal n = _mesh.normal(vertexIter.handle());
+		glm::vec4 normal(n[0], n[1], n[2], 0.0);
+		vertices[i++] = normal;
 	}
+
+	_mesh.release_face_normals();
 
 	// Iterate over faces and create a traingle for each face by referencing
 	// to its vertices:
 	std::vector<face_indices_t> faces(_mesh.n_faces());
 	i = 0;
 	for (MyMesh::FaceIter faceIter = _mesh.faces_begin();
-		 faceIter != _mesh.faces_end();
-		 ++faceIter)
+			faceIter != _mesh.faces_end();
+			++faceIter)
 	{
 		MyMesh::ConstFaceVertexIter cfvlt = _mesh.cfv_iter(faceIter.handle());
 		face_indices_t face;
@@ -99,7 +107,7 @@ void Model::genModelVertices()
 	}
 
 	{
-//		normalize points to arcBall radius
+		//		normalize points to arcBall radius
 		_lowerLeft /= maxV;
 		_lowerLeft *= CIRCLE_RADIUS;
 		_upperRight /= maxV;
@@ -183,54 +191,62 @@ void Model::loadMesh(const char* fileName) {
 
 void Model::computeFaceNormals()
 {
-//	_mesh.request_face_normals();
-//	_mesh.request_vertex_normals();
-//	_mesh.update_normals();
-//
-//	std::vector<float> faceNormals;
-//
-//	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
-//	{
-//		// circulate around the current face
-//		glm::vec3 face_normal = _mesh.normal(h_it);
-//		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
-//		{
-//			MyMesh::Point p = _mesh.point(fv_it.handle());
-//			// normalize each point
-//
-//			faceNormals.push_back(p[0]);
-//			faceNormals.push_back(p[1]);
-//			faceNormals.push_back(p[2]);
-//			faceNormals.push_back(1.0f);
-//		}
-//	}
-//
-//	_mesh.release_vertex_normals();
-//	_mesh.release_face_normals();
-//
-//	glBufferSubData(GL_ARRAY_BUFFER, 0, faceNormals.size() * sizeof(float), faceNormals.data());
+	//	_mesh.request_face_normals();
+	//	_mesh.request_vertex_normals();
+	//	_mesh.update_normals();
+	//
+	//	std::vector<float> faceNormals;
+	//
+	//	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
+	//	{
+	//		// circulate around the current face
+	//		glm::vec3 face_normal = _mesh.normal(h_it);
+	//		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
+	//		{
+	//			MyMesh::Point p = _mesh.point(fv_it.handle());
+	//			// normalize each point
+	//
+	//			faceNormals.push_back(p[0]);
+	//			faceNormals.push_back(p[1]);
+	//			faceNormals.push_back(p[2]);
+	//			faceNormals.push_back(1.0f);
+	//		}
+	//	}
+	//
+	//	_mesh.release_vertex_normals();
+	//	_mesh.release_face_normals();
+	//
+	//	glBufferSubData(GL_ARRAY_BUFFER, 0, faceNormals.size() * sizeof(float), faceNormals.data());
 
 }
 
 void Model::init(const char* meshFile)
 {
 	programManager::sharedInstance()
-	.createProgram("default",
-			SHADERS_DIR "ModelShader.vert",
-			SHADERS_DIR "ModelShader.frag");
+	.createProgram("RgbShader",
+			SHADERS_DIR "RgbShader.vert",
+			SHADERS_DIR "RgbShader.frag");
+
+	programManager::sharedInstance()
+	.createProgram("PhongShader",
+			SHADERS_DIR "PhongShader.vert",
+			SHADERS_DIR "PhongShader.frag");
+
+	programManager::sharedInstance()
+	.createProgram("GuShader",
+			SHADERS_DIR "GuShader.vert",
+			SHADERS_DIR "GuShader.frag");
 
 
 	programManager::sharedInstance()
-		.createProgram("circle",
+	.createProgram("circle",
 			SHADERS_DIR "CircleShader.vert",
 			SHADERS_DIR "CircleShader.frag");
 
-	GLuint program = programManager::sharedInstance().programWithID("default");
-	GLuint programCircle = programManager::sharedInstance().programWithID("circle");
-
-
-
-
+	_programRgb = programManager::sharedInstance().programWithID("RgbShader");
+	_programGu = programManager::sharedInstance().programWithID("GuShader");
+	_programPhong = programManager::sharedInstance().programWithID("PhongShader");
+	_programCircle = programManager::sharedInstance().programWithID("circle");
 
 	// Initialize vertices buffer and transfer it to OpenGL
 
@@ -248,7 +264,7 @@ void Model::init(const char* meshFile)
 		genCircleVertices();
 
 		// Obtain attribute handles:
-		_posAttribCircle = glGetAttribLocation(programCircle, "position");
+		_posAttribCircle = glGetAttribLocation(_programCircle, "position");
 		glEnableVertexAttribArray(_posAttribCircle);
 		glVertexAttribPointer(_posAttribCircle, // attribute handle
 				4,          // number of scalars per vertex
@@ -282,19 +298,11 @@ void Model::init(const char* meshFile)
 		computeFaceNormals();
 
 
+		bindAttributes(_programRgb);
+		bindAttributes(_programGu);
+		bindAttributes(_programPhong);
 
-		// Obtain uniform variable handles:
-		_transformUV = glGetUniformLocation(program, "transform");
-
-		// Obtain attribute handles:
-		_posAttrib = glGetAttribLocation(program, "position");
-		glEnableVertexAttribArray(_posAttrib);
-		glVertexAttribPointer(_posAttrib, // attribute handle
-				4,          // number of scalars per vertex
-				GL_FLOAT,   // scalar type
-				GL_FALSE,
-				0,
-				0);
+		setShadingMode(Model::SHADING_RGB);
 
 		glBindVertexArray(0);
 
@@ -302,6 +310,32 @@ void Model::init(const char* meshFile)
 	}
 
 
+}
+
+
+void Model::bindAttributes(GLuint program)
+{
+	// Obtain uniform variable handles:
+	_transformUV = glGetUniformLocation(program, "transform");
+
+	// Obtain attribute handles:
+	_posAttrib = glGetAttribLocation(program, "position");
+	glEnableVertexAttribArray(_posAttrib);
+	glVertexAttribPointer(_posAttrib, // attribute handle
+			4,          // number of scalars per vertex
+			GL_FLOAT,   // scalar type
+			GL_FALSE,
+			sizeof(glm::vec4) * 2,
+			0);
+
+	_normalAttrib = glGetAttribLocation(program, "normal");
+	glEnableVertexAttribArray(_normalAttrib);
+	glVertexAttribPointer(_normalAttrib, // attribute handle
+			4,          // number of scalars per vertex
+			GL_FLOAT,   // scalar type
+			GL_FALSE,
+			sizeof(glm::vec4) * 2,
+			(GLvoid*)(sizeof(glm::vec4)));
 }
 
 glm::vec2 Model::getScreenUnitCoordinates(glm::vec2 pos)
@@ -358,8 +392,7 @@ void Model::updateProjectionMatrix()
 void Model::draw()
 {
 	// Set the program to be used in subsequent lines:
-	GLuint program = programManager::sharedInstance().programWithID("default");
-	glUseProgram(program);
+	glUseProgram(_program);
 
 	glPolygonMode(GL_FRONT_AND_BACK, _glPolygonMode);
 
@@ -381,9 +414,7 @@ void Model::draw()
 
 void Model::draw2D()
 {
-
-	GLuint program = programManager::sharedInstance().programWithID("circle");
-		glUseProgram(program);
+	glUseProgram(_programCircle);
 
 	glBindVertexArray(_vaoCircle);
 	glDrawArrays(GL_LINE_LOOP, 0, _numCircleVertices);
@@ -549,3 +580,23 @@ void Model::toggleNormalMode()
 	}
 }
 
+void Model::setShadingMode(Model::shadingMode mode)
+{
+	_shadingMode = mode;
+
+	switch(_shadingMode)
+	{
+	case SHADING_RGB:
+		_program = _programRgb;
+		break;
+	case SHADING_GOURAUD:
+		_program = _programGu;
+		break;
+	case SHADING_PHONG:
+		_program = _programPhong;
+		break;
+	default:
+		break;
+
+	}
+}
