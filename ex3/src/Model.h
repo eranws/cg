@@ -166,8 +166,6 @@ public:
 
 	void genCircleVertices();
 
-	void computeFaceNormals();
-
 	void decreaseSpec();
 	void increaseSpec();
 
