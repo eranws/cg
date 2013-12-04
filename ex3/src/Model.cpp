@@ -439,7 +439,6 @@ void Model::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, _glPolygonMode);
 
 	// Draw using the state stored in the Vertex Array object:
-	glBindVertexArray(_vao);
 
 	glm::mat4 modelView  = _translateMat * _viewMat  * _rotationMat * _modelMat * _scaleMat;
 
@@ -449,10 +448,12 @@ void Model::draw()
 
 	if (_normalMode == NORMAL_FACE)
 	{
+		glBindVertexArray(_vao);
 		glDrawElements(GL_TRIANGLES, _mesh.n_faces() * 3, GL_UNSIGNED_INT, NULL);
 	}
 	else
 	{
+		glBindVertexArray(_vaoFace);
 		glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 	}
 
