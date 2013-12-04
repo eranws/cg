@@ -32,13 +32,17 @@ HDRS	=  	ex3.h		\
 EXTRAS =	\
 		shaders/RgbShader.frag	\
 		shaders/RgbShader.vert	\
-		shaders/ModelShader.frag	\
-		shaders/ModelShader.vert	\
+		shaders/CircleShader.frag	\
+		shaders/CircleShader.vert	\
+		shaders/PhongShader.frag	\
+		shaders/PhongShader.vert	\
+		shaders/GuShader.frag	\
+		shaders/GuShader.vert	\
 		Readme.txt			\
 		Makefile			\
 
-CUBE_MESH = ../meshes/cube.off
-#CUBE_MESH = ../meshes/m89.off
+#CUBE_MESH = ../meshes/cube.off
+CUBE_MESH = ../meshes/m89.off
 
 # compiler 
 CC	= g++
