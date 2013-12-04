@@ -42,7 +42,7 @@ private:
 	static const float CIRCLE_RADIUS = 0.8f;
 	static const float MODEL_SCALE = 0.45;
 
-	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo;
+	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo, _vaoFV, _vboFV, _currVao;
 
 	GLuint _program, _programRgb, _programGu, _programPhong, _programCircle;
 	void bindAttributes(GLuint program);
@@ -120,6 +120,7 @@ private:
 
 
 	int _numCircleVertices;
+	std::vector<glm::vec4> faceVertices;//(_mesh.n_faces() * 3 * 2);
 
 public:
 	Model(float w, float h);
@@ -169,6 +170,7 @@ public:
 	void increaseShine(){} //TODO
 
 	void setShadingMode(shadingMode mode);
+	void setNormalMode(Model::normalMode mode);
 	void toggleNormalMode();
 
 };
