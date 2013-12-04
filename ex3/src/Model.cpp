@@ -69,6 +69,7 @@ void Model::genModelVertices()
 
 	std::vector<glm::vec4> vertices(_mesh.n_vertices() * 2);
 
+	_mesh.request_face_normals();
 	_mesh.request_vertex_normals();
 	_mesh.update_normals();
 
@@ -81,12 +82,13 @@ void Model::genModelVertices()
 		p = _mesh.point(vertexIter.handle());
 		glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
 		vertices[i++] = position;
-		MyMesh::Normal n = _mesh.normal(vertexIter.handle());
-		glm::vec4 normal(n[0], n[1], n[2], 0.0);
+		MyMesh::Normal n = _mesh.normal(vertexIter);
+		glm::vec4 normal(n[0], n[1], n[2], 1.0);
+
 		vertices[i++] = normal;
 	}
-
 	_mesh.release_face_normals();
+	_mesh.release_vertex_normals();
 
 	// Iterate over faces and create a traingle for each face by referencing
 	// to its vertices:
@@ -216,6 +218,7 @@ void Model::computeFaceNormals()
 	//	_mesh.release_vertex_normals();
 	//	_mesh.release_face_normals();
 	//
+	//
 	//	glBufferSubData(GL_ARRAY_BUFFER, 0, faceNormals.size() * sizeof(float), faceNormals.data());
 
 }
@@ -297,7 +300,7 @@ void Model::init(const char* meshFile)
 		genModelVertices();
 		computeFaceNormals();
 
-		setShadingMode(Model::SHADING_RGB);
+		setShadingMode(Model::SHADING_PHONG);
 
 		glBindVertexArray(0);
 
