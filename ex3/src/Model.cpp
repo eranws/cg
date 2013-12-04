@@ -51,20 +51,6 @@ Model::~Model()
 void Model::genModelVerticesFaces()
 {
 
-	std::vector<float> v;
-	v.push_back(fabs(_lowerLeft[0]));
-	v.push_back(fabs(_lowerLeft[1]));
-	v.push_back(fabs(_lowerLeft[2]));
-
-	v.push_back(fabs(_upperRight[0]));
-	v.push_back(fabs(_upperRight[1]));
-	v.push_back(fabs(_upperRight[2]));
-
-
-
-	float maxV = *std::max_element(v.begin(), v.end());
-
-
 	std::vector<glm::vec4> vertices(_mesh.n_faces() * 3 * 2);
 
 	_mesh.request_face_normals();
@@ -79,7 +65,7 @@ void Model::genModelVerticesFaces()
 		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
 		{
 			MyMesh::Point p = _mesh.point(fv_it.handle());
-			glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
+			glm::vec4 position((p[0] - _center[0]) / _maxV, (p[1] - _center[1]) / _maxV, (p[2] - _center[2]) / _maxV, 1.0f);
 			vertices[i++] = position;
 			MyMesh::Normal n = _mesh.normal(h_it);
 			glm::vec4 normal(n[0], n[1], n[2], 1.0);
@@ -93,10 +79,6 @@ void Model::genModelVerticesFaces()
 	i = 0;
 	{
 		//		normalize points to arcBall radius
-		_lowerLeft /= maxV;
-		_lowerLeft *= CIRCLE_RADIUS;
-		_upperRight /= maxV;
-		_upperRight *= CIRCLE_RADIUS;
 		float upperRightOffset = glm::length(glm::vec3(CIRCLE_RADIUS - _upperRight[0], CIRCLE_RADIUS - _upperRight[1], CIRCLE_RADIUS - _upperRight[2]));
 		float lowerLeftOffset = glm::length(glm::vec3(CIRCLE_RADIUS + _lowerLeft[0], CIRCLE_RADIUS + _lowerLeft[1], CIRCLE_RADIUS + _lowerLeft[2]));
 		float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
@@ -125,21 +107,6 @@ void Model::genModelVerticesFaces()
 
 void Model::genModelVertices()
 {
-
-	std::vector<float> v;
-	v.push_back(fabs(_lowerLeft[0]));
-	v.push_back(fabs(_lowerLeft[1]));
-	v.push_back(fabs(_lowerLeft[2]));
-
-	v.push_back(fabs(_upperRight[0]));
-	v.push_back(fabs(_upperRight[1]));
-	v.push_back(fabs(_upperRight[2]));
-
-
-
-	float maxV = *std::max_element(v.begin(), v.end());
-
-
 	std::vector<glm::vec4> vertices(_mesh.n_vertices() * 2);
 
 	_mesh.request_face_normals();
@@ -153,7 +120,7 @@ void Model::genModelVertices()
 			++vertexIter)
 	{
 		p = _mesh.point(vertexIter.handle());
-		glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
+		glm::vec4 position((p[0] - _center[0]) / _maxV, (p[1] - _center[1]) / _maxV, (p[2] - _center[2]) / _maxV, 1.0f);
 		vertices[i++] = position;
 		MyMesh::Normal n = _mesh.normal(vertexIter);
 		glm::vec4 normal(n[0], n[1], n[2], 1.0);
@@ -182,10 +149,7 @@ void Model::genModelVertices()
 
 	{
 		//		normalize points to arcBall radius
-		_lowerLeft /= maxV;
-		_lowerLeft *= CIRCLE_RADIUS;
-		_upperRight /= maxV;
-		_upperRight *= CIRCLE_RADIUS;
+
 		float upperRightOffset = glm::length(glm::vec3(CIRCLE_RADIUS - _upperRight[0], CIRCLE_RADIUS - _upperRight[1], CIRCLE_RADIUS - _upperRight[2]));
 		float lowerLeftOffset = glm::length(glm::vec3(CIRCLE_RADIUS + _lowerLeft[0], CIRCLE_RADIUS + _lowerLeft[1], CIRCLE_RADIUS + _lowerLeft[2]));
 		float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
@@ -268,6 +232,25 @@ void Model::computeCenterAndBoundingBox()
 		}
 	}
 	_center /= (double)vNum;
+
+
+
+	std::vector<float> v;
+	v.push_back(fabs(_lowerLeft[0]));
+	v.push_back(fabs(_lowerLeft[1]));
+	v.push_back(fabs(_lowerLeft[2]));
+
+	v.push_back(fabs(_upperRight[0]));
+	v.push_back(fabs(_upperRight[1]));
+	v.push_back(fabs(_upperRight[2]));
+
+
+	_maxV = *std::max_element(v.begin(), v.end());
+	_lowerLeft /= _maxV;
+	_lowerLeft *= CIRCLE_RADIUS;
+	_upperRight /= _maxV;
+	_upperRight *= CIRCLE_RADIUS;
+
 }
 
 

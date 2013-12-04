@@ -60,6 +60,7 @@ private:
 	MyMesh _mesh;
 
 	MyMesh::Point _center, _lowerLeft, _upperRight;
+	float _maxV;
 
 	glm::mat4 _projectionMat, _viewMat, _rotationMat, _translateMat, _modelMat, _scaleMat;
 
