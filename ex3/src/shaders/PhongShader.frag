@@ -50,10 +50,10 @@ void main()
 	vec3 v = normalize(eye - viewPosition);
 	
 	vec3 r1 = normalize(reflect(l1, n));
-	vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0), specExp);
+	vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
 
 	vec3 r2 = normalize(reflect(l2, n));
-	vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0), specExp);
+	vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0001), specExp);
 
 
 	vec3 shade;

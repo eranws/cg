@@ -49,7 +49,8 @@ private:
 
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle, _normalAttrib;
-	GLint _modelViewUV, _projectionUV;
+	GLint _modelViewUV, _projectionUV, _specExpUV;
+
 
 	// View port frame:
 	float _width, _height;
@@ -121,6 +122,8 @@ private:
 
 	int _numCircleVertices;
 
+	float _specExp;
+
 public:
 	Model(float w, float h);
 
@@ -165,8 +168,8 @@ public:
 
 	void computeFaceNormals();
 
-	void decreaseShine(){} //TODO
-	void increaseShine(){} //TODO
+	void decreaseSpec();
+	void increaseSpec();
 
 	void setShadingMode(shadingMode mode);
 	void toggleNormalMode();

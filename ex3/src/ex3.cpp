@@ -39,8 +39,8 @@
 #define KEY_RELOAD          ('l') // Key used to reload the shaders 	      //
 #define KEY_WIREFRAME       ('w') // Key used to toggle wireframe rendering   //
 #define KEY_PERSPECTIVE     ('p') // Key used to toggle ortho/perspect view   //
-#define KEY_DECREASE_SHINE	('-')
-#define KEY_INCREASE_SHINE	('=')
+#define KEY_DECREASE_SPEC	('-')
+#define KEY_INCREASE_SPEC	('=')
 #define KEY_NORMAL_EST_MODE	('n')
 
 
@@ -202,11 +202,11 @@ void keyboard(unsigned char key, int x, int y)
 		exit(RC_OK);
 		break;
 
-	case KEY_DECREASE_SHINE:
-		_model.decreaseShine();
+	case KEY_DECREASE_SPEC:
+		_model.decreaseSpec();
 		break;
-	case KEY_INCREASE_SHINE:
-		_model.increaseShine();
+	case KEY_INCREASE_SPEC:
+		_model.increaseSpec();
 		break;
 
 	case '1':

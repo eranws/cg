@@ -26,7 +26,7 @@
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
 _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
-_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50)
+_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200)
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -315,6 +315,7 @@ void Model::bindAttributes(GLuint program)
 	// Obtain uniform variable handles:
 	_modelViewUV = glGetUniformLocation(program, "modelView");
 	_projectionUV = glGetUniformLocation(program, "projection");
+	_specExpUV = glGetUniformLocation(program, "specExp");
 
 	// Obtain attribute handles:
 	_posAttrib = glGetAttribLocation(program, "position");
@@ -401,6 +402,7 @@ void Model::draw()
 
 	glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(_projectionMat));
 	glUniformMatrix4fv(_modelViewUV, 1, GL_FALSE, glm::value_ptr(modelView));
+	glUniform1f(_specExpUV, _specExp);
 
 
 	glDrawElements(GL_TRIANGLES, _mesh.n_faces() * 3, GL_UNSIGNED_INT, NULL);
@@ -605,4 +607,22 @@ void Model::setShadingMode(Model::shadingMode mode)
 	glUseProgram(_program);
 
 
+}
+
+
+void Model::decreaseSpec()
+{
+	if(_specExp > 0)
+	{
+		_specExp -= 5;
+	}
+}
+
+
+void Model::increaseSpec()
+{
+	if(_specExp < 2000)
+	{
+		_specExp += 5;
+	}
 }
