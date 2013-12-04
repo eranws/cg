@@ -42,7 +42,7 @@ private:
 	static const float CIRCLE_RADIUS = 0.8f;
 	static const float MODEL_SCALE = 0.45;
 
-	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo;
+	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo, _vaoFace, _vboFace;
 
 	GLuint _program, _programRgb, _programGu, _programPhong, _programCircle;
 	void bindAttributes(GLuint program);
@@ -137,6 +137,7 @@ public:
 
 	void resize(int width, int height);
 
+	void genModelVerticesFaces();
 	void genModelVertices();
 
 	float getWidth() const {return _width;}

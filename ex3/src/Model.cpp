@@ -48,6 +48,89 @@ Model::~Model()
 		glDeleteBuffers(1, &_ebo);
 }
 
+void Model::genModelVerticesFaces()
+{
+
+	std::vector<float> v;
+	v.push_back(fabs(_lowerLeft[0]));
+	v.push_back(fabs(_lowerLeft[1]));
+	v.push_back(fabs(_lowerLeft[2]));
+
+	v.push_back(fabs(_upperRight[0]));
+	v.push_back(fabs(_upperRight[1]));
+	v.push_back(fabs(_upperRight[2]));
+
+
+
+	float maxV = *std::max_element(v.begin(), v.end());
+
+
+	std::vector<glm::vec4> vertices(_mesh.n_vertices() * 2);
+
+	_mesh.request_face_normals();
+	_mesh.request_vertex_normals();
+	_mesh.update_normals();
+
+	size_t i = 0;
+	MyMesh::Point p;
+	for (MyMesh::VertexIter vertexIter = _mesh.vertices_begin();
+			vertexIter != _mesh.vertices_end();
+			++vertexIter)
+	{
+		p = _mesh.point(vertexIter.handle());
+		glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
+		vertices[i++] = position;
+		MyMesh::Normal n = _mesh.normal(vertexIter);
+		glm::vec4 normal(n[0], n[1], n[2], 1.0);
+		vertices[i++] = normal;
+	}
+	_mesh.release_face_normals();
+	_mesh.release_vertex_normals();
+
+	// Iterate over faces and create a traingle for each face by referencing
+	// to its vertices:
+	std::vector<face_indices_t> faces(_mesh.n_faces());
+	i = 0;
+	for (MyMesh::FaceIter faceIter = _mesh.faces_begin();
+			faceIter != _mesh.faces_end();
+			++faceIter)
+	{
+		MyMesh::ConstFaceVertexIter cfvlt = _mesh.cfv_iter(faceIter.handle());
+		face_indices_t face;
+		face.a = cfvlt.handle().idx();
+		++cfvlt;
+		face.b = cfvlt.handle().idx();
+		++cfvlt;
+		face.c = cfvlt.handle().idx();
+		faces[i++] = face;
+	}
+
+	{
+		//		normalize points to arcBall radius
+		_lowerLeft /= maxV;
+		_lowerLeft *= CIRCLE_RADIUS;
+		_upperRight /= maxV;
+		_upperRight *= CIRCLE_RADIUS;
+		float upperRightOffset = glm::length(glm::vec3(CIRCLE_RADIUS - _upperRight[0], CIRCLE_RADIUS - _upperRight[1], CIRCLE_RADIUS - _upperRight[2]));
+		float lowerLeftOffset = glm::length(glm::vec3(CIRCLE_RADIUS + _lowerLeft[0], CIRCLE_RADIUS + _lowerLeft[1], CIRCLE_RADIUS + _lowerLeft[2]));
+		float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
+		for (size_t i = 0; i < vertices.size(); i++)
+		{
+			vertices[i] *= (1 + arcballNormalizeOffset);
+			vertices[i][3] = 1.0;
+		}
+	}
+	glGenVertexArrays(1, &_vaoFace);
+	glBindVertexArray(_vaoFace);
+
+		// Create and bind the object's vertex buffer:
+	glGenBuffers(1, &_vboFace);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboFace);
+
+	// Create and load vertex data into a Vertex Buffer Object:
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * vertices.size(), &(vertices[0]), GL_STATIC_DRAW);
+}
+
 
 
 void Model::genModelVertices()
@@ -122,6 +205,18 @@ void Model::genModelVertices()
 			vertices[i][3] = 1.0;
 		}
 	}
+
+	// Create and bind the object's Vertex Array Object:
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	// Create and bind the object's vertex buffer:
+	glGenBuffers(1, &_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+	// Create and bind the object's element buffer:
+	glGenBuffers(1, &_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
 
 	// Create and load vertex data into a Vertex Buffer Object:
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * vertices.size(), &(vertices[0]), GL_STATIC_DRAW);
@@ -249,17 +344,6 @@ void Model::init(const char* meshFile)
 
 	// Initialize Model
 	{
-		// Create and bind the object's Vertex Array Object:
-		glGenVertexArrays(1, &_vao);
-		glBindVertexArray(_vao);
-
-		// Create and bind the object's vertex buffer:
-		glGenBuffers(1, &_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-		// Create and bind the object's element buffer:
-		glGenBuffers(1, &_ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
 
 		//generate vertices to create the circle
 
