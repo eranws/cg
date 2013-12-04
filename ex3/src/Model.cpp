@@ -346,7 +346,6 @@ void Model::init(const char* meshFile)
 		genModelVertices();
 		genModelVerticesFaces();
 
-
 		resetMatrices();
 	}
 
@@ -448,8 +447,14 @@ void Model::draw()
 	glUniformMatrix4fv(_modelViewUV, 1, GL_FALSE, glm::value_ptr(modelView));
 	glUniform1f(_specExpUV, _specExp);
 
-
-	glDrawElements(GL_TRIANGLES, _mesh.n_faces() * 3, GL_UNSIGNED_INT, NULL);
+	if (_normalMode == NORMAL_FACE)
+	{
+		glDrawElements(GL_TRIANGLES, _mesh.n_faces() * 3, GL_UNSIGNED_INT, NULL);
+	}
+	else
+	{
+		glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
+	}
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
