@@ -65,46 +65,32 @@ void Model::genModelVerticesFaces()
 	float maxV = *std::max_element(v.begin(), v.end());
 
 
-	std::vector<glm::vec4> vertices(_mesh.n_vertices() * 2);
+	std::vector<glm::vec4> vertices(_mesh.n_faces() * 3 * 2);
 
 	_mesh.request_face_normals();
 	_mesh.request_vertex_normals();
 	_mesh.update_normals();
 
+
 	size_t i = 0;
-	MyMesh::Point p;
-	for (MyMesh::VertexIter vertexIter = _mesh.vertices_begin();
-			vertexIter != _mesh.vertices_end();
-			++vertexIter)
+	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
 	{
-		p = _mesh.point(vertexIter.handle());
-		glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
-		vertices[i++] = position;
-		MyMesh::Normal n = _mesh.normal(vertexIter);
-		glm::vec4 normal(n[0], n[1], n[2], 1.0);
-		vertices[i++] = normal;
+		// circulate around the current face
+		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
+		{
+			MyMesh::Point p = _mesh.point(fv_it.handle());
+			glm::vec4 position((p[0] - _center[0]) / maxV, (p[1] - _center[1]) / maxV, (p[2] - _center[2]) / maxV, 1.0f);
+			vertices[i++] = position;
+			MyMesh::Normal n = _mesh.normal(h_it);
+			glm::vec4 normal(n[0], n[1], n[2], 1.0);
+			vertices[i++] = normal;
+
+		}
 	}
 	_mesh.release_face_normals();
 	_mesh.release_vertex_normals();
 
-	// Iterate over faces and create a traingle for each face by referencing
-	// to its vertices:
-	std::vector<face_indices_t> faces(_mesh.n_faces());
 	i = 0;
-	for (MyMesh::FaceIter faceIter = _mesh.faces_begin();
-			faceIter != _mesh.faces_end();
-			++faceIter)
-	{
-		MyMesh::ConstFaceVertexIter cfvlt = _mesh.cfv_iter(faceIter.handle());
-		face_indices_t face;
-		face.a = cfvlt.handle().idx();
-		++cfvlt;
-		face.b = cfvlt.handle().idx();
-		++cfvlt;
-		face.c = cfvlt.handle().idx();
-		faces[i++] = face;
-	}
-
 	{
 		//		normalize points to arcBall radius
 		_lowerLeft /= maxV;
@@ -120,6 +106,7 @@ void Model::genModelVerticesFaces()
 			vertices[i][3] = 1.0;
 		}
 	}
+
 	glGenVertexArrays(1, &_vaoFace);
 	glBindVertexArray(_vaoFace);
 
@@ -129,6 +116,9 @@ void Model::genModelVerticesFaces()
 
 	// Create and load vertex data into a Vertex Buffer Object:
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * vertices.size(), &(vertices[0]), GL_STATIC_DRAW);
+
+	setShadingMode(Model::SHADING_PHONG);
+	glBindVertexArray(0);
 }
 
 
@@ -223,6 +213,10 @@ void Model::genModelVertices()
 
 	// Create and load face (elements) data into an Element Buffer Object:
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t)*faces.size(), &(faces[0]), GL_STATIC_DRAW);
+	setShadingMode(Model::SHADING_PHONG);
+
+	glBindVertexArray(0);
+
 }
 
 void Model::genCircleVertices()
@@ -350,10 +344,8 @@ void Model::init(const char* meshFile)
 		loadMesh(meshFile);
 		computeCenterAndBoundingBox();
 		genModelVertices();
+		genModelVerticesFaces();
 
-		setShadingMode(Model::SHADING_PHONG);
-
-		glBindVertexArray(0);
 
 		resetMatrices();
 	}
