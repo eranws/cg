@@ -190,37 +190,6 @@ void Model::loadMesh(const char* fileName) {
 	}
 }
 
-void Model::computeFaceNormals()
-{
-	//	_mesh.request_face_normals();
-	//	_mesh.request_vertex_normals();
-	//	_mesh.update_normals();
-	//
-	//	std::vector<float> faceNormals;
-	//
-	//	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
-	//	{
-	//		// circulate around the current face
-	//		glm::vec3 face_normal = _mesh.normal(h_it);
-	//		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
-	//		{
-	//			MyMesh::Point p = _mesh.point(fv_it.handle());
-	//			// normalize each point
-	//
-	//			faceNormals.push_back(p[0]);
-	//			faceNormals.push_back(p[1]);
-	//			faceNormals.push_back(p[2]);
-	//			faceNormals.push_back(1.0f);
-	//		}
-	//	}
-	//
-	//	_mesh.release_vertex_normals();
-	//	_mesh.release_face_normals();
-	//
-	//
-	//	glBufferSubData(GL_ARRAY_BUFFER, 0, faceNormals.size() * sizeof(float), faceNormals.data());
-
-}
 
 void Model::init(const char* meshFile)
 {
@@ -297,7 +266,6 @@ void Model::init(const char* meshFile)
 		loadMesh(meshFile);
 		computeCenterAndBoundingBox();
 		genModelVertices();
-		computeFaceNormals();
 
 		setShadingMode(Model::SHADING_PHONG);
 
