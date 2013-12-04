@@ -84,7 +84,6 @@ void Model::genModelVertices()
 		vertices[i++] = position;
 		MyMesh::Normal n = _mesh.normal(vertexIter);
 		glm::vec4 normal(n[0], n[1], n[2], 1.0);
-
 		vertices[i++] = normal;
 	}
 	_mesh.release_face_normals();
