@@ -234,6 +234,37 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 
+		// New in Ex4 !!!
+	case 't':
+		//	T/t: Switch between texturing modes (see above).
+		_model.nextTextureMode();
+		break;
+
+	case 's':
+		//	S/s: Decrease the scaling of the texture coordinates (or the scale of the bumps)
+		_model.decreaseTextureScale();
+		break;
+
+	case 'd':
+		//	D/d: Increase the scaling of the texture coordinates (or the scale of the bumps)
+		_model.increaseTextureScale();
+		break;
+
+	case 'f':
+		//	F/f: Decrease turbulence magnitude
+		_model.decreaseTurbulenceMagnitude();
+		break;
+
+	case 'g':
+		//	G/g: Increase turbulence magnitude
+		_model.increaseTurbulenceMagnitude();
+		break;
+
+
+
+
+
+
 	default:
 		std::cerr << "Key " << lower_key << " undefined\n";
 		break;

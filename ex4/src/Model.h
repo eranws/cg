@@ -50,7 +50,7 @@ private:
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle, _normalAttrib;
 	GLint _modelViewUV, _projectionUV, _specExpUV;
-
+	GLint _textureScaleUV, _turbulenceMagnitudeUV;
 
 	// View port frame:
 	float _width, _height;
@@ -85,6 +85,12 @@ private:
 	normalMode _normalMode;
 
 	shadingMode _shadingMode;
+
+	enum TextureMode{
+		TEXTURE_NONE, TEXTURE_MARBLE, TEXTURE_WOOD, TEXTURE_MIRROR, TEXTURE_BRICK
+	};
+	TextureMode _textureMode;
+
 
 	struct LightParams {
 		LightParams() :
@@ -124,6 +130,9 @@ private:
 	int _numCircleVertices;
 
 	float _specExp;
+
+	float _textureScale;
+	float _turbulenceMagnitude;
 
 public:
 	Model(float w, float h);
@@ -174,6 +183,17 @@ public:
 
 	void setShadingMode(shadingMode mode);
 	void toggleNormalMode();
+
+
+
+	//ex4
+	void nextTextureMode();
+
+	void decreaseTextureScale();
+	void increaseTextureScale();
+	void decreaseTurbulenceMagnitude();
+	void increaseTurbulenceMagnitude();
+
 
 };
 

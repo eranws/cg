@@ -26,7 +26,7 @@
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
 _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
-_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200)
+_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200), _textureScale(5), _turbulenceMagnitude(1)
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -293,6 +293,9 @@ void Model::loadShaders()
 	_programCircle = programManager::sharedInstance().programWithID("circle");
 
 	setShadingMode(_shadingMode);
+	glUniform1f(_textureScaleUV, _textureScale);
+	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
+
 
 }
 
@@ -352,6 +355,11 @@ void Model::bindAttributes(GLuint program)
 	_modelViewUV = glGetUniformLocation(program, "modelView");
 	_projectionUV = glGetUniformLocation(program, "projection");
 	_specExpUV = glGetUniformLocation(program, "specExp");
+
+	_textureScaleUV = glGetUniformLocation(program, "textureScale");
+	_turbulenceMagnitudeUV = glGetUniformLocation(program, "turbulenceMagnitude");
+
+
 
 	// Obtain attribute handles:
 	_posAttrib = glGetAttribLocation(program, "position");
@@ -668,4 +676,55 @@ void Model::increaseSpec()
 	{
 		_specExp += 5;
 	}
+}
+
+void Model::nextTextureMode()
+{
+	switch(_textureMode)
+	{
+	case TEXTURE_NONE: _textureMode = TEXTURE_MARBLE; break;
+	case TEXTURE_MARBLE: _textureMode = TEXTURE_WOOD; break;
+	case  TEXTURE_WOOD: _textureMode = TEXTURE_MIRROR; break;
+	case  TEXTURE_MIRROR: _textureMode = TEXTURE_BRICK; break;
+	case  TEXTURE_BRICK: _textureMode = TEXTURE_NONE; break;
+	default: break;
+	}
+}
+
+void Model::decreaseTextureScale()
+{
+	_textureScale--;
+	if (_textureScale < 1)
+		_textureScale = 1;
+	glUniform1f(_textureScaleUV, _textureScale);
+	std::cout << _textureScale << std::endl;
+}
+
+void Model::increaseTextureScale()
+{
+	_textureScale++;
+	if (_textureScale > 10)
+		_textureScale = 10;
+	glUniform1f(_textureScaleUV, _textureScale);
+
+	std::cout << _textureScale << std::endl;
+}
+
+void Model::decreaseTurbulenceMagnitude()
+{
+	_turbulenceMagnitude /= 2;
+	if (_turbulenceMagnitude < 1.0 / 16)
+		_turbulenceMagnitude = 1.0 / 16;
+	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
+	std::cout << _turbulenceMagnitude << std::endl;
+}
+
+
+void Model::increaseTurbulenceMagnitude()
+{
+	_turbulenceMagnitude *= 2;
+	if (_turbulenceMagnitude > 16)
+		_turbulenceMagnitude = 16;
+	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
+	std::cout << _turbulenceMagnitude << std::endl;
 }
