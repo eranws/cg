@@ -130,6 +130,7 @@ public:
 
 	virtual ~Model();
 
+	void loadShaders();
 	void init(const char* meshFile);
 
 	void draw();

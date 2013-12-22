@@ -9,7 +9,7 @@ uniform mat4 modelView;
 uniform mat4 projection;
 
 void main() {
-	color = (position + 1) / 2;
+	color = (position + 1) / 3;
     gl_Position = projection * modelView * position;
    	 
 }

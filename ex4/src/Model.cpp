@@ -92,7 +92,7 @@ void Model::genModelVerticesFaces()
 	glGenVertexArrays(1, &_vaoFace);
 	glBindVertexArray(_vaoFace);
 
-		// Create and bind the object's vertex buffer:
+	// Create and bind the object's vertex buffer:
 	glGenBuffers(1, &_vboFace);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboFace);
 
@@ -263,7 +263,7 @@ void Model::loadMesh(const char* fileName) {
 }
 
 
-void Model::init(const char* meshFile)
+void Model::loadShaders()
 {
 	programManager::sharedInstance()
 	.createProgram("RgbShader",
@@ -286,10 +286,20 @@ void Model::init(const char* meshFile)
 			SHADERS_DIR "CircleShader.vert",
 			SHADERS_DIR "CircleShader.frag");
 
+
 	_programRgb = programManager::sharedInstance().programWithID("RgbShader");
 	_programGu = programManager::sharedInstance().programWithID("GuShader");
 	_programPhong = programManager::sharedInstance().programWithID("PhongShader");
 	_programCircle = programManager::sharedInstance().programWithID("circle");
+
+	setShadingMode(_shadingMode);
+
+}
+
+void Model::init(const char* meshFile)
+{
+	loadShaders();
+
 
 	// Initialize vertices buffer and transfer it to OpenGL
 

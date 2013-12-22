@@ -62,6 +62,7 @@ void motion(int x, int y) ;
 
 /** timer callback */
 void timer(int value) ;
+void shadersTimer(int value);
 
 /** Global variables */
 
@@ -69,6 +70,7 @@ int     g_nFPS = 0, g_nFrames = 0;              // FPS and FPS Counter
 int     g_dwLastFPS = 0;                        // Last FPS Check Time
 bool    isAnimating = false;
 bool    g_duringAnimation = false;
+bool 	shadersAutoReloadEnabled = true;
 
 // A global variable for our model (a better practice would be to use a singletone that holds all model):
 Model _model(WINDOW_SIZE, WINDOW_SIZE);
@@ -111,6 +113,7 @@ int main(int argc, char* argv[])
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
+	glutTimerFunc(3000, shadersTimer, 0);   // uint millis int value
 	glutTimerFunc(100, timer, 0);   // uint millis int value
 
 	// Init anything that can be done once and for all:
@@ -178,14 +181,20 @@ void keyboard(unsigned char key, int x, int y)
 	switch(lower_key)
 	{
 	case KEY_RESET:
-		_model.resetMatrices();
 		// reset to initial view of the object
-		// For use in a future exercise
+		_model.resetMatrices();
 		break;
+
+	case 'k':
+		shadersAutoReloadEnabled = !shadersAutoReloadEnabled;
+		break;
+
 	case KEY_RELOAD:
 		// Reload the shading programs of the object
-		// For use in a future exercise
+		_model.loadShaders();
+		std::cout << "loading shaders" << std::endl;
 		break;
+
 	case KEY_WIREFRAME:
 		// Toggle wireframe mode
 		_model.changePolygonMode();
@@ -208,6 +217,7 @@ void keyboard(unsigned char key, int x, int y)
 	case KEY_INCREASE_SPEC:
 		_model.increaseSpec();
 		break;
+
 
 	case '1':
 		_model.setShadingMode(Model::SHADING_PHONG);
@@ -275,15 +285,17 @@ void mouse(int button, int state, int x, int y)
 
 
 	void timer(int value) {
-		/* Set the timer to be called again in X milli - seconds. */
-		if (isAnimating)
-		{
-			//_model.update();
-		}
 
-		glutTimerFunc(20, timer, ++value);   // uint millis int value
+		glutTimerFunc(20, timer, 0);   // uint millis int value
+		glutPostRedisplay();
 
-		if (isAnimating) {
-			glutPostRedisplay();
-		}
 	}
+
+	void shadersTimer(int value) {
+		if (shadersAutoReloadEnabled)
+		{
+			_model.loadShaders();
+		}
+		glutTimerFunc(1000, shadersTimer, 0);   // uint millis int value
+	}
+
