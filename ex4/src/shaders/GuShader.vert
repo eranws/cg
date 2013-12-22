@@ -1,13 +1,12 @@
 #version 330
 
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec4 normal;
 
 uniform float specExp = 200.0;
 	
-uniform vec3 light1 = vec3(3.0, 2.0, -1.0);
-uniform vec3 light2 = vec3(-3.0, 0.0, -1.0);
-
-//uniform vec3 light1 = vec3(1.0, 0.8, 1.0);
-//uniform vec3 light2 = vec3(-1.0, -0.7, 1.0);
+uniform vec3 light1 = vec3(3.0, 2.0, 1.0);
+uniform vec3 light2 = vec3(-3.0, 0.0, 1.0);
 
 uniform vec3 ambientColor = vec3(1.0, 1.0, 1.0);
 
@@ -19,16 +18,23 @@ uniform vec3 ka = vec3(0.1, 0.1, 0.1); // Ambient color
 uniform vec3 kd = vec3(0.3, 0.3, 0.3); // Diffuse coefficient
 uniform vec3 ks = vec3(0.3, 0.3, 0.3); // Specularity coefficient
 
-out vec4 outColor;
 
-in vec3 viewNormal;
-in vec3 viewPosition;
+out vec3 viewNormal;
+out vec3 viewPosition;
 
+uniform mat4 modelView;
+uniform mat4 projection;
+
+out vec4 color;
 
 void main()
 {
 	
-
+	gl_Position = projection * modelView * position;
+	
+	viewNormal = (modelView * normal).xyz;
+	viewPosition = (modelView * position).xyz;
+	
 	vec3 eye = vec3(0,0,-3);
 
 	//Ambient
@@ -61,7 +67,7 @@ void main()
 	shade += (diffuse1 + diffuse2);
 	shade += (spec1 + spec2);
 	
-	outColor =  vec4(shade, 1.0);
-	
-	
+	color =  vec4(shade, 1.0);
+    	 
 }
+
