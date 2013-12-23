@@ -26,7 +26,7 @@
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
 _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
-_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200), _textureScale(5), _turbulenceMagnitude(1)
+_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200), _textureScale(3), _turbulenceMagnitude(1.0/2)
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -703,8 +703,8 @@ void Model::decreaseTextureScale()
 void Model::increaseTextureScale()
 {
 	_textureScale++;
-	if (_textureScale > 10)
-		_textureScale = 10;
+	if (_textureScale > 5)
+		_textureScale = 5;
 	glUniform1f(_textureScaleUV, _textureScale);
 
 	std::cout << _textureScale << std::endl;
@@ -713,8 +713,8 @@ void Model::increaseTextureScale()
 void Model::decreaseTurbulenceMagnitude()
 {
 	_turbulenceMagnitude /= 2;
-	if (_turbulenceMagnitude < 1.0 / 16)
-		_turbulenceMagnitude = 1.0 / 16;
+	if (_turbulenceMagnitude < 1.0 / 64)
+		_turbulenceMagnitude = 1.0 / 64;
 	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 	std::cout << _turbulenceMagnitude << std::endl;
 }
@@ -723,8 +723,8 @@ void Model::decreaseTurbulenceMagnitude()
 void Model::increaseTurbulenceMagnitude()
 {
 	_turbulenceMagnitude *= 2;
-	if (_turbulenceMagnitude > 16)
-		_turbulenceMagnitude = 16;
+	if (_turbulenceMagnitude > 1.0/4)
+		_turbulenceMagnitude = 1.0/4;
 	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 	std::cout << _turbulenceMagnitude << std::endl;
 }

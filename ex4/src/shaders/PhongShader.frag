@@ -3,8 +3,18 @@
 uniform float turbulenceMagnitude; // SPIDER
 uniform float textureScale;
 
+const int TEXTURE_NONE = 0;
+const int TEXTURE_MARBLE = 1;
+const int TEXTURE_WOOD = 2;
+const int TEXTURE_MIRROR = 3;
+const int TEXTURE_BRICK = 4;
+
+
+uniform int textureMode = TEXTURE_MARBLE;
+
+
 uniform float specExp = 200.0;
-	
+
 uniform vec3 light1 = vec3(3.0, 2.0, -1.0);
 uniform vec3 light2 = vec3(-3.0, 0.0, -1.0);
 
@@ -20,6 +30,10 @@ uniform vec3 specularColor = vec3(1.0, 1.0, 1.0); // Specular color
 uniform vec3 ka = vec3(0.1, 0.1, 0.1); // Ambient color
 //uniform vec3 kd = vec3(0.3, 0.3, 0.3); // Diffuse coefficient
 uniform vec3 ks = vec3(0.3, 0.3, 0.3); // Specularity coefficient
+
+uniform vec3 woodColor1 = vec3(6.0/32, 3.0/32, 0.0); // wood 1 color
+uniform vec3 woodColor2 = vec3(6.0/8 , 3.0/8 , 0.0); // wood 2 color
+
 
 out vec4 outColor;
 
@@ -48,11 +62,40 @@ void main()
 
 	//Diffuse
 	float trb = turb(textureScale * realPosition);
-	float t = sin(2 * 3.1415 * (realPosition.x + trb));
 
-	t = (t + 1) / 2;
+	float t;
+	vec3 kd;
+	float texture_spec_coeff = 1.0;
 
-	vec3 kd = vec3(t,t,t);
+	switch (textureMode)
+	{
+		case TEXTURE_NONE:
+			break;
+
+		case TEXTURE_MARBLE:
+			float t = sin(2 * 3.1415 * (realPosition.x + trb));
+			t = (t + 1) / 2; //normalize sin/cos to [0,1]
+			kd = vec3(t,t,t);
+			break;
+
+		case TEXTURE_WOOD:
+			float a = 1;
+			float d = sqrt(realPosition.y * realPosition.y + realPosition.z * realPosition.z) + a * trb;
+			float wood = abs(cos(2 * 3.1415 * (d - floor(d))));
+			t = (wood + 1) / 2; //normalize sin/cos to [0,1]
+
+			kd = mix(woodColor1, woodColor2, t);
+			texture_spec_coeff = 0.2;
+			break;
+
+		case TEXTURE_MIRROR:
+			break;
+		case TEXTURE_BRICK:
+			break;
+
+
+	}
+
 
 	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
 	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
@@ -70,7 +113,7 @@ void main()
 	vec3 shade;
 	shade += ambient;
 	shade += (diffuse1 + diffuse2);
-	shade += (spec1 + spec2);
+	shade += (spec1 + spec2) * texture_spec_coeff;
 	
 	outColor =  vec4(shade, 1.0);
 	
@@ -126,9 +169,9 @@ float snoise(vec3 v)
 	// Permutations
 	i = mod289(i);
 	vec4 p = permute( permute( permute(
-									   i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-							  + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-					 + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+		i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+	+ i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+	+ i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
 	
 	// Gradients: 7x7 points over a square, mapped onto an octahedron.
 	// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
@@ -172,7 +215,7 @@ float snoise(vec3 v)
 	vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
 	m = m * m;
 	return 42.0 * dot( m*m, vec4(dot(p0,x0), dot(p1,x1),
-								 dot(p2,x2), dot(p3,x3) ) );
+		dot(p2,x2), dot(p3,x3) ) );
 }
 
 float turb(vec3 v)
