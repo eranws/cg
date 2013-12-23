@@ -26,7 +26,15 @@
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
 _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
-_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG), _numCircleVertices(50), _specExp(200), _textureScale(3), _turbulenceMagnitude(1.0/2)
+_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG),
+sphereFilename("textures/spheremap2.bmp"),
+brickFilename("textures/brickwork-texture.bmp"),
+brickBumpFilename ("textures/brickwork-bump-map.bmp"),
+_numCircleVertices(50),
+_specExp(200),
+_textureScale(3),
+_turbulenceMagnitude(1.0/2)
+
 {
 	for (int i=0; i < 3; i++)
 	{
@@ -332,6 +340,8 @@ void Model::init(const char* meshFile)
 		glBindVertexArray(0);
 	}
 
+	loadTexture(sphereFilename, &_sphereTexture);
+
 	// Initialize Model
 	{
 
@@ -457,6 +467,19 @@ void Model::draw()
 		glBindVertexArray(_vaoFace);
 		glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 	}
+
+	// Set texture
+	{
+		int loc0 = glGetUniformLocation(_program, "my_colormap");
+		glUniform1i(loc0, 0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+
+//		glActiveTexture(GL_TEXTURE1);
+//		glBindTexture(GL_TEXTURE_2D, _specMap);
+	}
+
 
 	// Unbind the Vertex Array object
 	glBindVertexArray(0);
@@ -727,4 +750,28 @@ void Model::increaseTurbulenceMagnitude()
 		_turbulenceMagnitude = 1.0/4;
 	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 	std::cout << _turbulenceMagnitude << std::endl;
+}
+
+void Model::loadTexture(const char* filename, GLuint* handle)
+{
+		BImage image( filename );
+
+		glGenTextures(1, handle); // Generate a texture in OpenGL
+		glBindTexture(GL_TEXTURE_2D, *handle); // Bind texture before setting its properties
+
+		// Setting texture properties
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		// Transfer data to texture:
+		glTexImage2D(GL_TEXTURE_2D,
+					 0, // level
+					 GL_RGBA, // Internal representation
+					 image.width(), image.height(), // Texture size
+					 0, // must be 0
+					 GL_RGB, GL_UNSIGNED_BYTE, // Pixel data format
+					 image.getImageData()); // Pixel data
+		glBindTexture(GL_TEXTURE_2D, 0);
 }

@@ -22,6 +22,8 @@
 #include "OpenMesh/Core/IO/MeshIO.hh"
 #include "OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh"
 
+#include "bimage.h"
+
 #define PI 3.14159265359
 typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
@@ -90,6 +92,11 @@ private:
 		TEXTURE_NONE, TEXTURE_MARBLE, TEXTURE_WOOD, TEXTURE_MIRROR, TEXTURE_BRICK
 	};
 	TextureMode _textureMode;
+
+	GLuint _sphereTexture, _brickTexture, _brickBumpMap;
+	const char* sphereFilename;
+	const char* brickFilename;
+	const char* brickBumpFilename;
 
 
 	struct LightParams {
@@ -193,6 +200,9 @@ public:
 	void increaseTextureScale();
 	void decreaseTurbulenceMagnitude();
 	void increaseTurbulenceMagnitude();
+
+	void loadTexture(const char* filename, GLuint* handle);
+
 
 
 };

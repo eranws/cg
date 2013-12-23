@@ -1,6 +1,8 @@
 #version 330
 
-uniform float turbulenceMagnitude; // SPIDER
+uniform sampler2D my_colormap;
+
+uniform float turbulenceMagnitude;
 uniform float textureScale;
 
 const int TEXTURE_NONE = 0;
@@ -10,7 +12,7 @@ const int TEXTURE_MIRROR = 3;
 const int TEXTURE_BRICK = 4;
 
 
-uniform int textureMode = TEXTURE_MARBLE;
+uniform int textureMode = TEXTURE_MIRROR;
 
 
 uniform float specExp = 200.0;
@@ -43,7 +45,21 @@ in vec3 realPosition;
 
 float turb(vec3 v);
 
+// Interpolated values from the vertex shaders
+in vec4 my_Color; // This replaces: uniform vec4 fillColor;
+in vec2 fragTexCoord;
+
+
 void main()
+{
+	vec4 diffuse = texture(my_colormap, fragTexCoord);
+	
+	outColor = vec4(diffuse.xyz, 1);
+
+}
+
+
+void main2()
 {
 	
 
