@@ -26,7 +26,9 @@
 Model::Model(float w, float h) :
 _vao(0), _vbo(0), _vaoCircle(0), _vboCircle(0),
 _width(w), _height(h), _glPolygonMode(GL_FILL), _viewMode(PERSPECTIVE),
-_normalMode(NORMAL_FACE), _shadingMode(SHADING_PHONG),
+_normalMode(NORMAL_FACE),
+_shadingMode(SHADING_PHONG),
+_textureMode(TEXTURE_NONE),
 sphereFilename("textures/spheremap2.bmp"),
 brickFilename("textures/brickwork-texture.bmp"),
 brickBumpFilename ("textures/brickwork-bump-map.bmp"),
@@ -341,6 +343,9 @@ void Model::init(const char* meshFile)
 	}
 
 	loadTexture(sphereFilename, &_sphereTexture);
+	loadTexture(brickFilename, &_brickTexture);
+	loadTexture(brickBumpFilename, &_brickBumpMap);
+
 
 	// Initialize Model
 	{
@@ -368,6 +373,10 @@ void Model::bindAttributes(GLuint program)
 
 	_textureScaleUV = glGetUniformLocation(program, "textureScale");
 	_turbulenceMagnitudeUV = glGetUniformLocation(program, "turbulenceMagnitude");
+	_textureModeUV = glGetUniformLocation(program, "textureMode");
+
+
+
 
 
 
@@ -456,6 +465,8 @@ void Model::draw()
 	glUniformMatrix4fv(_projectionUV, 1, GL_FALSE, glm::value_ptr(_projectionMat));
 	glUniformMatrix4fv(_modelViewUV, 1, GL_FALSE, glm::value_ptr(modelView));
 	glUniform1f(_specExpUV, _specExp);
+	glUniform1i(_textureModeUV, _textureMode);
+
 
 	if (_normalMode == NORMAL_FACE)
 	{
@@ -469,16 +480,36 @@ void Model::draw()
 	}
 
 	// Set texture
+	if (_textureMode == TEXTURE_MIRROR || _textureMode == TEXTURE_BRICK)
 	{
+
 		int loc0 = glGetUniformLocation(_program, "my_colormap");
 		glUniform1i(loc0, 0);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+		if (_textureMode == TEXTURE_MIRROR)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+		}
 
-//		glActiveTexture(GL_TEXTURE1);
-//		glBindTexture(GL_TEXTURE_2D, _specMap);
+		if (_textureMode == TEXTURE_BRICK)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _brickTexture);
+
+			int loc1 = glGetUniformLocation(_program, "my_specmap");
+			glUniform1i(loc1, 1);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
+		}
 	}
+	else
+	{
+	//	glActiveTexture(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 
 
 	// Unbind the Vertex Array object
@@ -712,6 +743,8 @@ void Model::nextTextureMode()
 	case  TEXTURE_BRICK: _textureMode = TEXTURE_NONE; break;
 	default: break;
 	}
+
+	std::cout << _textureMode << std::endl;
 }
 
 void Model::decreaseTextureScale()

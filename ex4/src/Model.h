@@ -52,7 +52,7 @@ private:
 	// Attribute handle:
 	GLint _posAttrib, _posAttribCircle, _normalAttrib;
 	GLint _modelViewUV, _projectionUV, _specExpUV;
-	GLint _textureScaleUV, _turbulenceMagnitudeUV;
+	GLint _textureScaleUV, _turbulenceMagnitudeUV, _textureModeUV;
 
 	// View port frame:
 	float _width, _height;

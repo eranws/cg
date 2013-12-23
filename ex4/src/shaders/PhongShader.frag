@@ -1,6 +1,9 @@
 #version 330
 
+#define MY_PI 3.1415926
+
 uniform sampler2D my_colormap;
+uniform sampler2D my_specmap;
 
 uniform float turbulenceMagnitude;
 uniform float textureScale;
@@ -12,7 +15,7 @@ const int TEXTURE_MIRROR = 3;
 const int TEXTURE_BRICK = 4;
 
 
-uniform int textureMode = TEXTURE_MIRROR;
+uniform int textureMode;
 
 
 uniform float specExp = 200.0;
@@ -42,41 +45,17 @@ out vec4 outColor;
 in vec3 viewNormal;
 in vec3 viewPosition;
 in vec3 realPosition;
+in vec3 position3;
 
 float turb(vec3 v);
-
-// Interpolated values from the vertex shaders
-in vec4 my_Color; // This replaces: uniform vec4 fillColor;
+vec2 sphereMap(vec3 pos);
+	
 in vec2 fragTexCoord;
-
 
 void main()
 {
-	vec4 diffuse = texture(my_colormap, fragTexCoord);
-	
-	outColor = vec4(diffuse.xyz, 1);
 
-}
-
-
-void main2()
-{
-	
-
-	vec3 eye = vec3(0,0,-3);
-
-	//Ambient
-	vec3 ambient = ka * ambientColor;
-
-
-	vec3 l1 = normalize(light1 - viewPosition);
-	vec3 l2 = normalize(light2 - viewPosition);
-	vec3 n = normalize(viewNormal);
-
-	float dist1 = distance(viewPosition.xyz, light1);
-	float dist2 = distance(viewPosition.xyz, light2);
-
-	//Diffuse
+		//Diffuse
 	float trb = turb(textureScale * realPosition);
 
 	float t;
@@ -86,15 +65,17 @@ void main2()
 	switch (textureMode)
 	{
 		case TEXTURE_NONE:
-			break;
+		kd = vec3(0.3, 0.3, 0.3);
+		break;
 
 		case TEXTURE_MARBLE:
-			float t = sin(2 * 3.1415 * (realPosition.x + trb));
+
+		t = sin(2 * 3.1415 * (realPosition.x + trb));
 			t = (t + 1) / 2; //normalize sin/cos to [0,1]
 			kd = vec3(t,t,t);
 			break;
 
-		case TEXTURE_WOOD:
+			case TEXTURE_WOOD:
 			float a = 1;
 			float d = sqrt(realPosition.y * realPosition.y + realPosition.z * realPosition.z) + a * trb;
 			float wood = abs(cos(2 * 3.1415 * (d - floor(d))));
@@ -104,81 +85,153 @@ void main2()
 			texture_spec_coeff = 0.2;
 			break;
 
-		case TEXTURE_MIRROR:
+			case TEXTURE_MIRROR:
+				// Set texture coordinates using spherical mapping:    	 
+			
+			vec3 pos = reflect(position3.xyz, normalize(viewNormal.xyz));
+
+			vec2 fragTexCoord = sphereMap(pos);
+			vec4 diffuse = texture(my_colormap, fragTexCoord);
+
+			outColor = vec4(diffuse.xyz, 1);
+
 			break;
-		case TEXTURE_BRICK:
+			case TEXTURE_BRICK:
+
+			float ky = (realPosition.y + 1) / 2;
+			vec2 fragCoord = vec2(
+			(realPosition.x + 1) / 2 + (realPosition.z + 1) / 2,
+			ky
+			);
+			/*
+			if (abs(realPosition.x) - 1.0 < 0.01)
+			{
+				fragCoord = (realPosition.yz + 1) / 2;
+			}
+			else if (abs(realPosition.y) - 1.0 < 0.001)
+			{
+				fragCoord = (realPosition.xz + 1) / 2;
+			}
+			else //if (abs(realPosition.z) - 1 < 0.001)
+			{
+				fragCoord = (realPosition.xy + 1) / 2;
+			}
+			*/
+
+			vec4 diffuse2 = texture(my_colormap, fragCoord);
+			outColor = vec4(diffuse2.xyz, 1);
+
+
+
 			break;
+
+			default:
+			break;
+
+
+		}
+
+
+		if (textureMode == TEXTURE_NONE || textureMode == TEXTURE_MARBLE || textureMode == TEXTURE_WOOD)
+		{
+			vec3 eye = vec3(0,0,-3);
+
+	//Ambient
+			vec3 ambient = ka * ambientColor;
+
+
+			vec3 l1 = normalize(light1 - viewPosition);
+			vec3 l2 = normalize(light2 - viewPosition);
+			vec3 n = normalize(viewNormal);
+
+			float dist1 = distance(viewPosition.xyz, light1);
+			float dist2 = distance(viewPosition.xyz, light2);
+
+
+			vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
+			vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
+
+	//Specular
+			vec3 v = normalize(eye - viewPosition);
+
+			vec3 r1 = normalize(reflect(l1, n));
+			vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
+
+			vec3 r2 = normalize(reflect(l2, n));
+			vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0001), specExp);
+
+
+			vec3 shade;
+			shade += ambient;
+			shade += (diffuse1 + diffuse2);
+			shade += (spec1 + spec2) * texture_spec_coeff;
+
+			outColor =  vec4(shade, 1.0);
+		}
+		
 
 
 	}
 
 
-	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
-	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
-	
-	//Specular
-	vec3 v = normalize(eye - viewPosition);
-	
-	vec3 r1 = normalize(reflect(l1, n));
-	vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
+	vec2 sphereMap(vec3 pos)
+	{
+		vec2 v2;
+		float theta = atan(pos.x/pos.z);
+		float phi   = atan(pos.y/length(vec2(pos.x,pos.z)));
+		float r     = length(pos.xyz);
 
-	vec3 r2 = normalize(reflect(l2, n));
-	vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0001), specExp);
+		float u = (theta + MY_PI) / (2 * MY_PI);
+		float v = (phi + MY_PI/2)  / MY_PI;
+		float au = 1;
+		float bu = 1;
+		v2.x = 1.0 - (au*u - floor(au * u));
+		v2.y = 1.0 - (bu*v - floor(bu * v));
 
-
-	vec3 shade;
-	shade += ambient;
-	shade += (diffuse1 + diffuse2);
-	shade += (spec1 + spec2) * texture_spec_coeff;
-	
-	outColor =  vec4(shade, 1.0);
-	
-	
-}
-
-
+		return v2;
+	}
 
 //
 // snoise and turb from here:
 // http://glsl.heroku.com/e#812.1
 
-vec3 mod289(vec3 x) {
-	return x - floor(x * (1.0 / 289.0)) * 289.0;
-}
+	vec3 mod289(vec3 x) {
+		return x - floor(x * (1.0 / 289.0)) * 289.0;
+	}
 
-vec4 mod289(vec4 x) {
-	return x - floor(x * (1.0 / 289.0)) * 289.0;
-}
+	vec4 mod289(vec4 x) {
+		return x - floor(x * (1.0 / 289.0)) * 289.0;
+	}
 
-vec4 permute(vec4 x) {
-	return mod289(((x*34.0)+1.0)*x);
-}
+	vec4 permute(vec4 x) {
+		return mod289(((x*34.0)+1.0)*x);
+	}
 
-vec4 taylorInvSqrt(vec4 r)
-{
-	return 1.79284291400159 - 0.85373472095314 * r;
-}
+	vec4 taylorInvSqrt(vec4 r)
+	{
+		return 1.79284291400159 - 0.85373472095314 * r;
+	}
 
-float snoise(vec3 v)
-{
-	const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-	const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-	
+	float snoise(vec3 v)
+	{
+		const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+		const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+
 	// First corner
-	vec3 i  = floor(v + dot(v, C.yyy) );
-	vec3 x0 =   v - i + dot(i, C.xxx) ;
-	
+		vec3 i  = floor(v + dot(v, C.yyy) );
+		vec3 x0 =   v - i + dot(i, C.xxx) ;
+
 	// Other corners
-	vec3 g = step(x0.yzx, x0.xyz);
-	vec3 l = 1.0 - g;
-	vec3 i1 = min( g.xyz, l.zxy );
-	vec3 i2 = max( g.xyz, l.zxy );
-	
+		vec3 g = step(x0.yzx, x0.xyz);
+		vec3 l = 1.0 - g;
+		vec3 i1 = min( g.xyz, l.zxy );
+		vec3 i2 = max( g.xyz, l.zxy );
+
 	//   x0 = x0 - 0.0 + 0.0 * C.xxx;
 	//   x1 = x0 - i1  + 1.0 * C.xxx;
 	//   x2 = x0 - i2  + 2.0 * C.xxx;
 	//   x3 = x0 - 1.0 + 3.0 * C.xxx;
-	vec3 x1 = x0 - i1 + C.xxx;
+		vec3 x1 = x0 - i1 + C.xxx;
 	vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
 	vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
 	

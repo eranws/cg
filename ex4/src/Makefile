@@ -45,8 +45,8 @@ EXTRAS =	\
 		Readme.txt					\
 		Makefile					\
 
-#CUBE_MESH = ../meshes/cube.off
-CUBE_MESH = ../meshes/m89.off
+CUBE_MESH = ../meshes/cube.off
+#CUBE_MESH = ../meshes/m89.off
 
 # compiler 
 CC	= g++
