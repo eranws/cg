@@ -20,26 +20,30 @@ ID2 = 302514401
 
 # list of all the sources files
 SRCS	=  	ex4.cpp		\
-		Model.cpp 	\
+		Model.cpp 		\
 		ShaderIO.cpp	\
+		bimage.cpp		\
 
 # list of all the headers files
-HDRS	=  	ex4.h		\
+HDRS	=  	ex4.h	\
 		Model.h 	\
 		ShaderIO.h	\
-
+		bimage.h 	\
 # list EXTRAS (shaders, etc.)
 EXTRAS =	\
-		shaders/RgbShader.frag	\
-		shaders/RgbShader.vert	\
+		shaders/RgbShader.frag		\
+		shaders/RgbShader.vert		\
 		shaders/CircleShader.frag	\
 		shaders/CircleShader.vert	\
 		shaders/PhongShader.frag	\
 		shaders/PhongShader.vert	\
-		shaders/GuShader.frag	\
-		shaders/GuShader.vert	\
-		Readme.txt			\
-		Makefile			\
+		shaders/GuShader.frag		\
+		shaders/GuShader.vert		\
+		textures/brickwork-bump-map.bmp \
+		textures/brickwork-texture.bmp 	\
+		textures/spheremap2.bmp 		\
+		Readme.txt					\
+		Makefile					\
 
 #CUBE_MESH = ../meshes/cube.off
 CUBE_MESH = ../meshes/m89.off
