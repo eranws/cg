@@ -34,8 +34,8 @@ brickFilename("textures/brickwork-texture.bmp"),
 brickBumpFilename ("textures/brickwork-bump-map.bmp"),
 _numCircleVertices(50),
 _specExp(200),
-_textureScale(3),
-_turbulenceMagnitude(1.0/2)
+_textureScale(INIT_TEXTURE_SCALE),
+_turbulenceMagnitude(INIT_TURBULANCE)
 
 {
 	for (int i=0; i < 3; i++)
@@ -420,6 +420,9 @@ void Model::resetMatrices()
 	_rotationMat =  glm::mat4();
 
 	_scaleMat = glm::scale(glm::mat4(), glm::vec3(MODEL_SCALE));
+	_textureMode = TEXTURE_MARBLE;
+	_textureScale = INIT_TEXTURE_SCALE;
+	_turbulenceMagnitude = INIT_TURBULANCE;
 }
 
 void Model::toggleProjectionMode()
@@ -736,12 +739,12 @@ void Model::nextTextureMode()
 {
 	switch(_textureMode)
 	{
-	case TEXTURE_NONE: _textureMode = TEXTURE_MARBLE; break;
-	case TEXTURE_MARBLE: _textureMode = TEXTURE_WOOD; break;
-	case  TEXTURE_WOOD: _textureMode = TEXTURE_MIRROR; break;
-	case  TEXTURE_MIRROR: _textureMode = TEXTURE_BRICK; break;
-	case  TEXTURE_BRICK: _textureMode = TEXTURE_NONE; break;
-	default: break;
+		case TEXTURE_NONE: _textureMode = TEXTURE_MARBLE; break;
+		case TEXTURE_MARBLE: _textureMode = TEXTURE_WOOD; break;
+		case  TEXTURE_WOOD: _textureMode = TEXTURE_MIRROR; break;
+		case  TEXTURE_MIRROR: _textureMode = TEXTURE_BRICK; break;
+		case  TEXTURE_BRICK: _textureMode = TEXTURE_NONE; break;
+		default: break;
 	}
 
 	std::cout << _textureMode << std::endl;
@@ -750,8 +753,8 @@ void Model::nextTextureMode()
 void Model::decreaseTextureScale()
 {
 	_textureScale--;
-	if (_textureScale < 1)
-		_textureScale = 1;
+	if (_textureScale < MIN_TEXTURE_SCALE)
+		_textureScale = MIN_TEXTURE_SCALE;
 	glUniform1f(_textureScaleUV, _textureScale);
 	std::cout << _textureScale << std::endl;
 }
@@ -759,8 +762,8 @@ void Model::decreaseTextureScale()
 void Model::increaseTextureScale()
 {
 	_textureScale++;
-	if (_textureScale > 5)
-		_textureScale = 5;
+	if (_textureScale > MAX_TEXTURE_SCALE)
+		_textureScale = MAX_TEXTURE_SCALE;
 	glUniform1f(_textureScaleUV, _textureScale);
 
 	std::cout << _textureScale << std::endl;
@@ -768,9 +771,9 @@ void Model::increaseTextureScale()
 
 void Model::decreaseTurbulenceMagnitude()
 {
-	_turbulenceMagnitude /= 2;
-	if (_turbulenceMagnitude < 1.0 / 64)
-		_turbulenceMagnitude = 1.0 / 64;
+	_turbulenceMagnitude --;
+	if (_turbulenceMagnitude < MIN_TURBULANCE)
+		_turbulenceMagnitude = MIN_TURBULANCE;
 	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 	std::cout << _turbulenceMagnitude << std::endl;
 }
@@ -778,9 +781,9 @@ void Model::decreaseTurbulenceMagnitude()
 
 void Model::increaseTurbulenceMagnitude()
 {
-	_turbulenceMagnitude *= 2;
-	if (_turbulenceMagnitude > 1.0/4)
-		_turbulenceMagnitude = 1.0/4;
+	_turbulenceMagnitude ++ ;
+	if (_turbulenceMagnitude > MAX_TURBULANCE)
+		_turbulenceMagnitude = MAX_TURBULANCE;
 	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 	std::cout << _turbulenceMagnitude << std::endl;
 }

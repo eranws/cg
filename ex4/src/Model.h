@@ -44,6 +44,13 @@ private:
 	static const float CIRCLE_RADIUS = 0.8f;
 	static const float MODEL_SCALE = 0.45;
 
+	static const float INIT_TURBULANCE = 1.f;
+	static const float INIT_TEXTURE_SCALE = 3.f;
+	static const float MIN_TURBULANCE = 0.f;
+	static const float MAX_TURBULANCE = 100.f;
+	static const float MIN_TEXTURE_SCALE = 1.f;
+	static const float MAX_TEXTURE_SCALE = 100.f;
+
 	GLuint _vao, _vbo, _ebo, _vaoCircle, _vboCircle, _nbo, _vaoFace, _vboFace;
 
 	GLuint _program, _programRgb, _programGu, _programPhong, _programCircle;

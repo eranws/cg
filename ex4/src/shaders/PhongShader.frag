@@ -4,9 +4,10 @@
 
 uniform sampler2D my_colormap;
 uniform sampler2D my_specmap;
-
 uniform float turbulenceMagnitude;
 uniform float textureScale;
+uniform int textureMode;
+uniform float specExp = 200.0;
 
 const int TEXTURE_NONE = 0;
 const int TEXTURE_MARBLE = 1;
@@ -15,29 +16,21 @@ const int TEXTURE_MIRROR = 3;
 const int TEXTURE_BRICK = 4;
 
 
-uniform int textureMode;
+vec3 light1 = vec3(3.0, 2.0, -1.0);
+vec3 light2 = vec3(-3.0, 0.0, -1.0);
 
+vec3 ambientColor = vec3(1.0, 1.0, 1.0);
+vec3 specularColor = vec3(1.0, 1.0, 1.0); // Specular color
 
-uniform float specExp = 200.0;
+vec3 lightColor1 = vec3(1.0, 0.9, 0.7); // Light 1 color
+vec3 lightColor2 = vec3(0.6, 0.6, 1.0); // Light 2 color
 
-uniform vec3 light1 = vec3(3.0, 2.0, -1.0);
-uniform vec3 light2 = vec3(-3.0, 0.0, -1.0);
+vec3 ka = vec3(0.1, 0.1, 0.1); // Ambient color
+vec3 kd = vec3(0.3, 0.3, 0.3); // Diffuse coefficient
+vec3 ks = vec3(0.3, 0.3, 0.3); // Specularity coefficient
 
-//uniform vec3 light1 = vec3(1.0, 0.8, 1.0);
-//uniform vec3 light2 = vec3(-1.0, -0.7, 1.0);
-
-uniform vec3 ambientColor = vec3(1.0, 1.0, 1.0);
-
-uniform vec3 lightColor1 = vec3(1.0, 0.9, 0.7); // Light 1 color
-uniform vec3 lightColor2 = vec3(0.6, 0.6, 1.0); // Light 2 color
-uniform vec3 specularColor = vec3(1.0, 1.0, 1.0); // Specular color
-
-uniform vec3 ka = vec3(0.1, 0.1, 0.1); // Ambient color
-//uniform vec3 kd = vec3(0.3, 0.3, 0.3); // Diffuse coefficient
-uniform vec3 ks = vec3(0.3, 0.3, 0.3); // Specularity coefficient
-
-uniform vec3 woodColor1 = vec3(6.0/32, 3.0/32, 0.0); // wood 1 color
-uniform vec3 woodColor2 = vec3(6.0/8 , 3.0/8 , 0.0); // wood 2 color
+vec3 woodColor1 = vec3(6.0/32, 3.0/32, 0.0); // wood 1 color
+vec3 woodColor2 = vec3(6.0/8 , 3.0/8 , 0.0); // wood 2 color
 
 
 out vec4 outColor;
@@ -45,151 +38,166 @@ out vec4 outColor;
 in vec3 viewNormal;
 in vec3 viewPosition;
 in vec3 realPosition;
-in vec3 position3;
+in vec3 finalPosition;
+in vec2 fragTexCoord;
 
 float turb(vec3 v);
 vec2 sphereMap(vec3 pos);
 	
-in vec2 fragTexCoord;
+void phongShading(float texture_spec_coeff)
+{
+	vec3 eye = vec3(0,0,-3);
+
+	//Ambient
+	vec3 ambient = ka * ambientColor;
+
+
+	vec3 l1 = normalize(light1 - viewPosition);
+	vec3 l2 = normalize(light2 - viewPosition);
+	vec3 n = normalize(viewNormal);
+
+	float dist1 = distance(viewPosition.xyz, light1);
+	float dist2 = distance(viewPosition.xyz, light2);
+
+
+	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
+	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
+
+	//Specular
+	vec3 v = normalize(eye - viewPosition);
+
+	vec3 r1 = normalize(reflect(l1, n));
+	vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
+
+	vec3 r2 = normalize(reflect(l2, n));
+	vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0001), specExp);
+
+
+	vec3 shade;
+	shade += ambient;
+	shade += (diffuse1 + diffuse2);
+	shade += (spec1 + spec2) * texture_spec_coeff;
+	outColor =  vec4(shade, 1.0);
+}
+
+void marbleTexture(float trb)
+{
+	float t;
+	t = sin(2 * 3.1415 * (realPosition.x * textureScale + trb));
+	t = (t + 1) / 2; //normalize sin/cos to [0,1]
+	kd = vec3(t,t,t);
+}
+
+void woodTexture(float trb)
+{
+	float t;
+	float a = 1;
+	float d = sqrt(realPosition.y * realPosition.y + realPosition.z * realPosition.z) * textureScale + a * trb;
+	float wood = abs(cos(2 * 3.1415 * (d - floor(d))));
+	t = (wood + 1) / 2; //normalize sin/cos to [0,1]
+	kd = mix(woodColor1, woodColor2, t);
+	
+}
+
+void mirrorTexture()
+{
+	// Set texture coordinates using spherical mapping:
+	vec3 pos = reflect(finalPosition.xyz, normalize(viewNormal.xyz));
+	vec2 fragTexCoord = sphereMap(pos);
+	vec4 diffuse = texture(my_colormap, fragTexCoord);
+	outColor = vec4(diffuse.xyz, 1);
+}
+
+void brickTexture()
+{
+	float ky = (realPosition.y + 1) / 2;
+	vec2 fragCoord = vec2(
+	(realPosition.x + 1) / 2 + (realPosition.z + 1) / 2,
+	ky
+	);
+	/*
+	if (abs(realPosition.x) - 1.0 < 0.01)
+	{
+		fragCoord = (realPosition.yz + 1) / 2;
+	}
+	else if (abs(realPosition.y) - 1.0 < 0.001)
+	{
+		fragCoord = (realPosition.xz + 1) / 2;
+	}
+	else //if (abs(realPosition.z) - 1 < 0.001)
+	{
+		fragCoord = (realPosition.xy + 1) / 2;
+	}
+	*/
+
+	vec4 diffuse2 = texture(my_colormap, fragCoord);
+	outColor = vec4(diffuse2.xyz, 1);
+}
+
+
+vec2 sphereMap(vec3 pos)
+{
+	vec2 v2;
+	float theta = atan(pos.x/pos.z);
+	float phi   = atan(pos.y/length(vec2(pos.x,pos.z)));
+	float r     = length(pos.xyz);
+
+	float u = (theta + MY_PI) / (2 * MY_PI);
+	float v = (phi + MY_PI/2)  / MY_PI;
+	float au = 1;
+	float bu = 1;
+	v2.x = 1.0 - (au*u - floor(au * u));
+	v2.y = 1.0 - (bu*v - floor(bu * v));
+
+	return v2;
+}
+
 
 void main()
 {
 
-		//Diffuse
-	float trb = turb(textureScale * realPosition);
+	float trb = turb(turbulenceMagnitude * realPosition);
 
-	float t;
-	vec3 kd;
-	float texture_spec_coeff = 1.0;
+	float texture_spec_coeff = 1.0; //No texture and Marble texture
 
 	switch (textureMode)
 	{
-		case TEXTURE_NONE:
-		kd = vec3(0.3, 0.3, 0.3);
-		break;
-
 		case TEXTURE_MARBLE:
-
-		t = sin(2 * 3.1415 * (realPosition.x + trb));
-			t = (t + 1) / 2; //normalize sin/cos to [0,1]
-			kd = vec3(t,t,t);
+			marbleTexture(trb);
 			break;
 
-			case TEXTURE_WOOD:
-			float a = 1;
-			float d = sqrt(realPosition.y * realPosition.y + realPosition.z * realPosition.z) + a * trb;
-			float wood = abs(cos(2 * 3.1415 * (d - floor(d))));
-			t = (wood + 1) / 2; //normalize sin/cos to [0,1]
-
-			kd = mix(woodColor1, woodColor2, t);
-			texture_spec_coeff = 0.2;
+		case TEXTURE_WOOD:
+			woodTexture(trb);
+			texture_spec_coeff = 0.1;
 			break;
 
-			case TEXTURE_MIRROR:
-				// Set texture coordinates using spherical mapping:    	 
+		case TEXTURE_MIRROR:	    	 
+			mirrorTexture();
+			break;
 			
-			vec3 pos = reflect(position3.xyz, normalize(viewNormal.xyz));
-
-			vec2 fragTexCoord = sphereMap(pos);
-			vec4 diffuse = texture(my_colormap, fragTexCoord);
-
-			outColor = vec4(diffuse.xyz, 1);
-
-			break;
-			case TEXTURE_BRICK:
-
-			float ky = (realPosition.y + 1) / 2;
-			vec2 fragCoord = vec2(
-			(realPosition.x + 1) / 2 + (realPosition.z + 1) / 2,
-			ky
-			);
-			/*
-			if (abs(realPosition.x) - 1.0 < 0.01)
-			{
-				fragCoord = (realPosition.yz + 1) / 2;
-			}
-			else if (abs(realPosition.y) - 1.0 < 0.001)
-			{
-				fragCoord = (realPosition.xz + 1) / 2;
-			}
-			else //if (abs(realPosition.z) - 1 < 0.001)
-			{
-				fragCoord = (realPosition.xy + 1) / 2;
-			}
-			*/
-
-			vec4 diffuse2 = texture(my_colormap, fragCoord);
-			outColor = vec4(diffuse2.xyz, 1);
-
-
-
+		case TEXTURE_BRICK:
+			brickTexture();
 			break;
 
-			default:
+		default:
 			break;
-
-
-		}
-
-
-		if (textureMode == TEXTURE_NONE || textureMode == TEXTURE_MARBLE || textureMode == TEXTURE_WOOD)
-		{
-			vec3 eye = vec3(0,0,-3);
-
-	//Ambient
-			vec3 ambient = ka * ambientColor;
-
-
-			vec3 l1 = normalize(light1 - viewPosition);
-			vec3 l2 = normalize(light2 - viewPosition);
-			vec3 n = normalize(viewNormal);
-
-			float dist1 = distance(viewPosition.xyz, light1);
-			float dist2 = distance(viewPosition.xyz, light2);
-
-
-			vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
-			vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
-
-	//Specular
-			vec3 v = normalize(eye - viewPosition);
-
-			vec3 r1 = normalize(reflect(l1, n));
-			vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
-
-			vec3 r2 = normalize(reflect(l2, n));
-			vec3 spec2 = ks * specularColor * pow(max(dot(v, r2), 0.0001), specExp);
-
-
-			vec3 shade;
-			shade += ambient;
-			shade += (diffuse1 + diffuse2);
-			shade += (spec1 + spec2) * texture_spec_coeff;
-
-			outColor =  vec4(shade, 1.0);
-		}
-		
-
-
 	}
 
 
-	vec2 sphereMap(vec3 pos)
+	if (textureMode == TEXTURE_NONE || textureMode == TEXTURE_MARBLE || textureMode == TEXTURE_WOOD)
 	{
-		vec2 v2;
-		float theta = atan(pos.x/pos.z);
-		float phi   = atan(pos.y/length(vec2(pos.x,pos.z)));
-		float r     = length(pos.xyz);
-
-		float u = (theta + MY_PI) / (2 * MY_PI);
-		float v = (phi + MY_PI/2)  / MY_PI;
-		float au = 1;
-		float bu = 1;
-		v2.x = 1.0 - (au*u - floor(au * u));
-		v2.y = 1.0 - (bu*v - floor(bu * v));
-
-		return v2;
+		phongShading(texture_spec_coeff);
 	}
+	
+
+}
+
+
+
+
+
+
+
 
 //
 // snoise and turb from here:
@@ -290,11 +298,13 @@ void main()
 float turb(vec3 v)
 {
 	
+	const float base_freq = 0.2; // SPIDER
+	
 	vec4 noisevec;
-	noisevec.x = snoise(v * turbulenceMagnitude*1.0) * 8.0;
-	noisevec.y = snoise(v * turbulenceMagnitude*2.0) * 4.0;
-	noisevec.z = snoise(v * turbulenceMagnitude*4.0) * 2.0;
-	noisevec.w = snoise(v * turbulenceMagnitude*8.0) * 1.0;
+	noisevec.x = snoise(v * base_freq*1.0) * 8.0;
+	noisevec.y = snoise(v * base_freq*2.0) * 4.0;
+	noisevec.z = snoise(v * base_freq*4.0) * 2.0;
+	noisevec.w = snoise(v * base_freq*8.0) * 1.0;
 	// noisevec = (noisevec / 8.0 + 1.0) / 2.0;
 	noisevec = noisevec / 8.0;
 	// noisevec = noisevec * noisevec;
