@@ -101,13 +101,13 @@ void woodTexture(float trb)
 vec2 sphereMap(vec3 posOnSphere)
 {
 	vec2 fragTexCoord;
-	float theta = atan(posOnSphere.x , -posOnSphere.z);
+	float theta = atan(posOnSphere.x , posOnSphere.z);
 	float phi   = atan(posOnSphere.y / length(vec2(posOnSphere.x,posOnSphere.z)));
 	float r     = length(posOnSphere.xyz);
 
 	float u = (theta + MY_PI) / (2 * MY_PI);
 	float v = (phi + MY_PI/2)  / MY_PI;
-	fragTexCoord.x = u;
+	fragTexCoord.x = 1.0 - u;
 	fragTexCoord.y = 1.0 - v;
 
 	return fragTexCoord;
@@ -117,7 +117,7 @@ void mirrorTexture()
 {
 	// Set texture coordinates using spherical mapping:
 	vec3 posOnSphere = reflect(vec3(finalPosition.xyz), normalize(viewNormal.xyz));
-	vec2 fragTexCoord = sphereMap(posOnSphere.xyz);
+	vec2 fragTexCoord = sphereMap(vec3(posOnSphere.xyz));
 	vec4 diffuse = texture(my_colormap, fragTexCoord);
 	outColor = vec4(diffuse.xyz, 0.0);
 }

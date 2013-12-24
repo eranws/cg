@@ -486,31 +486,30 @@ void Model::draw()
 	if (_textureMode == TEXTURE_MIRROR || _textureMode == TEXTURE_BRICK)
 	{
 
-		int loc0 = glGetUniformLocation(_program, "my_colormap");
-		glUniform1i(loc0, 0);
+//		int loc0 = glGetUniformLocation(_program, "my_colormap");
+//		glUniform1i(loc0, 0);
 
 		if (_textureMode == TEXTURE_MIRROR)
 		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+//			glActiveTexture(GL_TEXTURE0);
+//			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
 		}
 
 		if (_textureMode == TEXTURE_BRICK)
 		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, _brickTexture);
-
-			int loc1 = glGetUniformLocation(_program, "my_specmap");
-			glUniform1i(loc1, 1);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
+//			glActiveTexture(GL_TEXTURE0);
+//			glBindTexture(GL_TEXTURE_2D, _brickTexture);
+//
+//			int loc1 = glGetUniformLocation(_program, "my_specmap");
+//			glUniform1i(loc1, 1);
+//
+//			glActiveTexture(GL_TEXTURE1);
+//			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
 		}
 	}
 	else
 	{
-	//	glActiveTexture(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//unbind the texture
 	}
 
 
@@ -735,15 +734,39 @@ void Model::increaseSpec()
 	}
 }
 
+
 void Model::nextTextureMode()
 {
+	int loc0, loc1;
 	switch(_textureMode)
 	{
-		case TEXTURE_NONE: _textureMode = TEXTURE_MARBLE; break;
-		case TEXTURE_MARBLE: _textureMode = TEXTURE_WOOD; break;
-		case  TEXTURE_WOOD: _textureMode = TEXTURE_MIRROR; break;
-		case  TEXTURE_MIRROR: _textureMode = TEXTURE_BRICK; break;
-		case  TEXTURE_BRICK: _textureMode = TEXTURE_NONE; break;
+		case TEXTURE_NONE:
+			_textureMode = TEXTURE_MARBLE;
+			break;
+		case TEXTURE_MARBLE:
+			_textureMode = TEXTURE_WOOD;
+			break;
+		case  TEXTURE_WOOD:
+			_textureMode = TEXTURE_MIRROR;
+			loc0 = glGetUniformLocation(_program, "my_colormap");
+			glUniform1i(loc0, 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+			break;
+		case  TEXTURE_MIRROR:
+			_textureMode = TEXTURE_BRICK;
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _brickTexture);
+
+			loc1 = glGetUniformLocation(_program, "my_specmap");
+			glUniform1i(loc1, 1);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
+			break;
+		case  TEXTURE_BRICK:
+			_textureMode = TEXTURE_NONE;
+			break;
 		default: break;
 	}
 
@@ -791,6 +814,8 @@ void Model::increaseTurbulenceMagnitude()
 void Model::loadTexture(const char* filename, GLuint* handle)
 {
 		BImage image( filename );
+
+		image.normalize();
 
 		glGenTextures(1, handle); // Generate a texture in OpenGL
 		glBindTexture(GL_TEXTURE_2D, *handle); // Bind texture before setting its properties
