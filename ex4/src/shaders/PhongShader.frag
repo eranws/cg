@@ -42,7 +42,6 @@ in vec3 finalPosition;
 in vec2 fragTexCoord;
 
 float turb(vec3 v);
-vec2 sphereMap(vec3 pos);
 	
 void phongShading(float texture_spec_coeff)
 {
@@ -99,13 +98,28 @@ void woodTexture(float trb)
 	
 }
 
+vec2 sphereMap(vec3 posOnSphere)
+{
+	vec2 fragTexCoord;
+	float theta = atan(posOnSphere.x , -posOnSphere.z);
+	float phi   = atan(posOnSphere.y / length(vec2(posOnSphere.x,posOnSphere.z)));
+	float r     = length(posOnSphere.xyz);
+
+	float u = (theta + MY_PI) / (2 * MY_PI);
+	float v = (phi + MY_PI/2)  / MY_PI;
+	fragTexCoord.x = u;
+	fragTexCoord.y = 1.0 - v;
+
+	return fragTexCoord;
+}
+
 void mirrorTexture()
 {
 	// Set texture coordinates using spherical mapping:
-	vec3 pos = reflect(finalPosition.xyz, normalize(viewNormal.xyz));
-	vec2 fragTexCoord = sphereMap(pos);
+	vec3 posOnSphere = reflect(vec3(finalPosition.xyz), normalize(viewNormal.xyz));
+	vec2 fragTexCoord = sphereMap(posOnSphere.xyz);
 	vec4 diffuse = texture(my_colormap, fragTexCoord);
-	outColor = vec4(diffuse.xyz, 1);
+	outColor = vec4(diffuse.xyz, 0.0);
 }
 
 void brickTexture()
@@ -135,28 +149,13 @@ void brickTexture()
 }
 
 
-vec2 sphereMap(vec3 pos)
-{
-	vec2 v2;
-	float theta = atan(pos.x/pos.z);
-	float phi   = atan(pos.y/length(vec2(pos.x,pos.z)));
-	float r     = length(pos.xyz);
 
-	float u = (theta + MY_PI) / (2 * MY_PI);
-	float v = (phi + MY_PI/2)  / MY_PI;
-	float au = 1;
-	float bu = 1;
-	v2.x = 1.0 - (au*u - floor(au * u));
-	v2.y = 1.0 - (bu*v - floor(bu * v));
-
-	return v2;
-}
 
 
 void main()
 {
 
-	float trb = turb(turbulenceMagnitude * realPosition);
+	float trb = turb(turbulenceMagnitude * realPosition * sqrt(textureScale));
 
 	float texture_spec_coeff = 1.0; //No texture and Marble texture
 

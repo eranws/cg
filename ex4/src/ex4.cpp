@@ -122,6 +122,8 @@ int main(int argc, char* argv[])
 	// Set clear color to black:
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	//start animation
 	isAnimating = true;
