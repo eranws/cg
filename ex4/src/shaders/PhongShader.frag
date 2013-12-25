@@ -41,13 +41,14 @@ in vec3 realPosition;
 in vec3 finalPosition;
 in vec2 fragTexCoord;
 
-vec3 n;
+vec3 cameraPosition = vec3(0,0,-3);
+
+vec3 n = normalize(viewNormal);
 
 float turb(vec3 v);
 	
 void phongShading(float texture_spec_coeff)
 {
-	vec3 eye = vec3(0,0,-3);
 
 	//Ambient
 	vec3 ambient = ka * ambientColor;
@@ -64,7 +65,7 @@ void phongShading(float texture_spec_coeff)
 	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
 
 	//Specular
-	vec3 v = normalize(eye - viewPosition);
+	vec3 v = normalize(cameraPosition - viewPosition);
 
 	vec3 r1 = normalize(reflect(l1, n));
 	vec3 spec1 = ks * specularColor * pow(max(dot(v, r1), 0.0001), specExp);
@@ -117,10 +118,10 @@ vec2 sphereMap(vec3 posOnSphere)
 void mirrorTexture()
 {
 	// Set texture coordinates using spherical mapping:
-	vec3 posOnSphere = reflect(normalize(vec3(0,0,-3) - vec3(viewPosition.xyz) ), normalize(viewNormal.xyz));
-	vec2 fragTexCoord = sphereMap(vec3(posOnSphere.xyz));
+	vec3 posOnSphere = reflect(cameraPosition - viewPosition.xyz, n);
+	vec2 fragTexCoord = sphereMap(posOnSphere.xyz);
 	vec4 diffuse = texture(my_colormap, fragTexCoord);
-	outColor = vec4(diffuse.xyz, 0.0);
+	outColor = vec4(diffuse.xyz, 1.0);
 }
 
 void brickTexture()
@@ -161,8 +162,6 @@ void brickTexture()
 
 void main()
 {
-
-	n = normalize(viewNormal);
 
 	float trb = turb(turbulenceMagnitude * realPosition * sqrt(textureScale));
 
