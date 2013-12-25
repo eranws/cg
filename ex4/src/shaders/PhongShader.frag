@@ -41,6 +41,8 @@ in vec3 realPosition;
 in vec3 finalPosition;
 in vec2 fragTexCoord;
 
+vec3 n;
+
 float turb(vec3 v);
 	
 void phongShading(float texture_spec_coeff)
@@ -53,8 +55,7 @@ void phongShading(float texture_spec_coeff)
 
 	vec3 l1 = normalize(light1 - viewPosition);
 	vec3 l2 = normalize(light2 - viewPosition);
-	vec3 n = normalize(viewNormal);
-
+	
 	float dist1 = distance(viewPosition.xyz, light1);
 	float dist2 = distance(viewPosition.xyz, light2);
 
@@ -102,13 +103,13 @@ vec2 sphereMap(vec3 posOnSphere)
 {
 	vec2 fragTexCoord;
 	float theta = atan(posOnSphere.x , posOnSphere.z);
-	float phi   = atan(posOnSphere.y / length(vec2(posOnSphere.x,posOnSphere.z)));
+	float phi   = atan(posOnSphere.y , length(posOnSphere.xz));
 	float r     = length(posOnSphere.xyz);
 
 	float u = (theta + MY_PI) / (2 * MY_PI);
 	float v = (phi + MY_PI/2)  / MY_PI;
 	fragTexCoord.x = 1.0 - u;
-	fragTexCoord.y = 1.0 - v;
+	fragTexCoord.y = v;
 
 	return fragTexCoord;
 }
@@ -116,7 +117,7 @@ vec2 sphereMap(vec3 posOnSphere)
 void mirrorTexture()
 {
 	// Set texture coordinates using spherical mapping:
-	vec3 posOnSphere = reflect(vec3(finalPosition.xyz), normalize(viewNormal.xyz));
+	vec3 posOnSphere = reflect(normalize(vec3(0,0,-3) - vec3(viewPosition.xyz) ), normalize(viewNormal.xyz));
 	vec2 fragTexCoord = sphereMap(vec3(posOnSphere.xyz));
 	vec4 diffuse = texture(my_colormap, fragTexCoord);
 	outColor = vec4(diffuse.xyz, 0.0);
@@ -124,28 +125,34 @@ void mirrorTexture()
 
 void brickTexture()
 {
-	float ky = (realPosition.y + 1) / 2;
-	vec2 fragCoord = vec2(
-	(realPosition.x + 1) / 2 + (realPosition.z + 1) / 2,
-	ky
-	);
-	/*
-	if (abs(realPosition.x) - 1.0 < 0.01)
-	{
-		fragCoord = (realPosition.yz + 1) / 2;
-	}
-	else if (abs(realPosition.y) - 1.0 < 0.001)
-	{
-		fragCoord = (realPosition.xz + 1) / 2;
-	}
-	else //if (abs(realPosition.z) - 1 < 0.001)
-	{
-		fragCoord = (realPosition.xy + 1) / 2;
-	}
-	*/
+	const float eps = 0.001;    
 
-	vec4 diffuse2 = texture(my_colormap, fragCoord);
-	outColor = vec4(diffuse2.xyz, 1);
+	vec2 fragCoord;
+
+    vec3 texturePos = (realPosition + 1) / 2;
+	if (1 - abs(realPosition.x) < eps)
+	{
+		fragCoord = texturePos.yz;
+	}
+	if (1 - abs(realPosition.y) < eps)
+	{
+		fragCoord = texturePos.xz;
+	}
+	if (1 - abs(realPosition.z) < eps)
+	{
+		fragCoord = texturePos.xy;
+	}
+
+
+	const float dx = 1.0/512;
+    const float dy = 1.0/512;
+    
+	float val = texture(my_specmap, fragCoord).x; //
+	float du = texture(my_specmap, vec2(fragCoord.x + dx, fragCoord.y)).x - val;
+    float dv = texture(my_specmap, vec2(fragCoord.x, fragCoord.y + dy)).x  - val;
+    n = normalize(viewNormal - textureScale * vec3(du, dv , 0.0));
+
+	kd = texture(my_colormap, fragCoord).xyz;
 }
 
 
@@ -154,6 +161,8 @@ void brickTexture()
 
 void main()
 {
+
+	n = normalize(viewNormal);
 
 	float trb = turb(turbulenceMagnitude * realPosition * sqrt(textureScale));
 
@@ -176,6 +185,7 @@ void main()
 			
 		case TEXTURE_BRICK:
 			brickTexture();
+			texture_spec_coeff = 0.0;
 			break;
 
 		default:
@@ -183,7 +193,7 @@ void main()
 	}
 
 
-	if (textureMode == TEXTURE_NONE || textureMode == TEXTURE_MARBLE || textureMode == TEXTURE_WOOD)
+	if (textureMode != TEXTURE_MIRROR)
 	{
 		phongShading(texture_spec_coeff);
 	}
