@@ -342,9 +342,6 @@ void Model::init(const char* meshFile)
 		glBindVertexArray(0);
 	}
 
-	loadTexture(sphereFilename, &_sphereTexture);
-	loadTexture(brickFilename, &_brickTexture);
-	loadTexture(brickBumpFilename, &_brickBumpMap);
 
 
 	// Initialize Model
@@ -360,6 +357,9 @@ void Model::init(const char* meshFile)
 		resetMatrices();
 	}
 
+	loadTexture(sphereFilename, &_sphereTexture);
+	loadTexture(brickFilename, &_brickTexture);
+	loadTexture(brickBumpFilename, &_brickBumpMap);
 
 }
 

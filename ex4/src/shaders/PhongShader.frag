@@ -84,7 +84,7 @@ void phongShading(float texture_spec_coeff)
 void marbleTexture(float trb)
 {
 	float t;
-	t = sin(2 * 3.1415 * (realPosition.x * textureScale + trb));
+	t = pow(sin(2 * 3.1415 * (realPosition.x * textureScale + trb)),3);
 	t = (t + 1) / 2; //normalize sin/cos to [0,1]
 	kd = vec3(t,t,t);
 }
