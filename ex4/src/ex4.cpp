@@ -70,7 +70,7 @@ int     g_nFPS = 0, g_nFrames = 0;              // FPS and FPS Counter
 int     g_dwLastFPS = 0;                        // Last FPS Check Time
 bool    isAnimating = false;
 bool    g_duringAnimation = false;
-bool 	shadersAutoReloadEnabled = true;
+bool 	shadersAutoReloadEnabled = false;
 
 // A global variable for our model (a better practice would be to use a singletone that holds all model):
 Model _model(WINDOW_SIZE, WINDOW_SIZE);

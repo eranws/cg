@@ -469,7 +469,35 @@ void Model::draw()
 	glUniformMatrix4fv(_modelViewUV, 1, GL_FALSE, glm::value_ptr(modelView));
 	glUniform1f(_specExpUV, _specExp);
 	glUniform1i(_textureModeUV, _textureMode);
+	glUniform1f(_textureScaleUV, _textureScale);
+	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
 
+
+	// Set texture
+	if (_textureMode == TEXTURE_MIRROR || _textureMode == TEXTURE_BRICK)
+	{
+
+		int loc0 = glGetUniformLocation(_program, "my_colormap");
+		glUniform1i(loc0, 0);
+
+		if (_textureMode == TEXTURE_MIRROR)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
+		}
+
+		if (_textureMode == TEXTURE_BRICK)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _brickTexture);
+
+			int loc1 = glGetUniformLocation(_program, "my_specmap");
+			glUniform1i(loc1, 1);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
+		}
+	}
 
 	if (_normalMode == NORMAL_FACE)
 	{
@@ -482,35 +510,6 @@ void Model::draw()
 		glDrawArrays(GL_TRIANGLES, 0, _mesh.n_faces() * 3);
 	}
 
-	// Set texture
-	if (_textureMode == TEXTURE_MIRROR || _textureMode == TEXTURE_BRICK)
-	{
-
-//		int loc0 = glGetUniformLocation(_program, "my_colormap");
-//		glUniform1i(loc0, 0);
-
-		if (_textureMode == TEXTURE_MIRROR)
-		{
-//			glActiveTexture(GL_TEXTURE0);
-//			glBindTexture(GL_TEXTURE_2D, _sphereTexture);
-		}
-
-		if (_textureMode == TEXTURE_BRICK)
-		{
-//			glActiveTexture(GL_TEXTURE0);
-//			glBindTexture(GL_TEXTURE_2D, _brickTexture);
-//
-//			int loc1 = glGetUniformLocation(_program, "my_specmap");
-//			glUniform1i(loc1, 1);
-//
-//			glActiveTexture(GL_TEXTURE1);
-//			glBindTexture(GL_TEXTURE_2D, _brickBumpMap);
-		}
-	}
-	else
-	{
-		//unbind the texture
-	}
 
 
 
@@ -770,7 +769,6 @@ void Model::nextTextureMode()
 		default: break;
 	}
 
-	std::cout << _textureMode << std::endl;
 }
 
 void Model::decreaseTextureScale()
@@ -778,8 +776,6 @@ void Model::decreaseTextureScale()
 	_textureScale--;
 	if (_textureScale < MIN_TEXTURE_SCALE)
 		_textureScale = MIN_TEXTURE_SCALE;
-	glUniform1f(_textureScaleUV, _textureScale);
-	std::cout << _textureScale << std::endl;
 }
 
 void Model::increaseTextureScale()
@@ -787,9 +783,6 @@ void Model::increaseTextureScale()
 	_textureScale++;
 	if (_textureScale > MAX_TEXTURE_SCALE)
 		_textureScale = MAX_TEXTURE_SCALE;
-	glUniform1f(_textureScaleUV, _textureScale);
-
-	std::cout << _textureScale << std::endl;
 }
 
 void Model::decreaseTurbulenceMagnitude()
@@ -797,8 +790,6 @@ void Model::decreaseTurbulenceMagnitude()
 	_turbulenceMagnitude --;
 	if (_turbulenceMagnitude < MIN_TURBULANCE)
 		_turbulenceMagnitude = MIN_TURBULANCE;
-	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
-	std::cout << _turbulenceMagnitude << std::endl;
 }
 
 
@@ -807,8 +798,6 @@ void Model::increaseTurbulenceMagnitude()
 	_turbulenceMagnitude ++ ;
 	if (_turbulenceMagnitude > MAX_TURBULANCE)
 		_turbulenceMagnitude = MAX_TURBULANCE;
-	glUniform1f(_turbulenceMagnitudeUV, _turbulenceMagnitude);
-	std::cout << _turbulenceMagnitude << std::endl;
 }
 
 void Model::loadTexture(const char* filename, GLuint* handle)
