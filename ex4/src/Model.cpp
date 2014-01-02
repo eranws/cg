@@ -803,9 +803,6 @@ void Model::increaseTurbulenceMagnitude()
 void Model::loadTexture(const char* filename, GLuint* handle)
 {
 		BImage image( filename );
-
-		image.normalize();
-
 		glGenTextures(1, handle); // Generate a texture in OpenGL
 		glBindTexture(GL_TEXTURE_2D, *handle); // Bind texture before setting its properties
 
