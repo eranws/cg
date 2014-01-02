@@ -14,11 +14,11 @@
 //////////////////////////////
 
 // for some reason, in windows the file is located on a different location  //
-#ifdef WIN32
-#include <OpenMesh/Core/Math/VectorT.hh>
-#else
+//#ifdef WIN32
+//#include <OpenMesh/Core/Math/VectorT.hh>
+//#else
 #include <OpenMesh/Core/Geometry/VectorT.hh>
-#endif
+//#endif
 
 
 //////////////////////////////
