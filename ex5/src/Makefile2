@@ -1,0 +1,63 @@
+CC = g++
+AR = ar
+RANLIB = ranlib
+MSG = @echo
+NEWL = @echo
+CLEAR = clear
+HDRS = ray.hh MyVecs.hh object.hh sphere.hh scene.hh polygon.hh camera.hh lights.hh MyMeshObject.hh ellipsoid.hh
+SRCS = ex4a.o ex4b.o Main.o sphere.o scene.o polygon.o MyMeshObject.o ellipsoid.o
+OBJS = $(subst .cc,.o,$(SRCS)) 	#substituting .cc -> .o
+
+TEST_SRCS = $(TEST:=.cc)
+TEST_OBJS = $(subst .cc,.o,$(TEST_SRCS))
+
+#OpenMesh definitions
+CG_HOME = /cs/course/current/cg
+OM_DIR = $(CG_HOME)/OpenMesh
+OM_LIBS = -L$(OM_DIR)/lib -lOpenMeshCore
+OM_INCLUDE=  -I$(OM_DIR)/include
+
+#bimage definitions
+BIMAGE_DIR = $(CG_HOME)/bimage
+LINK_FLAGS =  -L$(BIMAGE_DIR)  -lbimage $(OM_LIBS)
+INCLUDE =  -I/usr/include $(OM_INCLUDE) -I$(BIMAGE_DIR)
+COMP_FLAGS = -O3 -Wall -Wno-deprecated -fPIC $(INCLUDE) 
+
+all: rt face spheres Main
+
+.cc.o: $(SRCS) $(HDRS)
+	$(MSG) Compiling $<...
+	$(CC) $(COMP_FLAGS) -Wno-deprecated -c $<
+	$(NEWL)
+
+rt: $(OBJS)
+	$(MSG) Creating static library...
+	ar rc librt.a $(OBJS)
+	ranlib librt.a 
+
+Main: Main.o    
+	$(CC)   Main.o $(LINK_FLAGS)  -L. -lrt  -o ex4.MyScene
+
+face: ex4a.o
+	$(CC) ex4a.o $(LINK_FLAGS)  -L. -lrt  -o ex4.makeFace
+
+spheres: ex4b.o    
+	$(CC)   ex4b.o $(LINK_FLAGS)  -L. -lrt  -o ex4.makeSphere
+
+
+clean:
+	/bin/rm -f *.o *core *~ ! ex4.makeFace ex4.makeSphere librt.a
+
+depend:
+	makedepend $(SRCS) $(HDRS) 
+
+# DO NOT DELETE
+
+ray.o: MyVecs.hh
+object.o: MyVecs.hh ray.hh
+sphere.o: MyVecs.hh object.hh ray.hh
+scene.o: ray.hh MyVecs.hh sphere.hh object.hh polygon.hh lights.hh
+polygon.o: MyVecs.hh object.hh ray.hh
+camera.o: MyVecs.hh scene.hh ray.hh sphere.hh object.hh polygon.hh lights.hh
+lights.o: MyVecs.hh
+MyMeshObject.o: MyMesh.hh object.hh MyVecs.hh ray.hh
