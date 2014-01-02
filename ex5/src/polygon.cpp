@@ -27,7 +27,9 @@ Polygon::Polygon(vector<Point3d>& vertices, vector<Point2d> textices,
 }
 
 int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
-		Vector3d& N, Color3d& texColor) {
+		Vector3d& N, Color3d& texColor)
+{
+	return 0; //TODO;
 }
 
 void Polygon::triangulate() {

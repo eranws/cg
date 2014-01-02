@@ -11,7 +11,9 @@ void MyMeshObject::set_texture_map(BImage* image) {
 }
 
 int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
-		Vector3d& N, Color3d& texColor) {
+		Vector3d& N, Color3d& texColor)
+{
+	return 0;
 }
 
 void MyMeshObject::calculateBoundingSphere() {

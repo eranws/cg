@@ -19,6 +19,7 @@ Triangle::~Triangle() {
 }
 
 bool Triangle::isInside(const Point3d& p, Point2d& texCoord) const {
+	return false; //TODO
 }
 
 
