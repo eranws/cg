@@ -43,6 +43,9 @@ public:
 
   Color3d textureDiffuse(const Point3d& P) const;
 
+protected:
+	Vector3d getNormal(const Point3d& p) const;
+
  private:
 
   Point3d   _C; // The sphere's center  //

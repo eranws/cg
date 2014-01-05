@@ -4,7 +4,7 @@
 
 #include "object.h"
 
-Object::Object()
+Object::Object() : _diffuseTexture(NULL)
 {
 
 }
@@ -63,7 +63,7 @@ const Color3d& Object::getSpecular() const
 
 const Color3d& Object::getAmbient() const
 {
-	return Color3d(); //TODO
+	return COLOR_RED; //TODO
 }
 
 const Color3d& Object::getReflection() const

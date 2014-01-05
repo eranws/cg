@@ -70,6 +70,7 @@ public:
   const double    getIndex()        const;
   const double    getShining()      const;
 
+
 protected:
   Color3d _ambient;       // The object's ambient color         //
   Color3d _diffuse;       // The object's diffuse color         //
@@ -81,6 +82,8 @@ protected:
   double _index ;         // The object's refraction index      //
 
   BImage* _diffuseTexture;// The objects's diffuse texture map  //
+
+  Vector3d getNormal(const Point3d& p) const;
 } ;
 
 #endif /* _OBJECT_HH */
