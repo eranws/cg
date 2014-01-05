@@ -58,4 +58,6 @@ private:
   Vector3d      _D;       // Ray direction - should be a unit vector          //
 } ;
 
+typedef Ray Plane;
+
 #endif /* _RAY_HH */

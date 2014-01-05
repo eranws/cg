@@ -53,7 +53,7 @@ double& Object::shining()
 
 const Color3d& Object::getDiffuse() const
 {
-	return Color3d(); //TODO
+	return COLOR_GREEN; //TODO(); //TODO
 }
 
 const Color3d& Object::getSpecular() const

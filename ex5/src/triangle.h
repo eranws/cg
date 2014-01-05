@@ -18,7 +18,7 @@
 
 #include "general.h"
 #include "MyVecs.h"
-
+#include "ray.h"
 
 //////////////////////////////
 // Class Decleration        //
@@ -39,10 +39,14 @@ public:
   // isInside - return true if the given point is inside the triangle //
   bool isInside(IN const Point3d& p, OUT Point2d& texCoord) const;
 
+  Plane getPlane();
+
 private:
   Point3d _p0;  // One of the triangle vertices   //
   Vector3d _u;  // a vector from p0 to p1         //
   Vector3d _v;  // a vector from p0 to p2         //
+  Vector3d _n;  // the triangle normal Plane //
+
 
   Point2d _t0;  // The texture map coordiate of p0  //
   Point2d _tu;  // The texture map coordinate of p1 //

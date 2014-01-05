@@ -57,6 +57,11 @@ public:
   // Ray intersection with the convex polygon //
   virtual int intersect(IN Ray& ray, IN double tMax, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor);
 
+   Color3d textureDiffuse(const Point3d& P) const;
+
+protected:
+	Vector3d getNormal(const Point3d& p) const;
+
 private:
   // triangulate - split the polygon to triangles (saved on the _triangles memeber) //
   void triangulate();

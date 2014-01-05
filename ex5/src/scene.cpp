@@ -38,8 +38,7 @@ Color3d Scene::trace_ray(Ray ray, double vis) const
 
 		if (isFound)
 		{
-			Color3d ambient = obj->getAmbient();
-			retColor = ambient;
+			retColor = texColor;
 		}
 		else
 		{
