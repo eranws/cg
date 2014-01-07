@@ -40,14 +40,14 @@ public:
   // Destructor - free a MyMeshObject //
   virtual ~MyMeshObject();
 
-  virtual void set_texture_map(BImage* image);
-
   // intersect - calculate intersection of a given ray with the object  //
   virtual int intersect(IN Ray& ray, IN double tMax, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor);
+
 
 private:
   // calculate and create a bounding sphere for the object  //
   void calculateBoundingSphere();
+  void populatePolygons();
 
 private:
   MyMesh    _mesh;            // The mesh the object is made of   //
@@ -56,6 +56,10 @@ private:
 
   // Handle to a polygon pointer property for a MyMesh's face //
   OpenMesh::FPropHandleT<Polygon*> _fp_polygon_handle;
+
+  vector<Polygon> _polygons;
+  
+
 };
 
 

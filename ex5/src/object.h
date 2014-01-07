@@ -46,7 +46,7 @@ public:
   // Default constructor  //
   Object();
 
-  virtual void set_texture_map(BImage* image);
+  void set_texture_map(BImage* image);
 
   // calculate intersection of a given ray with the object //
   virtual int intersect(IN Ray& ray, IN double tMax, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) = 0 ;
@@ -83,7 +83,6 @@ protected:
 
   BImage* _diffuseTexture;// The objects's diffuse texture map  //
 
-  Vector3d getNormal(const Point3d& p) const;
 } ;
 
 #endif /* _OBJECT_HH */

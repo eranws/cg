@@ -67,15 +67,32 @@ bool Scene::findNearestObject(Ray ray, Object** object, double& t, Point3d& P,
 							  Vector3d& N, Color3d& texColor) const
 {
 	bool retVal = false;
-	object = NULL;
+	double closestT = INF;
+	
+	int dbgIntersectCount = 0;
+
 	for (int i=0; i < _objects.size(); i++)
 	{
 		Object* it = _objects[i];
-		int isIntersect = it->intersect(ray, INF, t, P, N, texColor);
+		Color3d texColor2;
+		int isIntersect = it->intersect(ray, INF, t, P, N, texColor2);
+		//t = abs(t); // handle negative distances
 		if (isIntersect == 1)
 		{
-			//TODO: check if closer than current
-			retVal = true;
+			dbgIntersectCount++;
+			if (dbgIntersectCount > 1)
+			{
+				dbgIntersectCount++;
+			}
+
+			if (t < closestT)
+			{
+				texColor = texColor2;
+				closestT = t;
+				object =  (Object**)&(_objects[i]);
+				
+				retVal = true;
+			}
 		}
 
 	}

@@ -59,9 +59,6 @@ public:
 
    Color3d textureDiffuse(const Point3d& P) const;
 
-protected:
-	Vector3d getNormal(const Point3d& p) const;
-
 private:
   // triangulate - split the polygon to triangles (saved on the _triangles memeber) //
   void triangulate();

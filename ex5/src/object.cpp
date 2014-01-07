@@ -6,84 +6,81 @@
 
 Object::Object() : _diffuseTexture(NULL)
 {
-
 }
 
 void Object::set_texture_map(BImage* image)
 {
-
+	_diffuseTexture = image;
 }
 
 Color3d& Object::diffuse()
 {
-	return Color3d(); //TODO
+	return _diffuse;
 }
 
 Color3d& Object::specular()
 {
-	return Color3d(); //TODO
+	return _specular;
 }
 
 Color3d& Object::ambient()
 {
-	return Color3d(); //TODO
+	return _ambient;
 }
 
 Color3d& Object::reflection()
 {
-	return Color3d(); //TODO
+	return _reflection;
 }
 
 Color3d& Object::transparency()
 {
-	return Color3d(); //TODO
+	return _transparency;
 }
 
 double& Object::index()
 {
-	double v = 0.0; //TODO
-	return v;		
+	return _index;		
 }
 
 double& Object::shining()
 {
-	double v = 0.0; //TODO
-	return v;		
+	return _shining;
 }
 
 const Color3d& Object::getDiffuse() const
 {
-	return COLOR_GREEN; //TODO(); //TODO
+	return _diffuse;
 }
 
 const Color3d& Object::getSpecular() const
 {
-	return Color3d(); //TODO
+	return _specular;
 }
 
 const Color3d& Object::getAmbient() const
 {
-	return COLOR_RED; //TODO
+	return _ambient;
 }
 
 const Color3d& Object::getReflection() const
 {
-	return Color3d(); //TODO
+	return _reflection;
 }
 
 const Color3d& Object::getTransparency() const
 {
-	return Color3d(); //TODO
+	return _transparency;
 }
 
 const double Object::getIndex() const
 {
-	return 0;
+	return _index;
 }
 
 const double Object::getShining() const
 {
-	return 0;
+	return _shining;
 }
 
 

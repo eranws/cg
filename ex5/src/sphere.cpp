@@ -62,7 +62,7 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
 	if (retVal == 1)
 	{
 		P = ray(t);
-		N = getNormal(P);
+		N = P - _C;
 
 		if (_diffuseTexture)
 		{
@@ -80,9 +80,4 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
 
 Color3d Sphere::textureDiffuse(const Point3d& P) const {
 	return COLOR_BLACK; //TODO (phi theta)
-}
-
-Vector3d Sphere::getNormal(const Point3d& p) const
-{
-	return p - _C;
 }

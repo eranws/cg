@@ -50,6 +50,9 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 			
 			//if (t > tMax) //TODO!!!
 
+			if (t > 0)
+			{
+
 			Point2d texCoords; //TODO !!!
 			P = ray(t);
 			if (tri->isInside(P, texCoords))
@@ -65,6 +68,7 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 				{
 					texColor = getDiffuse();
 				}
+			}
 			}
 		}
 
@@ -93,6 +97,3 @@ void Polygon::triangulate()
 Color3d Polygon::textureDiffuse(const Point3d& P) const {
 	return COLOR_BLACK;
 }
-
-
-
