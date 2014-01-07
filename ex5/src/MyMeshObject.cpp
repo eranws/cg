@@ -51,14 +51,6 @@ int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 
 }
 
-void MyMeshObject::calculateBoundingSphere()
-{
-	Point3d center;
-	double radius = 0.0;
-
-	_boundingSphere = new Sphere(center, radius);
-}
-
 
 void MyMeshObject::populatePolygons()
 {
@@ -84,4 +76,29 @@ void MyMeshObject::populatePolygons()
 				_polygons.push_back(Polygon(vertices));
         }
         //_mesh.release_face_normals();
+}
+
+void MyMeshObject::calculateBoundingSphere()
+{
+	Point3d center = Point3d(0, 0, 0);
+	double radius = 0.0;
+
+    MyMesh::VertexIter vertexIter;
+	
+	int vNum = _mesh.n_vertices();
+    for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter)
+	{
+		center += _mesh.point(vertexIter);
+	}
+    center /= (double)vNum;
+
+	for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter)
+	{
+		Point3d p = center - _mesh.point(vertexIter);
+		if (p.sqrnorm() > radius) radius = p.sqrnorm();
+	}
+	radius = sqrt(radius);
+
+	_boundingSphere = new Sphere(center, radius);
+
 }

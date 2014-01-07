@@ -60,10 +60,19 @@ int renderScene(size_t scene_index, size_t samplesPerPixel, size_t refRays, doub
 			camera.render(i, 1, img, *scene);
 		});
 #else
+
+		cout << "rendering scene #" << scene_index << " samplesPerPixel:" << samplesPerPixel << " refRays:" << refRays << " cutoff" << cutoff << endl;
+		cout << "h: " << h << " w: " << w << endl;
+
+
+		time_t t0 = time(0);
 		for (size_t i = 0; i < h; i++)
 		{
 			// The render command:
 			camera.render(i, 1, img, *scene);
+
+			time_t t1 = time(0);
+			if (i % 10 == 0) cout << "line #" << i << " time: " << t1-t0 << "s" << endl;		
 		}
 #endif
 	}
