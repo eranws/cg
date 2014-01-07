@@ -44,7 +44,7 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 		Plane p = tri->getPlane();
 
 		double c = ray.D() | p.D();
-		if (c > 0)
+		if (abs(c) > EPS)
 		{
 			t = ((p.O() | p.D()) - (p.D() | ray.O())) / (c);
 			
