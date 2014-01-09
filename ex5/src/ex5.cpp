@@ -66,7 +66,7 @@ int renderScene(size_t scene_index, size_t samplesPerPixel, size_t refRays, doub
 
 
 		time_t t0 = time(0);
-		for (size_t i = 0; i < h; i++)
+		for (int i = 0; i < h; i++)
 		{
 			// The render command:
 			camera.render(i, 1, img, *scene);

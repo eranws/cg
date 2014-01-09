@@ -12,8 +12,8 @@ Scene::Scene(){
 }
 
 Scene::Scene(Color3d& color, AmbientLight& light, double cutoffAngle) :
-	_background(color),
 	_ambientLight(light),
+	_background(color),
 	_cutoffAngle(cutoffAngle)
 {
 }
@@ -71,7 +71,7 @@ bool Scene::findNearestObject(Ray ray, Object** object, double& t, Point3d& P,
 	
 	int dbgIntersectCount = 0;
 
-	for (int i=0; i < _objects.size(); i++)
+	for (size_t i=0; i < _objects.size(); i++)
 	{
 		Object* it = _objects[i];
 		Color3d texColor2;

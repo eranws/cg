@@ -26,7 +26,7 @@ int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 
 	int retVal = 0;
 	double closestT = INF;
-	for (int i = 0; i < _polygons.size(); i++)
+	for (size_t i = 0; i < _polygons.size(); i++)
 	{
 		Color3d texColor2;
 		int intersectPolygon = _polygons[i].intersect(ray, tMax, t, P, N, texColor2);
@@ -58,7 +58,6 @@ void MyMeshObject::populatePolygons()
         //_mesh.update_normals();
 
 
-        size_t i = 0;
         for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
         {
 			vector<Point3d> vertices;

@@ -38,13 +38,13 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 {
 	int retVal = 0;
 
-	for (int i = 0; i < _triangles.size(); i++)
+	for (size_t i = 0; i < _triangles.size(); i++)
 	{
 		Triangle* tri = _triangles[i];
 		Plane p = tri->getPlane();
 
 		double c = ray.D() | p.D();
-		if (abs(c) > EPS)
+		if (fabs(c) > EPS)
 		{
 			t = ((p.O() | p.D()) - (p.D() | ray.O())) / (c);
 			
@@ -86,7 +86,7 @@ void Polygon::triangulate()
 		return;
 
 	Point3d p0 = _vertices[0];
-	for (int i = 2; i < _vertices.size(); i++)
+	for (size_t i = 2; i < _vertices.size(); i++)
 	{
 		Triangle* t = new Triangle(p0, _vertices[i-1], _vertices[i]);
 		_triangles.push_back(t);

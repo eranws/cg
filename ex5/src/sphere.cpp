@@ -16,6 +16,11 @@ Sphere::Sphere(Point3d C, double r)  : _C(C), _r(r)
 {
 }
 
+Sphere::~Sphere()
+{
+}
+
+
 int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
 		Color3d& texColor)
 {

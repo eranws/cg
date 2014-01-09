@@ -44,7 +44,7 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 	verticalDir = -verticalDir;
 
-	for (int i = row_start; i < row_start + number_of_rows; i++)
+	for (size_t i = row_start; i < row_start + number_of_rows; i++)
 	{
 		double yr = (((0.5 + i) / n) - 0.5) * 2; // -1 < x < 1
 		yr *= centerRayLength * atan(tan(_fov_h) * aspectRatio);
