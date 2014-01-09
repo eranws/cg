@@ -44,15 +44,16 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 	verticalDir = -verticalDir;
 
+
 	for (size_t i = row_start; i < row_start + number_of_rows; i++)
 	{
-		double yr = (((0.5 + i) / n) - 0.5) * 2; // -1 < x < 1
-		yr *= centerRayLength * atan(tan(_fov_h) * aspectRatio);
-			
+		double yr = (float(i) / n) * 2 - 1;  // -1 < yr < 1
+		yr *= centerRayLength * tan(_fov_h) * aspectRatio;  // sceneBottom < yr < sceneTop
+
 		for (int j = 0; j < m; j++)
 		{
-			double xr = (((0.5 + j) / m) - 0.5) * 2;
-			xr *= centerRayLength * _fov_h;
+			double xr = (float(j) / m) * 2 - 1;  // -1 < xr < 1
+			xr *= centerRayLength * tan(_fov_h); // sceneLeft < xr < sceneRight
 
 			Point3d dir = centerRay + horizontalDir * xr + verticalDir * yr;
 
