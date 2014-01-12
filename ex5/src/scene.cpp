@@ -20,6 +20,8 @@ Scene::Scene(Color3d& color, AmbientLight& light, double cutoffAngle) :
 
 Vector3d reflect(Vector3d d, Vector3d n)
 {
+	d.normalize();
+	n.normalize();
 	return (d - (2*(d|n) * n)).normalize();
 }
 
@@ -28,7 +30,7 @@ Vector3d refract(Vector3d I, Vector3d N, double mu)
 	double NI = (N | I);
 	double det = 1 - mu * mu * (1 - NI * NI);
 
-	if (det > 0)
+	if (det > EPS)
 	{
 		return N * (mu * NI - sqrt(det)) - mu * I;
 	}
@@ -46,7 +48,7 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 	Color3d reflectionColor = COLOR_BLACK;
 	Color3d refractionColor = COLOR_BLACK;
 
-	if (vis > 0.99)// MINIMAL_VIS )
+	if (vis > MINIMAL_VIS )
 	{
 		const Object* obj = 0;
 		double t;
@@ -57,71 +59,73 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 		bool isFound = findNearestObject(ray, &obj, t, P, N, texColor);
 		if (isFound)
 		{
-			
+
 			if (obj->getReflection() != COLOR_BLACK)
 			{
 				Ray reflected(P, reflect(ray.D(), N));	
-				reflectionColor = obj->getSpecular() * trace_ray(reflected, vis * obj->getReflection().length() * 0.5, obj);  //! TODO vis/2?
+				reflectionColor = obj->getSpecular() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);  //! TODO vis/2?
 			} 			
+
 			
-			double muOrigin = 1; 
-			if (originObj) // ray started from air or camera
+			if (obj->isRefractive() || (originObj && originObj->isRefractive()))
 			{
-				muOrigin = originObj->getIndex();
+				double muOrigin = 1;
+				Vector3d refractiveNormal;
+				if (originObj == obj) // inside object, the outer material is air
+				{
+					muOrigin = originObj->getIndex();
+					refractiveNormal = -N;
+				}
+
+				double muOut = 1;
+				if (obj != originObj) // 
+				{
+					muOut = obj->getIndex(); //! TODO mu1/mu2
+					refractiveNormal = N;
+				}
+
+				double mu = muOrigin / muOut;
+
+				Ray refracted(P, refract(ray.D(), refractiveNormal, mu));
+
+				//std::cout << (refracted.D() | ray.D()) << std::endl;
+				//Ray refracted(P, ray.D());
+				
+				refractionColor = trace_ray(refracted, vis * RECURSION_FACTOR, obj);
 			}
 
-			double muOut = 1;
-			if (obj != originObj) // the outer material is air
-			{
-				muOut = obj->getIndex(); //! TODO mu1/mu2
-			}
 			
-			double mu = muOrigin / muOut;
-			if (obj->isRefractive())
-			{
-				Ray refracted(P, refract(ray.D(), N, mu));
-				refractionColor = trace_ray(refracted, vis *  obj->getTransparency().length() * 0.5, obj);
-			}
-						
-			retColor = obj->getAmbient() * _ambientLight._color;
 
-			//return retColor;
+			Color3d sumLights = obj->getAmbient() * _ambientLight._color;
 
-			for (int i=0; i < _lights.size(); i++)
+			for (size_t i = 0; i < _lights.size(); i++)
 			{
 				Vector3d L = (_lights[i]->_position - P).normalize();
 
 				bool isShadow = findNearestObject(Ray(P,L));
-				
+
 				if (isShadow) 
-					0;
-					//continue;
+					continue;
 
 
-				if ((L | N) > 0)
+				if ((L | N) > EPS)
 				{
 					Color3d diffuse = obj->getDiffuse() * _lights[i]->_color * (L | N);					
-					retColor += diffuse;
-				
+					sumLights += diffuse;
 				}
-					Vector3d R = reflect(L, N);
-					Color3d specular = obj->getSpecular() * _lights[i]->_color * pow(std::max(ray.D() | R, EPS), obj->getShining());
-								
-					retColor += specular;
-								
+				Vector3d R = reflect(L, N);
+				Color3d specular = obj->getSpecular() * _lights[i]->_color * pow(std::max(ray.D() | R, EPS), obj->getShining());
+
+				sumLights += specular;
+
 			}
 
-			//retColor *= (COLOR_WHITE - obj->getTransparency()) * (COLOR_WHITE - obj->getReflection());
+			retColor = sumLights / (_lights.size() + 1); //avoid overflow, TODO weight light by distance, +1 for ambient
+			retColor *= (COLOR_WHITE - obj->getTransparency()) * (COLOR_WHITE - obj->getReflection());
 
-			/*
-			retColor +=	reflectionColor * obj->getReflection() * (COLOR_WHITE - obj->getTransparency()) + 
-			refractionColor * obj->getTransparency();
-			*/
+			retColor += reflectionColor * obj->getReflection() * (COLOR_WHITE - obj->getTransparency());
+			retColor += refractionColor * obj->getTransparency();
 
-//			retColor = 
-//				texColor * (COLOR_WHITE - obj->getTransparency()) + 
-//				reflectionColor +
-//				refractionColor ;
 
 		}
 	}
@@ -146,13 +150,13 @@ Ray Scene::perturbateRay(const Ray& r) const
 
 bool Scene::findNearestObject(Ray ray) const
 {
-		const Object* obj = 0;
-		double t;
-		Point3d P;
-		Vector3d N;
-		Color3d texColor;
+	const Object* obj = 0;
+	double t;
+	Point3d P;
+	Vector3d N;
+	Color3d texColor;
 
-		return findNearestObject(ray, &obj, t, P, N, texColor);
+	return findNearestObject(ray, &obj, t, P, N, texColor);
 }
 
 
@@ -161,7 +165,7 @@ bool Scene::findNearestObject(Ray ray, const Object** object, double& t, Point3d
 {
 	bool retVal = false;
 	double closestT = INF;
-	
+
 	int dbgIntersectCount = 0;
 
 	for (size_t i=0; i < _objects.size(); i++)

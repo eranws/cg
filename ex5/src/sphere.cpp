@@ -37,7 +37,7 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
     
     // if discriminant is negative there are no real roots, so return 
     // false as ray misses sphere
-    if (disc < 0)
+    if (disc < -EPS)
         return 0;
 
     // compute q as described above
@@ -52,12 +52,12 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
         std::swap(t0, t1); // if t0 is bigger than t1 swap them around
     }
 
-    if (t0 >= 0)
+    if (t0 > EPS)
 	{
 		retVal = 1;
 		t = t0;
 	}
-    else if (t1 >= 0)
+    else if (t1 > EPS)
     {
 		retVal = 1;
         t = t1;
