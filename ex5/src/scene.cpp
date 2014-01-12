@@ -76,7 +76,6 @@ bool Scene::findNearestObject(Ray ray, Object** object, double& t, Point3d& P,
 		Object* it = _objects[i];
 		Color3d texColor2;
 		int isIntersect = it->intersect(ray, INF, t, P, N, texColor2);
-		//t = abs(t); // handle negative distances
 		if (isIntersect == 1)
 		{
 			dbgIntersectCount++;
@@ -90,7 +89,6 @@ bool Scene::findNearestObject(Ray ray, Object** object, double& t, Point3d& P,
 				texColor = texColor2;
 				closestT = t;
 				object =  (Object**)&(_objects[i]);
-				
 				retVal = true;
 			}
 		}
