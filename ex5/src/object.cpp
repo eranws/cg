@@ -1,10 +1,18 @@
 /*
- * object.cpp
- */
+* object.cpp
+*/
 
 #include "object.h"
 
-Object::Object() : _diffuseTexture(NULL)
+Object::Object() :
+	_ambient(COLOR_DEFAULT_AMBIENT),
+	_diffuse(COLOR_DEFAULT),
+	_specular(COLOR_DEFAULT),
+	_reflection(COLOR_DEFAULT),
+	_transparency(COLOR_DEFAULT),
+	_shining(0.0),
+	_index(1.0),
+	_diffuseTexture(NULL)
 {
 }
 

@@ -56,7 +56,7 @@ public:
   Scene(Color3d & color, AmbientLight & light, double cutoffAngle);
 
   // trace_ray - Ray scene intersection for color rays
-  Color3d trace_ray(Ray ray, double vis = 1.0) const;
+  Color3d trace_ray(Ray ray, double vis = 1.0, const Object* originObj = NULL) const;
 
   // add_object - add the given object to the scene
   void add_object(Object * obj);
@@ -91,7 +91,9 @@ public:
 	
 private:
   // find the nearest object intersecting with the given ray
-  bool findNearestObject(IN Ray ray, OUT Object** object, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) const;
+	bool findNearestObject(IN Ray ray) const;
+  
+  bool findNearestObject(IN Ray ray, const OUT Object** object, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) const;
   
   // calculate the reflection color at the given intersection point
   Color3d calcReflection(const Ray& ray, const Point3d& P, const Vector3d& N, const Object& object, double vis = 1.0, bool isCritical = false) const;
@@ -101,7 +103,7 @@ private:
 
 private:
   
-  vector<Object *>        _objects;       // The scene's objects          //
+  vector<const Object *>        _objects;       // The scene's objects          //
   vector<PointLight * >   _lights;        // The scene's point lights     //
 
   AmbientLight            _ambientLight;  // The scene's Ambient light    //

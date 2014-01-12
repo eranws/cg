@@ -16,7 +16,7 @@ MyMeshObject::~MyMeshObject()
 }
 
 int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
-		Vector3d& N, Color3d& texColor)
+		Vector3d& N, Color3d& texColor) const
 {
 	int intersectBoundingSphere = _boundingSphere->intersect(ray, tMax, t, P, N, texColor);
 	if (intersectBoundingSphere == 0)

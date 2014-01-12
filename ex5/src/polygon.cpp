@@ -15,7 +15,7 @@ Polygon::~Polygon()
 {
 }
 
-Polygon::Polygon(vector<Point3d>& vertices) : _vertices(vertices)
+Polygon::Polygon(vector<Point3d>& vertices) : Object(), _vertices(vertices)
 {
 	triangulate();
 }
@@ -34,7 +34,7 @@ Polygon::Polygon(vector<Point3d>& vertices, vector<Point2d> textices,
 }
 
 int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
-		Vector3d& N, Color3d& texColor)
+		Vector3d& N, Color3d& texColor) const
 {
 	int retVal = 0;
 

@@ -22,7 +22,7 @@ Sphere::~Sphere()
 
 
 int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
-		Color3d& texColor)
+		Color3d& texColor) const
 {
 	int retVal = 0;
 
@@ -67,7 +67,7 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
 	if (retVal == 1)
 	{
 		P = ray(t);
-		N = P - _C;
+		N = (P - _C).normalize();
 
 		if (_diffuseTexture)
 		{
@@ -84,5 +84,5 @@ int Sphere::intersect(Ray& ray, double tMax, double& t, Point3d& P, Vector3d& N,
 }
 
 Color3d Sphere::textureDiffuse(const Point3d& P) const {
-	return COLOR_BLACK; //TODO (phi theta)
+	return COLOR_RED; //TODO (phi theta)
 }
