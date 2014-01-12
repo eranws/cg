@@ -18,17 +18,19 @@ Scene::Scene(Color3d& color, AmbientLight& light, double cutoffAngle) :
 {
 }
 
+Vector3d reflect(Vector3d d, Vector3d n)
+{
+	return d - (2*(d|n) * n) / (n|n);
+}
+
 Color3d Scene::trace_ray(Ray ray, double vis) const
 {
-	Color3d retColor;
+	Color3d retColor = _background;
+	Color3d reflColor = COLOR_BLACK;
 
-	if (vis < MINIMAL_VIS)
+	if (vis > MINIMAL_VIS)
 	{
-		retColor = COLOR_BLACK;
-	}
-	else
-	{
-		Object* obj;
+		Object* obj = 0;
 		double t;
 		Point3d P;
 		Vector3d N;
@@ -38,11 +40,13 @@ Color3d Scene::trace_ray(Ray ray, double vis) const
 
 		if (isFound)
 		{
-			retColor = texColor;
-		}
-		else
-		{
-			retColor = _background;
+			if (obj->getReflection() != COLOR_BLACK)
+			{
+				Ray reflected(P, reflect(ray.D(), N));
+				
+				reflColor = obj->getReflection() * trace_ray(reflected, vis/2);
+			}
+			retColor = texColor + reflColor;
 		}
 	}
 
@@ -88,7 +92,7 @@ bool Scene::findNearestObject(Ray ray, Object** object, double& t, Point3d& P,
 			{
 				texColor = texColor2;
 				closestT = t;
-				object =  (Object**)&(_objects[i]);
+				*object =  _objects[i];
 				retVal = true;
 			}
 		}
