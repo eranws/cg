@@ -13,7 +13,9 @@
   <ItemGroup>
     <ClCompile Include="src\bimageWin32.cpp" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\Ellipsoid.cpp" />
     <ClCompile Include="src\ex5.cpp" />
+    <ClCompile Include="src\Lens.cpp" />
     <ClCompile Include="src\MyMeshObject.cpp" />
     <ClCompile Include="src\object.cpp" />
     <ClCompile Include="src\polygon.cpp" />
@@ -23,7 +25,9 @@
   <ItemGroup>
     <ClInclude Include="src\bimage.h" />
     <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\Ellipsoid.h" />
     <ClInclude Include="src\general.h" />
+    <ClInclude Include="src\Lens.h" />
     <ClInclude Include="src\lights.h" />
     <ClInclude Include="src\MyMesh.h" />
     <ClInclude Include="src\MyMeshObject.h" />
