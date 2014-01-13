@@ -1,0 +1,109 @@
+/*
+ * Ellipsoid.cpp
+ *
+ *  Created on: Jan 2, 2014
+ *      Author: ilansh
+ */
+
+#include "Ellipsoid.h"
+
+
+Ellipsoid::Ellipsoid(Point3d C, double r, Vector3d scale)  : _C(C), _r(r), _scale(scale)
+{
+	_scaleInv = Vector3d(1.0/_scale[0], 1.0/_scale[1], 1.0/_scale[2]);
+}
+
+Ellipsoid::~Ellipsoid()
+{
+}
+
+
+bool Ellipsoid::getRoots(const Ray& ray, double* t0, double* t1) const
+{
+	//Compute A, B and C coefficients
+	
+	using OpenMesh::dot;
+    double a = dot(ray.D(), ray.D()); //should be 1
+	double b = 2 * dot(ray.D(), ray.O() - _C);
+    double c = dot(ray.O() - _C, ray.O() - _C) - (_r * _r);
+
+    //Find discriminant
+    double disc = b * b - 4 * a * c;
+   
+	 // if discriminant is negative there are no real roots, so return 
+    // false as ray misses Ellipsoid
+    if (disc < -EPS)
+        return false;
+
+    // compute q as described above
+    double distSqrt = sqrt(disc);
+    *t0 = (-b - distSqrt) * 0.5;
+    *t1 = (-b + distSqrt) * 0.5;
+
+	if (t0 > t1)
+    {
+        std::swap(t0, t1);
+    }
+
+
+	return true;
+}
+
+int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3d& N,
+		Color3d& texColor) const
+{
+	int retVal = 0;
+
+	Ray ray((inRay.O() - _C) * _scaleInv + _C, inRay.D() * _scaleInv);
+
+
+	 
+
+	double t0, t1;
+	if (!getRoots(ray, &t0, &t1))
+		return 0;
+   
+	if (t0 > t1)
+    {
+        std::swap(t0, t1); // if t0 is bigger than t1 swap them around
+    }
+
+    if (t0 > EPS)
+	{
+		retVal = 1;
+		t = t0;
+	}
+    else if (t1 > EPS)
+    {
+		retVal = 1;
+        t = t1;
+    }
+
+
+	if (retVal == 1)
+	{
+		P = ray(t);
+		P -= _C;
+		P *= _scale;
+		P += _C;
+
+		N = (P - _C) * _scaleInv;
+		N.normalize();
+
+		if (_diffuseTexture)
+		{
+			texColor = textureDiffuse(P);
+		}
+		else
+		{
+			texColor = getDiffuse();
+		}
+
+	}
+	
+	return retVal;
+}
+
+Color3d Ellipsoid::textureDiffuse(const Point3d& P) const {
+	return COLOR_RED; //TODO (phi theta)
+}

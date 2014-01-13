@@ -8,8 +8,8 @@
 //            intersection of a given ray with the sphere.
 //
 
-#ifndef _SPHERE_HH
-#define _SPHERE_HH
+#ifndef _LENS_HH_
+#define _LENS_HH_
 
 
 //////////////////////////////
@@ -19,20 +19,29 @@
 #include "general.h"
 #include "object.h"
 
-#include "Ellipsoid.h"
+#include "Sphere.h"
 
 //////////////////////////////
 // Class Decleration        //
 //////////////////////////////
 
-class Sphere : public Ellipsoid 
+class Lens : public Object 
 {
 public:
   // Constructor - create a sphere with the given parameters  //
-	Sphere(Point3d C = POINT_ORIGIN, double r = 1.0) : Ellipsoid(C, r) //sphere is an ellipsoid with equal scale factor in all axes (1)
-	{	
-	};
+	Lens(Point3d center = POINT_ORIGIN, double radius = 1.0, double width = 1.0);
 
+	virtual ~Lens();
+
+
+	virtual int intersect(IN Ray& ray, IN double tMax, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) const;
+
+	Point3d _center;
+	double _r; //radius
+	double _w; //width
+
+	Sphere _sphere1;
+	Sphere _sphere2;
 };
 
 #endif /* _SPHERE_HH */

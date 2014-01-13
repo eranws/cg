@@ -8,6 +8,9 @@
 #ifndef cg_projects_Scene2_h
 #define cg_projects_Scene2_h
 
+#include "Ellipsoid.h"
+#include "Lens.h"
+
 struct Scene2 : public Scene
 {
 	
@@ -21,9 +24,9 @@ struct Scene2 : public Scene
 	void defineLights()
 	{
 		Scene & scene = *this;
-		Point3d pos(10,100,10);
+		Point3d pos(10,20,-2);
 		Color3d color(1,1,1);
-		PointLight  * p = new PointLight(pos,color);
+		PointLight  * p = new PointLight(pos,color, 5);
 		scene.add_light(p);
 		
 		Point3d pos1(10,20,30);
@@ -51,7 +54,7 @@ struct Scene2 : public Scene
 		scene.backgroundColor() = (blue +  white) * 0.5;
 		Point3d center(10,0,-2);
 		double radius = 4;
-		Sphere * sp = new Sphere(center,radius);
+		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(0.3, 1.4, 1.5));
 		sp->diffuse() = white;
 		sp->reflection() = black;
 		sp->specular() = white;
@@ -61,7 +64,7 @@ struct Scene2 : public Scene
 #endif
 		scene.add_object(sp);
 		
-		Point3d center1(0,0,-10);
+		Point3d center1(10,10,-2);
 		double radius1 = 4;
 		Sphere * sp1 = new Sphere(center1,radius1);
 		sp1->diffuse() = red + green * 0.8;
@@ -86,13 +89,16 @@ struct Scene2 : public Scene
 		
 		
 		Point3d center3(0,0,10);
-		double radius3 = 4;
-		Sphere * sp3 = new Sphere(center3,radius3);
-		sp3->diffuse() = white * 0.1;
-		sp3->transparency() = white * 0.9;
+		double radius3 = 1;
+		//Sphere * sp3 = new Sphere(center3,radius3);
+		Lens* sp3 = new Lens(center3,radius3, radius3 / 10);
+		//sp3->diffuse() = white * 0.1;
+		sp3->diffuse() = red * 0.1;
+
+		//sp3->transparency() = white * 0.9;
 		sp3->specular() = white;
 		sp3->shining() = 64;
-		sp3->index() = 1.5;
+		//sp3->index() = 1.5;
 		scene.add_object(sp3);
 		
 		
@@ -121,7 +127,7 @@ struct Scene2 : public Scene
 	
 	virtual void setDefaultCamera(Camera& camera) const
 	{
-		Point3d pos(-1,6,25);
+		Point3d pos(-10,6,25);
 		double fov_h = 50 / 180.0 * M_PI ;
 		Point3d coi(0,0,-0);
 		Vector3d up(0,1,0) ;

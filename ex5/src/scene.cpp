@@ -11,6 +11,7 @@ Scene::Scene(){
 
 }
 
+
 Scene::Scene(Color3d& color, AmbientLight& light, double cutoffAngle) :
 	_ambientLight(light),
 	_background(color),
@@ -22,11 +23,18 @@ Vector3d reflect(Vector3d d, Vector3d n)
 {
 	d.normalize();
 	n.normalize();
+
 	return (d - (2*(d|n) * n)).normalize();
 }
 
 Vector3d refract(Vector3d I, Vector3d N, double mu)
 {
+
+	I = -I;
+
+	I.normalize();
+	N.normalize();
+
 	double NI = (N | I);
 	double det = 1 - mu * mu * (1 - NI * NI);
 
@@ -48,6 +56,10 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 	Color3d reflectionColor = COLOR_BLACK;
 	Color3d refractionColor = COLOR_BLACK;
 
+	ray = Ray(ray(EPS*10), ray.D());
+
+#define dbg(x) {std::cout << #x << ":" << x << " ";}
+
 	if (vis > MINIMAL_VIS )
 	{
 		const Object* obj = 0;
@@ -62,50 +74,64 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 			if (obj->getReflection() != COLOR_BLACK)
 			{
-				Ray reflected(P, reflect(ray.D(), N));	
-				reflectionColor = obj->getSpecular() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);  //! TODO vis/2?
+				Ray reflected(P, reflect(ray.D(), N));
+
+				for (int s = 0; s < _numberOfRefRays; s++)
+				{
+					reflectionColor += obj->getSpecular() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);
+				}
+				reflectionColor /= _numberOfRefRays;
 			} 			
 
-			
+
 			if (obj->isRefractive() || (originObj && originObj->isRefractive()))
 			{
-				double muOrigin = 1;
-				Vector3d refractiveNormal;
-				if (originObj == obj) // inside object, the outer material is air
-				{
-					muOrigin = originObj->getIndex();
-					refractiveNormal = -N;
-				}
+				double mu = 1.0 / obj->getIndex();
 
-				double muOut = 1;
-				if (obj != originObj) // 
+				Vector3d refractiveNormal = N;
+				if (originObj == obj) // inside object
 				{
-					muOut = obj->getIndex(); //! TODO mu1/mu2
-					refractiveNormal = N;
+					mu = 1.0 / mu;
+					refractiveNormal = -N;				
 				}
-
-				double mu = muOrigin / muOut;
 
 				Ray refracted(P, refract(ray.D(), refractiveNormal, mu));
 
-				//std::cout << (refracted.D() | ray.D()) << std::endl;
-				//Ray refracted(P, ray.D());
-				
-				refractionColor = trace_ray(refracted, vis * RECURSION_FACTOR, obj);
+				for (int s = 0; s < _numberOfRefRays; s++)
+				{
+					refractionColor += trace_ray(refracted, vis * RECURSION_FACTOR, obj);
+				}
+				refractionColor /= _numberOfRefRays;				
 			}
 
-			
+
 
 			Color3d sumLights = obj->getAmbient() * _ambientLight._color;
 
 			for (size_t i = 0; i < _lights.size(); i++)
 			{
-				Vector3d L = (_lights[i]->_position - P).normalize();
 
-				bool isShadow = findNearestObject(Ray(P,L));
+				
+				bool isShadow = true;
 
-				if (isShadow) 
+				Vector3d L;
+
+				for (size_t s = 0; s < _lights[i]->_shadowRays.size(); s++)
+				{
+					L = (_lights[i]->_position + _lights[i]->_shadowRays[s] * _lights[i]->_radius - P).normalize();
+					isShadow = findNearestObject(Ray(P,L));
+
+					if (!isShadow)
+					{
+						break;
+					}
+				}
+
+
+				if (isShadow)
+				{
 					continue;
+				}
 
 
 				if ((L | N) > EPS)
@@ -144,7 +170,11 @@ void Scene::add_light(PointLight* light)
 
 Ray Scene::perturbateRay(const Ray& r) const
 {
-	return Ray(); //TODO
+	Vector3d pert(rand(), rand(), rand());
+	pert.normalize();
+	pert *= sin(M_PI * _cutoffAngle / 180);
+
+	return Ray(r.O(), r.D() + pert);
 }
 
 
@@ -166,44 +196,21 @@ bool Scene::findNearestObject(Ray ray, const Object** object, double& t, Point3d
 	bool retVal = false;
 	double closestT = INF;
 
-	int dbgIntersectCount = 0;
 
 	for (size_t i=0; i < _objects.size(); i++)
 	{
 		const Object* it = _objects[i];
 		Color3d texColor2;
 		int isIntersect = it->intersect(ray, INF, t, P, N, texColor2);
-		if (isIntersect == 1)
+		if (isIntersect == 1 && t < closestT)
 		{
-			dbgIntersectCount++;
-			if (dbgIntersectCount > 1)
-			{
-				dbgIntersectCount++;
-			}
-
-			if (t < closestT)
-			{
 				texColor = texColor2;
 				closestT = t;
 				*object =  _objects[i];
 				retVal = true;
-			}
 		}
 
 	}
 
 	return retVal;
-}
-
-Color3d Scene::calcReflection(const Ray& ray, const Point3d& P,
-							  const Vector3d& N, const Object& object, double vis,
-							  bool isCritical) const
-{
-	return COLOR_BLACK; //TODO
-}
-
-Color3d Scene::calcRefraction(const Ray& ray, const Point3d& P,
-							  const Vector3d& N, const Object& object, double vis) const
-{
-	return COLOR_BLACK; //TODO
 }

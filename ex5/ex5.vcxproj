@@ -18,7 +18,6 @@
     <ClCompile Include="src\object.cpp" />
     <ClCompile Include="src\polygon.cpp" />
     <ClCompile Include="src\scene.cpp" />
-    <ClCompile Include="src\sphere.cpp" />
     <ClCompile Include="src\triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
