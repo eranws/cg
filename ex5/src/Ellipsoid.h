@@ -43,7 +43,7 @@ public:
 
 	Vector3d getCenter() const {return _C;}
 
-private:
+protected:
 
 	Point3d   _C; // The Ellipsoid's center  //
 	double    _r; // The Ellipsoid's underlying sphere radius  //

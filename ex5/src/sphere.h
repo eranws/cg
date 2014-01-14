@@ -33,6 +33,11 @@ public:
 	{	
 	};
 
+	bool isInside(Point3d p) const
+	{
+		return (p-_C).length() < _r;
+	}
+
 };
 
 #endif /* _SPHERE_HH */
