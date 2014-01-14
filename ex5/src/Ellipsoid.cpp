@@ -92,7 +92,7 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 
 		if (_diffuseTexture)
 		{
-			texColor = textureDiffuse(P);
+			texColor = textureDiffuse(N);
 		}
 		else
 		{
@@ -104,6 +104,18 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 	return retVal;
 }
 
-Color3d Ellipsoid::textureDiffuse(const Point3d& P) const {
-	return COLOR_RED; //TODO (phi theta)
+Color3d Ellipsoid::textureDiffuse(const Point3d& P) const
+{
+        float theta = atan(P[X] / P[Z]);
+        float phi   = atan(P[Y] / Point2d(P[X],P[Z]).length());
+
+        float u = (theta + M_PI) / (2 * M_PI);
+        float v = (phi + M_PI/2)  / M_PI;
+
+		u *= _diffuseTexture->width();
+		v *= _diffuseTexture->height();
+
+		Bpixel pix = (*_diffuseTexture)(u, v);
+		return Color3d(pix.r, pix.g, pix.b) * COLOR_NORMALIZE;		
+
 }

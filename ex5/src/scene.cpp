@@ -136,7 +136,7 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				if ((L | N) > EPS)
 				{
-					Color3d diffuse = obj->getDiffuse() * _lights[i]->_color * (L | N);					
+					Color3d diffuse = texColor * _lights[i]->_color * (L | N);					
 					sumLights += diffuse;
 				}
 				Vector3d R = reflect(L, N);
