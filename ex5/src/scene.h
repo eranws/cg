@@ -91,7 +91,7 @@ public:
 
 private:
 	// find the nearest object intersecting with the given ray
-	bool findNearestObject(IN Ray ray) const;
+	bool findNearestObject(Ray ray, const Object* object, double maxT) const;
 
 	bool findNearestObject(IN Ray ray, const OUT Object** object, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) const;
 

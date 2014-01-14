@@ -118,8 +118,12 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (size_t s = 0; s < _lights[i]->_shadowRays.size(); s++)
 				{
-					L = (_lights[i]->_position + _lights[i]->_shadowRays[s] * _lights[i]->_radius - P).normalize();
-					isShadow = findNearestObject(Ray(P,L));
+					Vector3d lightPos = _lights[i]->_position + _lights[i]->_shadowRays[s] * _lights[i]->_radius ;
+					L = (lightPos - P);
+					double maxT = L.length();
+					L.normalize();
+					
+					isShadow = findNearestObject(Ray(lightPos, -L), obj, maxT);
 
 					if (!isShadow)
 					{
@@ -176,15 +180,25 @@ Ray Scene::perturbateRay(const Ray& r) const
 }
 
 
-bool Scene::findNearestObject(Ray ray) const
+bool Scene::findNearestObject(Ray ray, const Object* object, double maxT) const
 {
-	const Object* obj = 0;
-	double t;
-	Point3d P;
-	Vector3d N;
-	Color3d texColor;
+	for (size_t i=0; i < _objects.size(); i++)
+	{
+		const Object* it = _objects[i];
+		double t;
+		Point3d P;			//unused
+		Vector3d N;			//unused
+		Color3d texColor;	//unused
 
-	return findNearestObject(ray, &obj, t, P, N, texColor);
+		int isIntersect = it->intersect(ray, INF, t, P, N, texColor);
+		if (isIntersect == 1 && t > EPS && t < maxT - EPS)
+		{
+			return true;
+		}
+	}
+
+	return false;
+
 }
 
 
@@ -194,15 +208,12 @@ bool Scene::findNearestObject(Ray ray, const Object** object, double& t, Point3d
 	bool retVal = false;
 	double closestT = INF;
 
-
 	for (size_t i=0; i < _objects.size(); i++)
 	{
 		const Object* it = _objects[i];
-		Color3d texColor2;
-		int isIntersect = it->intersect(ray, closestT, t, P, N, texColor2);
+		int isIntersect = it->intersect(ray, closestT, t, P, N, texColor);
 		if (isIntersect == 1 && t < closestT)
 		{
-				texColor = texColor2;
 				closestT = t;
 				*object =  _objects[i];
 				retVal = true;
