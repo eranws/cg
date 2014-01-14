@@ -8,22 +8,27 @@
 
 #include "triangle.h"
 
-Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2) : _p0(p0), _p1(p1) ,_p2(p2)
+void Triangle::init()
 {
-	Vector3d _u = (p1 - p0);  // a vector from p0 to p1         //
-	Vector3d _v = (p2 - p0);  // a vector from p0 to p2         //
+	Vector3d _u = (_p1 - _p0);  // a vector from p0 to p1         //
+	Vector3d _v = (_p2 - _p0);  // a vector from p0 to p2         //
 
 	_n = (_u % _v).normalize();
 	_area = (_u % _v).norm();
 }
 
-Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2, Point2d t0, Point2d t1,	Point2d t2)
+Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2) : _p0(p0), _p1(p1) ,_p2(p2)
 {
-	//TODO
+	_textured = false;
+	init();
 }
 
-Triangle::~Triangle() {
+Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2, Point2d t0, Point2d t1,	Point2d t2) : _p0(p0), _p1(p1) ,_p2(p2), _t0(t0), _tu(t1) ,_tv(t2)
+{
+	_textured = true;
+	init();
 }
+
 
 bool Triangle::isInside(const Point3d& P, Point2d& texCoord) const
 {
@@ -40,7 +45,3 @@ Plane Triangle::getPlane()
 {
 	return Plane(_p0, _n);
 }
-
-
-
-

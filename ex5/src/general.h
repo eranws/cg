@@ -55,7 +55,7 @@ static const Color3d COLOR_RED              = Color3d(1.0,0.0,0.0); // Red color
 static const Color3d COLOR_GREEN            = Color3d(0.0,1.0,0.0); // Green color                  //
 static const Color3d COLOR_BLUE             = Color3d(0.0,0.0,1.0); // Blue color                   //
 
-static const Color3d COLOR_DEFAULT = COLOR_RED;
+static const Color3d COLOR_DEFAULT = COLOR_BLACK;
 
 
 

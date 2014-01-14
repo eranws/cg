@@ -35,13 +35,6 @@ using namespace std;
 class Polygon : public Object 
 {
 public:
-
-  // Constructor - create a default polygon //
-  Polygon();
-
-  // Destructor - get rid of a polygon  //
-  virtual ~Polygon();
-
   // Constructor - Create a polygon from the given vertices //
   Polygon(vector<Point3d> & vertices);
 
@@ -57,7 +50,7 @@ public:
   // Ray intersection with the convex polygon //
   virtual int intersect(IN Ray& ray, IN double tMax, OUT double& t, OUT Point3d& P, OUT Vector3d& N, OUT Color3d& texColor) const;
 
-   Color3d textureDiffuse(const Point3d& P) const;
+   Color3d textureDiffuse(const Point3d& P, const Point2d& tex, int triIndex) const;
 
 private:
   // triangulate - split the polygon to triangles (saved on the _triangles memeber) //
@@ -70,6 +63,7 @@ private:
   vector<Point3d>   _vertices;  // The polygon's vertices                           //
   vector<Triangle*> _triangles; // The polygon's triangles                          //
   Vector3d          _normal;    // The polygon's normal                             //
+  bool _externalNormal;
 
 } ;
 
