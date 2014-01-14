@@ -79,6 +79,10 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
         t = t1;
     }
 
+	if (t > tMax)
+	{
+		retVal = 0;
+	}
 
 	if (retVal == 1)
 	{

@@ -151,11 +151,9 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 			retColor += reflectionColor * obj->getReflection() * (COLOR_WHITE - obj->getTransparency());
 			retColor += refractionColor * obj->getTransparency();
-
-
 		}
 	}
-
+	
 	return retColor;
 }
 void Scene::add_object(Object* obj)
@@ -201,7 +199,7 @@ bool Scene::findNearestObject(Ray ray, const Object** object, double& t, Point3d
 	{
 		const Object* it = _objects[i];
 		Color3d texColor2;
-		int isIntersect = it->intersect(ray, INF, t, P, N, texColor2);
+		int isIntersect = it->intersect(ray, closestT, t, P, N, texColor2);
 		if (isIntersect == 1 && t < closestT)
 		{
 				texColor = texColor2;

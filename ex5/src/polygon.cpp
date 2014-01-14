@@ -44,9 +44,7 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 		{
 			t = ((p.O() | p.D()) - (p.D() | ray.O())) / (c);
 
-			//if (t > tMax) //TODO!!!
-
-			if (t > 0)
+			if (t > 0 && t < tMax)
 			{
 
 				Point2d texCoords;
