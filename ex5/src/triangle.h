@@ -27,38 +27,39 @@
 class Triangle 
 {
 public:
-  // Constructor - create a triangle from the given points  //
-  Triangle(Point3d p0, Point3d p1, Point3d p2);
-  Triangle(Point3d p0, Point3d p1, Point3d p2, Point2d t0, Point2d t1, Point2d t2);
+	// Constructor - create a triangle from the given points  //
+	Triangle(Point3d p0, Point3d p1, Point3d p2);
+	Triangle(Point3d p0, Point3d p1, Point3d p2, Point2d t0, Point2d t1, Point2d t2);
 
 
 
-  // Destructor - get rid of a triangle //
-  ~Triangle();
+	// Destructor - get rid of a triangle //
+	~Triangle();
 
-  // isInside - return true if the given point is inside the triangle //
-  bool isInside(IN const Point3d& p, OUT Point2d& texCoord) const;
+	// isInside - return true if the given point is inside the triangle //
+	bool isInside(IN const Point3d& p, OUT Point2d& texCoord) const;
 
-  Plane getPlane();
+	Plane getPlane();
 
 private:
-  Point3d _p0;  // One of the triangle vertices   //
-  Vector3d _u;  // a vector from p0 to p1         //
-  Vector3d _v;  // a vector from p0 to p2         //
-  Vector3d _n;  // the triangle normal Plane //
+	Point3d _p0;  // One of the triangle vertices   //
+	Point3d _p1;  // One of the triangle vertices   //
+	Point3d _p2;  // One of the triangle vertices   //
 
+	Vector3d _n;  // the triangle normal Plane //
+	double _area;
 
-  Point2d _t0;  // The texture map coordiate of p0  //
-  Point2d _tu;  // The texture map coordinate of p1 //
-  Point2d _tv;  // The texture map coordinate of p2 //
+	Point2d _t0;  // The texture map coordiate of p0  //
+	Point2d _tu;  // The texture map coordinate of p1 //
+	Point2d _tv;  // The texture map coordinate of p2 //
 
-  bool  _textured;
+	bool  _textured;
 
-  // Used for checking if a point is inside the triangle  //
-  double _uu;
-  double _uv;
-  double _vv;
-  double _d;
+	// Used for checking if a point is inside the triangle  //
+	double _uu;
+	double _uv;
+	double _vv;
+	double _d;
 };
 
 #endif /* _TRIANGLE_HH */
