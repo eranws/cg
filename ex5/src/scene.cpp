@@ -78,9 +78,10 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (int s = 0; s < _numberOfRefRays; s++)
 				{
-					reflectionColor += obj->getSpecular() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);
+					reflectionColor += obj->getReflection() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);
 				}
 				reflectionColor /= _numberOfRefRays;
+
 			} 			
 
 
@@ -99,7 +100,7 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (int s = 0; s < _numberOfRefRays; s++)
 				{
-					refractionColor += trace_ray(refracted, vis * RECURSION_FACTOR, obj);
+					refractionColor += obj->getTransparency() * trace_ray(refracted, vis * RECURSION_FACTOR, obj);
 				}
 				refractionColor /= _numberOfRefRays;				
 			}
@@ -151,10 +152,10 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 			}
 
 			retColor = sumLights / (_lights.size() + 1); //avoid overflow, TODO weight light by distance, +1 for ambient
-			retColor *= (COLOR_WHITE - obj->getTransparency()) * (COLOR_WHITE - obj->getReflection());
+			retColor *= (COLOR_WHITE - obj->getTransparency() - obj->getReflection());
 
-			retColor += reflectionColor * obj->getReflection() * (COLOR_WHITE - obj->getTransparency());
-			retColor += refractionColor * obj->getTransparency();
+			retColor += reflectionColor;// * (COLOR_WHITE - obj->getTransparency());
+			retColor += refractionColor;
 		}
 	}
 	
