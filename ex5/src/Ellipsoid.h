@@ -31,7 +31,7 @@ public:
 	// Constructor - create a Ellipsoid with the given parameters  //
 	Ellipsoid(Point3d C = POINT_ORIGIN, double r = 1, Vector3d _scale = Vector3d(1,1,1));
 
-	// Destructor - delete a Ellipsoid  //
+	// Destructor - delete an Ellipsoid  //
 	virtual ~Ellipsoid();
 
 	// Ray Ellipsoid intersection //
@@ -39,7 +39,7 @@ public:
 
 	Color3d textureDiffuse(const Point3d& P) const;
 
-	bool getRoots(const Ray& ray, double* t0, double* t1) const;
+	bool getRoots(const Ray& ray, double* t0 = NULL, double* t1 = NULL) const;
 
 	Vector3d getCenter() const {return _C;}
 

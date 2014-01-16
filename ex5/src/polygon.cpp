@@ -63,7 +63,7 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 		}
 
 		if (retVal == 1)
-			break; // no need to check more polygons
+			break; // no need to check more triangles in polygon
 
 	}
 
@@ -86,6 +86,11 @@ void Polygon::triangulate()
 		else
 		{
 			t = new Triangle(p0, _vertices[i-1], _vertices[i]);
+		}
+
+		if (_externalNormal)
+		{
+			t->setNormal(-_normal);
 		}
 
 		_triangles.push_back(t);
