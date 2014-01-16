@@ -36,7 +36,7 @@ struct Scene3 : public Scene
 		Scene & scene = *this;
 #if !WITHOUT_TEXTURES
 		BImage * b = new BImage("textures/checkerboard_lg.bmp");
-		BImage * w = new BImage("textures/mesh_uv.bmp");
+		BImage * w = new BImage("textures/warning.bmp");
 #endif
 		
 		/* define some colors */
