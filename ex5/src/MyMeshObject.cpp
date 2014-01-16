@@ -16,65 +16,84 @@ MyMeshObject::~MyMeshObject()
 }
 
 int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
-		Vector3d& N, Color3d& texColor) const
+							Vector3d& N, Color3d& texColor) const
 {
-	int intersectBoundingSphere = _boundingSphere->intersect(ray, tMax, t, P, N, texColor);
-	if (intersectBoundingSphere == 0)
+	bool intersectBoundingSphere = _boundingSphere->getRoots(ray);
+	if (!intersectBoundingSphere)
 	{
-		//return 0;
+		return 0;
 	}
 
 	int retVal = 0;
-	double closestT = INF;
 	for (size_t i = 0; i < _polygons.size(); i++)
 	{
-		Color3d texColor2;
-		int intersectPolygon = _polygons[i].intersect(ray, tMax, t, P, N, texColor2);
-	
+		int intersectPolygon = _polygons[i].intersect(ray, tMax, t, P, N, texColor);
 		if (intersectPolygon == 1)
 		{
-		//TODO: optimize OOP stuff with scene
-		if (t < closestT)
-		{
-			texColor = texColor2;
-			closestT = t;
-			
+			tMax = t;
 			retVal = 1;
-		}
 		}
 	}
 
 	return retVal;
-
-
-
-
 }
 
 
 void MyMeshObject::populatePolygons()
 {
-		//_mesh.request_face_normals();
-        //_mesh.update_normals();
+	_mesh.request_face_normals();
+	_mesh.update_normals();
 
+	_mesh.request_vertex_texcoords2D();
+	bool textured = _mesh.has_vertex_texcoords2D();
 
-        for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
-        {
-			vector<Point3d> vertices;
-                // circulate around the current face
-                for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
-                {
-                        MyMesh::Point p = _mesh.point(fv_it.handle());
-						vertices.push_back(p);
+	bool hasNormal =_mesh.has_face_normals();
 
-                        //MyMesh::Normal n = _mesh.normal(h_it);
-                        //glm::vec4 normal(n[0], n[1], n[2], 1.0);
-                        
+	for (MyMesh::FaceIter h_it=_mesh.faces_begin(); h_it!=_mesh.faces_end(); ++h_it)
+	{
+		vector<Point3d> vertices;
+		vector<Point2d> textices;
+		// circulate around the current face
+		for (MyMesh::FaceVertexIter fv_it = _mesh.fv_iter(h_it); fv_it; ++fv_it)
+		{
+			MyMesh::Point p = _mesh.point(fv_it.handle());
+			vertices.push_back(p);
 
-                }
+			if (textured)
+			{
+				MyMesh::TexCoord2D uv = _mesh.texcoord2D(fv_it);// vhandle is a VertexHandle
+				textices.push_back(uv);
+			}
+		}
+
+		if (textured)
+		{
+			if (hasNormal)
+			{
+				Vector3d n = _mesh.normal(h_it);
+				_polygons.push_back(Polygon(vertices, textices, n));
+			}
+			else
+			{
+				_polygons.push_back(Polygon(vertices, textices));
+			}
+		}
+		else
+		{
+			if (hasNormal)
+			{
+				Vector3d n = _mesh.normal(h_it);
+				_polygons.push_back(Polygon(vertices, n));
+			}
+			else
+			{
 				_polygons.push_back(Polygon(vertices));
-        }
-        //_mesh.release_face_normals();
+			}
+		}
+
+		_polygons.back().setParent(this);
+	}
+	_mesh.release_face_normals();
 }
 
 void MyMeshObject::calculateBoundingSphere()
@@ -82,22 +101,29 @@ void MyMeshObject::calculateBoundingSphere()
 	Point3d center = Point3d(0, 0, 0);
 	double radius = 0.0;
 
-    MyMesh::VertexIter vertexIter;
-	
+	MyMesh::VertexIter vertexIter;
+
 	int vNum = _mesh.n_vertices();
-    for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter)
+	for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter)
 	{
 		center += _mesh.point(vertexIter);
 	}
-    center /= (double)vNum;
+	center /= (double)vNum;
 
 	for (vertexIter = _mesh.vertices_begin(); vertexIter != _mesh.vertices_end(); ++vertexIter)
 	{
 		Point3d p = center - _mesh.point(vertexIter);
-		if (p.sqrnorm() > radius) radius = p.sqrnorm();
+		radius = std::max(radius, p.length());
 	}
-	radius = sqrt(radius);
+	_boundingSphere = new Sphere(center, radius + EPS);
 
-	_boundingSphere = new Sphere(center, radius);
+}
 
+void MyMeshObject::set_texture_map(BImage* image)
+{
+	_diffuseTexture = image;
+	for (int i=0; i<_polygons.size(); i++)
+	{
+		_polygons[i].set_texture_map(image);
+	}
 }

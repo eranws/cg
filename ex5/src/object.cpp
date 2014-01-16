@@ -12,7 +12,8 @@ Object::Object() :
 	_transparency(COLOR_DEFAULT),
 	_shining(0.0),
 	_index(1.0),
-	_diffuseTexture(NULL)
+	_diffuseTexture(NULL),
+	_parent(NULL)
 {
 }
 
@@ -58,40 +59,51 @@ double& Object::shining()
 
 const Color3d& Object::getDiffuse() const
 {
-	return _diffuse;
+
+	return _parent ? _parent->getDiffuse() : _diffuse;
 }
 
 const Color3d& Object::getSpecular() const
 {
-	return _specular;
+	return _parent ? _parent->getSpecular() : _specular;
 }
 
 const Color3d& Object::getAmbient() const
 {
-	return _ambient;
+	return _parent ? _parent->getAmbient() :_ambient;
 }
 
 const Color3d& Object::getReflection() const
 {
-	return _reflection;
+	return _parent ? _parent->getReflection() : _reflection;
 }
 
 const Color3d& Object::getTransparency() const
 {
-	return _transparency;
+	return _parent ? _parent->getTransparency() : _transparency;
 }
 
 const double Object::getIndex() const
 {
-	return _index;
+	return _parent ? _parent->getIndex() : _index;
 }
 
 const double Object::getShining() const
 {
-	return _shining;
+	return _parent ? _parent->getShining() : _shining;
 }
 
+const BImage* Object::getDiffuseTexture() const
+{
+	return _parent ? _parent->getDiffuseTexture() : _diffuseTexture;
+}
 
+bool Object::hasTexture() const
+{
+	return  _parent ? _parent->hasTexture() : _diffuseTexture != NULL;
+}
 
-
-
+bool Object::isRefractive() const
+{
+	return _parent ? _parent->isRefractive() : _index > 1.0;
+}
