@@ -51,7 +51,9 @@ HDRS	=  	camera.h        \
             triangle.h      \
             Lens.h          \
             Ellipsoid.h     \
-            bimage.h        
+            bimage.h        \
+            Scene4.h        \
+            Scene5.h
 
 # list EXTRAS (shaders, etc.)
 EXTRAS =	textures/checkerboard_lg.bmp    \
@@ -148,6 +150,14 @@ scene1: $(APP)
 scene2: $(APP)
 	$(APP) 1 3 1 1
 
+scene3: $(APP)
+	$(APP) 1 1 1 2
+
+scene4: $(APP)
+	$(APP) 1 1 1 3
+
+scene5: $(APP)
+	$(APP) 1 1 1 4
  
 .PHONY:
 clean :

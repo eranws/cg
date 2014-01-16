@@ -1,24 +1,25 @@
+
+
 //
-//  Scene2.h
+//  Scene5.h
 //  cg-projects
 //
-//  Created by HUJI Computer Graphics course staff, 2012-2013.
 //
 
-#ifndef cg_projects_Scene2_h
-#define cg_projects_Scene2_h
+#ifndef cg_projects_Scene5_h
+#define cg_projects_Scene5_h
 #include "Lens.h"
 
-struct Scene2 : public Scene
+struct Scene5 : public Scene
 {
-	
-	Scene2()
+
+	Scene5()
 	: Scene()
 	{
 		defineGeometry();
 		defineLights();
 	}
-	
+
 	void defineLights()
 	{
 		Scene & scene = *this;
@@ -26,15 +27,15 @@ struct Scene2 : public Scene
 		Color3d color(1,1,1);
 		PointLight  * p = new PointLight(pos,color, 10);
 		scene.add_light(p);
-		
+
 		Point3d pos1(10,20,30);
 		Color3d color1(1,1,1);
 		PointLight  * p1 = new PointLight(pos1,color1);
 		scene.add_light(p1);
-		
-		
+
+
 	}
-	
+
 	void defineGeometry()
 	{
 		Scene & scene = *this;
@@ -48,7 +49,7 @@ struct Scene2 : public Scene
 		Color3d red(1,0,0.0);
 		Color3d green(0,1.0,0.0);
 		Color3d blue(0,0,1.0);
-		
+
 		scene.backgroundColor() = (blue +  white) * 0.5;
 		Point3d center(10,0,-2);
 		double radius = 4;
@@ -61,7 +62,7 @@ struct Scene2 : public Scene
 		sp->set_texture_map(b);
 #endif
 		scene.add_object(sp);
-		
+
 		Point3d center1(0,0,-10);
 		double radius1 = 4;
 		Sphere * sp1 = new Sphere(center1,radius1);
@@ -73,7 +74,7 @@ struct Scene2 : public Scene
 #if !WITHOUT_TEXTURES
 		sp1->set_texture_map(w);
 #endif
-		
+
 		Point3d center2(-10,0,-2);
 		double radius2 = 4;
 		Sphere * sp2 = new Sphere(center2,radius2);
@@ -84,11 +85,11 @@ struct Scene2 : public Scene
 		sp2->specular() = white;
 		sp2->shining() = 16;
 		scene.add_object(sp2);
-		
-		
+
+
 		Point3d center3(0,0,10);
 		double radius3 = 4;
-		Sphere * sp3 = new Sphere(center3,radius3);
+		Lens * sp3 = new Lens(center3,radius3);
 		sp3->diffuse() = white * 0.1;
 		sp3->transparency() = white * 0.9;
 		sp3->specular() = white;
@@ -97,11 +98,11 @@ struct Scene2 : public Scene
 		scene.add_object(sp3);
 
 
-		
-		
+
+
 		//create a plane
-		vector<Point3d> plane(4);
-		vector<Point2d> plane_uv(4);
+		std::vector<Point3d> plane(4);
+		std::vector<Point2d> plane_uv(4);
 		double x = 100;
 		double z = -4;
 		plane[0] = Point3d(-x,z,-x);
@@ -119,9 +120,9 @@ struct Scene2 : public Scene
 		poly->set_texture_map(b);
 #endif
 		scene.add_object(poly);
-		
+
 	}
-	
+
 	virtual void setDefaultCamera(Camera& camera) const
 	{
 		Point3d pos(-1,6,25);
@@ -134,8 +135,8 @@ struct Scene2 : public Scene
 		//		Vector3d up(0,1,0) ;
 		camera = Camera(pos,coi,up,fov_h);
 	}
-	
-	virtual ~Scene2() {
+
+	virtual ~Scene5() {
 
 	}
 

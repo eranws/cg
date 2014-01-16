@@ -10,13 +10,13 @@
 
 #define WITHOUT_TEXTURES 0
 
-// TODO: Change to add more scenes
-#define MAX_SCENE_INDEX 2
+#define MAX_SCENE_INDEX 4
 
 #include "Scene1.h"
 #include "Scene2.h"
 #include "Scene3.h"
-// TODO: Include additional scenes here
+#include "Scene4.h"
+#include "Scene5.h"
 
 /** Create a new scene according to the scene index and parameters. */
 void setupScene(Scene** scene, size_t scene_index, size_t refRays, double cutoff)
@@ -34,7 +34,14 @@ void setupScene(Scene** scene, size_t scene_index, size_t refRays, double cutoff
 	{
 		res = new Scene3();
 	}
-	// TODO: Add additional scenes here
+	else if (scene_index == 3)
+	{
+		res = new Scene4();
+	}
+	else if (scene_index == 4)
+	{
+		res = new Scene5();
+	}
 	else
 	{
 		res = NULL;
