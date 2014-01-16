@@ -94,13 +94,10 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 		N = (P - _C) * _scaleInv;
 		N.normalize();
 
+		texColor = _diffuse;
 		if (_diffuseTexture)
 		{
-			texColor = textureDiffuse(N);
-		}
-		else
-		{
-			texColor = getDiffuse();
+			texColor *= textureDiffuse(N);
 		}
 
 	}

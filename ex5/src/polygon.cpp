@@ -53,14 +53,10 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 				{
 					retVal = 1;
 					N = p.D();
-
+					texColor = _diffuse;
 					if (_diffuseTexture)
 					{
-						texColor = textureDiffuse(P, texCoords, i);
-					}
-					else
-					{
-						texColor = getDiffuse();
+						texColor *= textureDiffuse(P, texCoords, i);
 					}
 				}
 			}

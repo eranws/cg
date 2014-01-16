@@ -70,6 +70,9 @@ public:
   const double    getIndex()        const;
   const double    getShining()      const;
 
+
+
+  const bool hasTexture() const {return _diffuseTexture != NULL;}
   const bool isRefractive() const {return _index > 1.0;}
 
 protected:

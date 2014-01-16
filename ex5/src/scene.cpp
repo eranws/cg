@@ -68,7 +68,11 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 		Vector3d N;
 		Color3d texColor;
 
+
+
+
 		bool isFound = findNearestObject(ray, &obj, t, P, N, texColor);
+
 		if (isFound)
 		{
 
@@ -150,13 +154,13 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				if ((L | N) > EPS)
 				{
-					Color3d diffuse = texColor * _lights[i]->_color * (L | N);					
+					Color3d diffuse = texColor * _lights[i]->_color * (L | N);
 					sumLights += diffuse;
+					Vector3d R = reflect(L, N);
+					Color3d specular = obj->getSpecular() * _lights[i]->_color * pow(std::max(ray.D() | R, EPS), obj->getShining());
+					sumLights += specular;
 				}
-				Vector3d R = reflect(L, N);
-				Color3d specular = obj->getSpecular() * _lights[i]->_color * pow(std::max(ray.D() | R, EPS), obj->getShining());
 
-				sumLights += specular;
 
 			}
 
