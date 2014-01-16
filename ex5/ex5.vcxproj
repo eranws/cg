@@ -40,6 +40,8 @@
     <ClInclude Include="src\Scene1.h" />
     <ClInclude Include="src\Scene2.h" />
     <ClInclude Include="src\Scene3.h" />
+    <ClInclude Include="src\Scene4.h" />
+    <ClInclude Include="src\Scene5.h" />
     <ClInclude Include="src\SceneChooser.h" />
     <ClInclude Include="src\sphere.h" />
     <ClInclude Include="src\triangle.h" />

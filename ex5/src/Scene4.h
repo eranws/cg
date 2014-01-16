@@ -23,14 +23,18 @@ struct Scene4 : public Scene
 	void defineLights()
 	{
 		Scene & scene = *this;
-		Point3d pos(10,100,10);
+		Point3d pos(-4,15,-1);
 		Color3d color(1,1,1);
-		PointLight  * p = new PointLight(pos,color, 1);
+		PointLight  * p = new PointLight(pos,color, 5);
 		scene.add_light(p);
-		
-		Point3d pos1(10,20,-10);
+
+		Point3d pos2(1,4,-1);
+		PointLight  * p2 = new PointLight(pos,color, 1);
+		scene.add_light(p2);
+
+		Point3d pos1(-1,13,0);
 		Color3d color1(1,1,1);
-		PointLight  * p1 = new PointLight(pos1,color1);
+		PointLight  * p1 = new PointLight(pos1,color1, 7);
 		scene.add_light(p1);
 	}
 	
@@ -50,15 +54,15 @@ struct Scene4 : public Scene
 		Color3d blue(0,0,1.0);
 		
 		
-		Point3d center(0.37,0.5,1);
-		double radius = 2;
-		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(1.0, 0.5, 0.25));
+		Point3d center(1,2,-1);
+		double radius = 0.5;
+		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(0.5, 1, 0.5));
 		sp->diffuse() = white;
 		sp->reflection() = black;
 		sp->specular() = white;
 		sp->shining() = 16;
 #if !WITHOUT_TEXTURES
-		sp->set_texture_map(b);
+		sp->set_texture_map(w);
 #endif
 		scene.add_object(sp);
 
@@ -107,8 +111,8 @@ struct Scene4 : public Scene
 		std::vector<Point3d> plane2(4);
 		plane2[0] = Point3d(-0.25,0.5,0);
 		plane2[1] = Point3d(-0.25,0.55,0);
-		plane2[2] = Point3d(-0.25,0.55,2);
-		plane2[3] = Point3d(-0.25,0.5,2);
+		plane2[2] = Point3d(-0.25,0.3,2);
+		plane2[3] = Point3d(-0.25,0.25,2);
 		Polygon * poly2 = new Polygon(plane2);
 		poly2->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
 		poly2->reflection() = (green + red) * 0.8 + white * 0.5;
@@ -118,55 +122,42 @@ struct Scene4 : public Scene
 		std::vector<Point3d> plane3(4);
 		plane3[0] = Point3d(1,0.5,0);
 		plane3[1] = Point3d(1,0.55,0);
-		plane3[2] = Point3d(1.5,0.55,2);
-		plane3[3] = Point3d(1.5,0.5,2);
+		plane3[2] = Point3d(1.5,0.3,2);
+		plane3[3] = Point3d(1.5,0.25,2);
 		Polygon * poly3 = new Polygon(plane3);
 		poly3->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
 		poly3->reflection() = (green + red) * 0.8 + white * 0.5;
 		scene.add_object(poly3);
-
-
-
-
-
-		MyMesh mesh;
-		mesh.request_vertex_texcoords2D();
-		if ( ! OpenMesh::IO::read_mesh(mesh, "meshes/girl_face.obj"))
-		{
-			fprintf(stderr, "Error: cannot read mesh from file\n");
-			exit(-1);
-		}
-		MyMeshObject * mo = new MyMeshObject(mesh);
-		mo->diffuse() = white;
-		mo->reflection() = black;
-		//  mo->transparency() = white * 0.5;
-		mo->specular() = black;
-		mo->shining() = 0;
-		mo->index() = 1.0;
-#if !WITHOUT_TEXTURES
-		mo->set_texture_map(w);
-#endif
-//		scene.add_object(mo);
-		
+	
 		//create a plane
 		std::vector<Point3d> plane(4);
-		double x = 100;
+		double x = -5;
+		double y = 0.22;
 		double z = -4;
-		plane[0] = Point3d(-x,z,-x);
-		plane[1] = Point3d(-x,z,x);
-		plane[2] = Point3d(x,z,x);
-		plane[3] = Point3d(x,z,-x);
+		plane[0] = Point3d(-x,y,-z);
+		plane[1] = Point3d(-x,y,z);
+		plane[2] = Point3d(x,y,z);
+		plane[3] = Point3d(x,y,-z);
 		Polygon * poly = new Polygon(plane);
-		poly->diffuse() = ((blue + red) * 0.5 + white * 0.5) * 0.2;
-		poly->reflection() = (blue + red) * 0.5 + white * 0.5;
+		//poly->diffuse() = red * 0.5 + white * 0.5;
+//		poly->reflection() = (blue + red) * 0.5 + white * 0.5;
+		poly->ambient() = red;
+//		poly->specular()  = white;
+		poly->diffuse() = white/2 + red/2;
+		poly->reflection() = white/16;
+		poly->specular() = white/4;
+		poly->shining() = 2;
+
+		poly->set_texture_map(w);
+
 		scene.add_object(poly);
 	}
 	
 	virtual void setDefaultCamera(Camera& camera) const
 	{
-		Point3d pos(1,3,-4);
-		double fov_h = 20 / 180.0 * M_PI;
-		Point3d coi(0,0,-0);
+		Point3d pos(1,2,-4);
+		double fov_h = 30 / 180.0 * M_PI;
+		Point3d coi(0,0, 0);
 		Vector3d up(0,1,0) ;
 		camera = Camera(pos,coi,up,fov_h);
 	}
