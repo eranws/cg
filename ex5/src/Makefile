@@ -158,6 +158,9 @@ scene4: $(APP)
 
 scene5: $(APP)
 	$(APP) 1 1 1 4
+
+scenes: $(APP)
+	$(APP) 1 1 1
  
 .PHONY:
 clean :

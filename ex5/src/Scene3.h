@@ -22,7 +22,7 @@ struct Scene3 : public Scene
 		Scene & scene = *this;
 		Point3d pos(10,100,10);
 		Color3d color(1,1,1);
-		PointLight  * p = new PointLight(pos,color, 1);
+		PointLight  * p = new PointLight(pos,color, 2);
 		scene.add_light(p);
 		
 		Point3d pos1(10,20,-10);

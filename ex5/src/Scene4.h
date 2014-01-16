@@ -50,8 +50,8 @@ struct Scene4 : public Scene
 		Color3d blue(0,0,1.0);
 		
 		
-		Point3d center(0.25,-0.2,3);
-		double radius = 0.5;
+		Point3d center(0.37,0.5,1);
+		double radius = 2;
 		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(1.0, 0.5, 0.25));
 		sp->diffuse() = white;
 		sp->reflection() = black;
@@ -68,7 +68,7 @@ struct Scene4 : public Scene
 		//Make a pair of glasses!!
 
 		//lens1
-		Point3d centerLens1(0, 0, 0);
+		Point3d centerLens1(0, 0.5, 0);
 		double radiusLens1 = 0.25;
 		Lens * lens1 = new Lens(centerLens1, radiusLens1, radiusLens1 / 4);
 		lens1->diffuse() = blue;
@@ -80,7 +80,7 @@ struct Scene4 : public Scene
 		scene.add_object(lens1);
 
 		//lens2
-		Point3d centerLens2(0.75, 0, 0);
+		Point3d centerLens2(0.75, 0.5, 0);
 		double radiusLens2 = 0.25;
 		Lens * lens2 = new Lens(centerLens2, radiusLens2, radiusLens1 / 4);
 		lens2->diffuse() = blue;
@@ -94,35 +94,35 @@ struct Scene4 : public Scene
 
 		//Connecting plane
 		std::vector<Point3d> plane1(4);
-		plane1[0] = Point3d(0.25,0,0);
-		plane1[1] = Point3d(0.25,0.05,0);
-		plane1[2] = Point3d(0.52,0.05,0);
-		plane1[3] = Point3d(0.52,0,0);
+		plane1[0] = Point3d(0.25,0.5,0);
+		plane1[1] = Point3d(0.25,0.55,0);
+		plane1[2] = Point3d(0.52,0.55,0);
+		plane1[3] = Point3d(0.52,0.5,0);
 		Polygon * poly1 = new Polygon(plane1);
-		poly1->diffuse() = ((green + red) * 0.5 + white * 0.5) * 0.2;
-		poly1->reflection() = (green + red) * 0.5 + white * 0.5;
+		poly1->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
+		poly1->reflection() = (green + red) * 0.8 + white * 0.5;
 		scene.add_object(poly1);
 
 		//arm 1
 		std::vector<Point3d> plane2(4);
-		plane2[0] = Point3d(-0.25,0,0);
-		plane2[1] = Point3d(-0.25,0.05,0);
-		plane2[2] = Point3d(-0.25,0.05,2);
-		plane2[3] = Point3d(-0.25,0,2);
+		plane2[0] = Point3d(-0.25,0.5,0);
+		plane2[1] = Point3d(-0.25,0.55,0);
+		plane2[2] = Point3d(-0.25,0.55,2);
+		plane2[3] = Point3d(-0.25,0.5,2);
 		Polygon * poly2 = new Polygon(plane2);
-		poly2->diffuse() = ((green + red) * 0.5 + white * 0.5) * 0.2;
-		poly2->reflection() = (green + red) * 0.5 + white * 0.5;
+		poly2->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
+		poly2->reflection() = (green + red) * 0.8 + white * 0.5;
 		scene.add_object(poly2);
 
 		//arm 2
 		std::vector<Point3d> plane3(4);
-		plane3[0] = Point3d(1,0,0);
-		plane3[1] = Point3d(1,0.05,0);
-		plane3[2] = Point3d(1.5,0.05,2);
-		plane3[3] = Point3d(1.5,0,2);
+		plane3[0] = Point3d(1,0.5,0);
+		plane3[1] = Point3d(1,0.55,0);
+		plane3[2] = Point3d(1.5,0.55,2);
+		plane3[3] = Point3d(1.5,0.5,2);
 		Polygon * poly3 = new Polygon(plane3);
-		poly3->diffuse() = ((green + red) * 0.5 + white * 0.5) * 0.2;
-		poly3->reflection() = (green + red) * 0.5 + white * 0.5;
+		poly3->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
+		poly3->reflection() = (green + red) * 0.8 + white * 0.5;
 		scene.add_object(poly3);
 
 
@@ -159,13 +159,13 @@ struct Scene4 : public Scene
 		Polygon * poly = new Polygon(plane);
 		poly->diffuse() = ((blue + red) * 0.5 + white * 0.5) * 0.2;
 		poly->reflection() = (blue + red) * 0.5 + white * 0.5;
-//		scene.add_object(poly);
+		scene.add_object(poly);
 	}
 	
 	virtual void setDefaultCamera(Camera& camera) const
 	{
-		Point3d pos(1,2,-4);
-		double fov_h = 25 / 180.0 * M_PI;
+		Point3d pos(1,3,-4);
+		double fov_h = 20 / 180.0 * M_PI;
 		Point3d coi(0,0,-0);
 		Vector3d up(0,1,0) ;
 		camera = Camera(pos,coi,up,fov_h);
