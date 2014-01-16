@@ -58,7 +58,9 @@ HDRS	=  	camera.h        \
 # list EXTRAS (shaders, etc.)
 EXTRAS =	textures/checkerboard_lg.bmp    \
             textures/warning.bmp            \
-            meshes/girl_face.obj
+            meshes/girl_face.obj			\
+			Readme.txt						\
+			Makefile
 
 
 # compiler 
@@ -159,8 +161,6 @@ scene4: $(APP)
 scene5: $(APP)
 	$(APP) 1 1 1 4
 
-scenes: $(APP)
-	$(APP) 1 1 1
  
 .PHONY:
 clean :

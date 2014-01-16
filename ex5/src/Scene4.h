@@ -42,7 +42,6 @@ struct Scene4 : public Scene
 	{
 		Scene & scene = *this;
 #if !WITHOUT_TEXTURES
-		BImage * b = new BImage("textures/checkerboard_lg.bmp");
 		BImage * w = new BImage("textures/warning.bmp");
 #endif
 		
@@ -114,8 +113,8 @@ struct Scene4 : public Scene
 		plane2[2] = Point3d(-0.25,0.3,2);
 		plane2[3] = Point3d(-0.25,0.25,2);
 		Polygon * poly2 = new Polygon(plane2);
-		poly2->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
-		poly2->reflection() = (green + red) * 0.8 + white * 0.5;
+		poly2->diffuse() = ((green + red) + white * 0.8) * 0.2;
+		poly2->reflection() = (green + red) + white * 0.5;
 		scene.add_object(poly2);
 
 		//arm 2
@@ -125,8 +124,8 @@ struct Scene4 : public Scene
 		plane3[2] = Point3d(1.5,0.3,2);
 		plane3[3] = Point3d(1.5,0.25,2);
 		Polygon * poly3 = new Polygon(plane3);
-		poly3->diffuse() = ((green + red) * 0.8 + white * 0.5) * 0.2;
-		poly3->reflection() = (green + red) * 0.8 + white * 0.5;
+		poly3->diffuse() = ((green + red) + white * 0.8) * 0.2;
+		poly3->reflection() = (green + red) + white * 0.5;
 		scene.add_object(poly3);
 	
 		//create a plane
