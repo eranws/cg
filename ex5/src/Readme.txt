@@ -6,7 +6,7 @@ Implementation:
 ---
 
 Our example commands are given in the makefile.
-To run each scene type: make sceneX (1 < X < 5)
+To run each scene type: make sceneX (1 <= X <= 5)
 The parameters for scene 1: 1 3 0.7 0
 The parameters for scene 2: 1 3 1 1
 The parameters for scene 3: 1 1 1 1
@@ -22,8 +22,16 @@ The shadow rays are then shot from the light source in the direction of the curr
 If a ray reaches it without hitting any object on the way - we count this pixel as "illuminated" and break 
 (no need to check for more rays).
 
- 
- 
+
+Our parametric object:
+We implemented a Lens defined by the intersection of two spheres of the same size.
+We created two scenes with our lens object:
+Scene4: A model of Glasses with an ellipsoid behind. (to run in type "make scene4")
+Scene5: We showcase the magnifying ability of our lens by replacing the front sphere in scene2 with our lens. (to run it type "make scene5")
+
+The lens was difficult to implement correctly, we feel that a small bonus might be appropriate (especially since we submitted without an extension).
+Thanks (:
+
 
 Files sent:
 ---
