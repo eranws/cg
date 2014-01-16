@@ -36,10 +36,6 @@ int MyMeshObject::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 	}
 
 	return retVal;
-
-
-
-
 }
 
 
@@ -82,6 +78,7 @@ void MyMeshObject::populatePolygons()
 				_polygons.push_back(Polygon(vertices, textices));
 			}
 		}
+		else
 		{
 			if (hasNormal)
 			{
@@ -93,6 +90,8 @@ void MyMeshObject::populatePolygons()
 				_polygons.push_back(Polygon(vertices));
 			}
 		}
+
+		_polygons.back().setParent(this);
 	}
 	_mesh.release_face_normals();
 }

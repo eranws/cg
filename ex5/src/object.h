@@ -69,11 +69,14 @@ public:
   const Color3d&  getTransparency() const;
   const double    getIndex()        const;
   const double    getShining()      const;
+  const BImage*   getDiffuseTexture() const;
 
 
 
-  const bool hasTexture() const {return _diffuseTexture != NULL;}
-  const bool isRefractive() const {return _index > 1.0;}
+ bool hasTexture() const;
+ bool isRefractive() const;
+
+ void setParent(Object* parent){_parent = parent;}
 
 protected:
   Color3d _ambient;       // The object's ambient color         //
@@ -87,6 +90,7 @@ protected:
 
   BImage* _diffuseTexture;// The objects's diffuse texture map  //
 
+  Object* _parent; //for compound objects
 } ;
 
 #endif /* _OBJECT_HH */

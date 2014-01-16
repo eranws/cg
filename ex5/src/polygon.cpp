@@ -53,7 +53,8 @@ int Polygon::intersect(Ray& ray, double tMax, double& t, Point3d& P,
 				{
 					retVal = 1;
 					N = p.D();
-					texColor = _diffuse;
+
+					texColor = getDiffuse();
 					if (_diffuseTexture)
 					{
 						texColor *= textureDiffuse(P, texCoords, i);
@@ -106,9 +107,11 @@ Color3d Polygon::textureDiffuse(const Point3d& P, const Point2d& tex, int triInd
 	double u = _triangles[triIndex]->t0()[X] * (1 - u1 - v1) + _triangles[triIndex]->tu()[X] *u1 + _triangles[triIndex]->tv()[X] * v1;
 	double v = _triangles[triIndex]->t0()[Y] * (1 - u1 - v1) + _triangles[triIndex]->tu()[Y] *u1 + _triangles[triIndex]->tv()[Y] * v1;
 
-	u *= _diffuseTexture->width();
-	v *= _diffuseTexture->height();
+	BImage* texture = const_cast<BImage*>(getDiffuseTexture()); //HACK, BImage doesn't support const operations...
+	
+	u *= texture->width();
+	v *= texture->height();
 
-	Bpixel pix = (*_diffuseTexture)(u, v);
+	Bpixel pix = (*texture)(u, v);
 	return Color3d(pix.r, pix.g, pix.b) * COLOR_NORMALIZE;
 }
