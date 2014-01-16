@@ -36,13 +36,21 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 	const int n = img.getHeight();
 	const float aspectRatio = float(n)/m;
 
-	Vector3d centerRay = _coi - _position; //Z
-	double centerRayLength = centerRay.length();
+//	Vector3d centerRay = _coi - _position; //Z
+//	double centerRayLength = centerRay.length();
 
-	Vector3d verticalDir = _up.normalized();
-	Vector3d horizontalDir = OpenMesh::cross(centerRay, _up).normalize();
+//	Vector3d verticalDir = _up.normalized();
+//	Vector3d horizontalDir = OpenMesh::cross(centerRay, _up).normalize();
 
-	verticalDir = -verticalDir;
+//	verticalDir = -verticalDir;
+
+	Vector3d centerRay = (_coi - _position).normalize();
+	Vector3d horizontal = (centerRay % _up).normalize();
+	Vector3d vertical = (centerRay % horizontal).normalize();
+
+	Vector3d dx = horizontal * 2 * tan(_fov_h) / img.getWidth();
+	Vector3d dy = vertical * 2 * aspectRatio * tan(_fov_h) / img.getHeight();
+
 
 	for (size_t samples = 0; samples < _samples_per_pixel; samples++)
 	{
@@ -57,20 +65,21 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 		for (size_t i = row_start; i < row_start + number_of_rows; i++)
 		{
-			double yr = (float(i + sy) / n) * 2 - 1;  // -1 < yr < 1
-			yr *= centerRayLength * tan(_fov_h) * aspectRatio;  // sceneBottom < yr < sceneTop
+//			double yr = (float(i + sy) / n) * 2 - 1;  // -1 < yr < 1
+//			yr *= centerRayLength * tan(_fov_h) * aspectRatio;  // sceneBottom < yr < sceneTop
 
 			for (int j = 0; j < m; j++)
 			{
-				double xr = (float(j + sx) / m) * 2 - 1;  // -1 < xr < 1
-				xr *= centerRayLength * tan(_fov_h); // sceneLeft < xr < sceneRight
+//				double xr = (float(j + sx) / m) * 2 - 1;  // -1 < xr < 1
+//				xr *= centerRayLength * tan(_fov_h); // sceneLeft < xr < sceneRight
 
-				Point3d dir = centerRay + horizontalDir * xr + verticalDir * yr;
+//				Point3d dir = centerRay + (0.5 + horizontalDir * xr + verticalDir * yr;
+				Vector3d dir = (j + sx - img.getWidth() * 0.5)*dx + (i + sy - img.getHeight() * 0.5)*dy + centerRay;
 
 				Ray r(_position, dir);
-				//r.normalize() called on ctor
 
 				Color3d color = scene.trace_ray(r, 1.0);
+
 
 				color[0] = std::min(color[0], 1.0);
 				color[1] = std::min(color[1], 1.0);

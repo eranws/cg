@@ -7,9 +7,9 @@ Implementation:
 
 Our example commands are given in the makefile.
 To run each scene type: make sceneX (1 <= X <= 5)
-The parameters for scene 1: 1 3 0.7 0
-The parameters for scene 2: 1 3 1 1
-The parameters for scene 3: 1 1 1 1
+The parameters for scene 1: ex5 2 3 0.7 0
+The parameters for scene 2: ex5 1 3 1.3 1
+The parameters for scene 3: ex5 1 1 1 2
 
 Sphere lights:
 We implemented sphere lights simply by adding a radius member to the PointLight class.

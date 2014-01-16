@@ -145,10 +145,10 @@ tar:
 	tar cvf $(EXEC).tar Makefile $(SRCS) $(HDRS) README
 
 scene1: $(APP)
-	$(APP) 1 3 0.7 0
+	$(APP) 2 3 0.7 0
 
 scene2: $(APP)
-	$(APP) 1 3 1 1
+	$(APP) 1 3 1.3 1
 
 scene3: $(APP)
 	$(APP) 1 1 1 2
