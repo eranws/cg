@@ -38,7 +38,7 @@
 //////////////////////////////
 
 static const double MINIMAL_VIS       = 0.1;
-static const double RECURSION_FACTOR  = 0.70;
+static const double RECURSION_FACTOR  = 0.5;
 
 //////////////////////////////
 // Class Decleration        //

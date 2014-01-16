@@ -78,7 +78,11 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (int s = 0; s < _numberOfRefRays; s++)
 				{
-					reflectionColor += obj->getReflection() * trace_ray(reflected, vis * RECURSION_FACTOR, obj);
+					if (_numberOfRefRays > 1)
+					{
+						reflected = perturbateRay(reflected);
+					}
+					reflectionColor += (obj->getReflection() * trace_ray(reflected, vis * RECURSION_FACTOR, obj));
 				}
 				reflectionColor /= _numberOfRefRays;
 
@@ -100,6 +104,10 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (int s = 0; s < _numberOfRefRays; s++)
 				{
+					if (_numberOfRefRays > 1)
+					{
+						refracted = perturbateRay(refracted);
+					}
 					refractionColor += obj->getTransparency() * trace_ray(refracted, vis * RECURSION_FACTOR, obj);
 				}
 				refractionColor /= _numberOfRefRays;				
@@ -119,6 +127,7 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 				for (size_t s = 0; s < _lights[i]->_shadowRays.size(); s++)
 				{
+					//Position on the sphere light, or Point light (radius is EPS if point light)
 					Vector3d lightPos = _lights[i]->_position + _lights[i]->_shadowRays[s] * _lights[i]->_radius ;
 					L = (lightPos - P);
 					double maxT = L.length();
@@ -151,8 +160,7 @@ Color3d Scene::trace_ray(Ray ray, double vis, const Object* originObj) const
 
 			}
 
-			retColor = sumLights / (_lights.size() + 1); //avoid overflow, TODO weight light by distance, +1 for ambient
-			retColor *= (COLOR_WHITE - obj->getTransparency() - obj->getReflection());
+			retColor = sumLights;
 
 			retColor += reflectionColor;// * (COLOR_WHITE - obj->getTransparency());
 			retColor += refractionColor;

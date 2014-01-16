@@ -22,12 +22,13 @@ ID2 = 302514401
 SRCS	=  	bimage.cpp      \
             ex5.cpp         \
             scene.cpp       \
-            sphere.cpp      \
             triangle.cpp    \
             camera.cpp      \
             object.cpp      \
             polygon.cpp     \
             MyMeshObject.cpp\
+            Lens.cpp        \
+            Ellipsoid.cpp   \
               
 
 # list of all the headers files
@@ -48,6 +49,8 @@ HDRS	=  	camera.h        \
             scene.h         \
             sphere.h        \
             triangle.h      \
+            Lens.h          \
+            Ellipsoid.h     \
             bimage.h        
 
 # list EXTRAS (shaders, etc.)
@@ -139,8 +142,12 @@ zip:
 tar:
 	tar cvf $(EXEC).tar Makefile $(SRCS) $(HDRS) README
 
-path:
-	source ~cg/setpath.csh
+scene1: $(APP)
+	$(APP) 1 3 0.7 0
+
+scene2: $(APP)
+	$(APP) 1 3 1 1
+
  
 .PHONY:
 clean :

@@ -87,8 +87,8 @@ struct Scene2 : public Scene
 		
 		
 		Point3d center3(0,0,10);
-		double radius3 = 8;
-		Lens * sp3 = new Lens(center3,radius3, radius3 / 10);
+		double radius3 = 4;
+		Sphere * sp3 = new Sphere(center3,radius3);
 		sp3->diffuse() = white * 0.1;
 		sp3->transparency() = white * 0.9;
 		sp3->specular() = white;

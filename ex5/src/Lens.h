@@ -19,7 +19,7 @@
 #include "general.h"
 #include "object.h"
 
-#include "Sphere.h"
+#include "sphere.h"
 
 //////////////////////////////
 // Class Decleration        //

@@ -39,7 +39,7 @@ public:
 
 	Color3d textureDiffuse(const Point3d& P) const;
 
-	bool Ellipsoid::getRoots(const Ray& ray, double* t0, double* t1) const;
+	bool getRoots(const Ray& ray, double* t0, double* t1) const;
 
 	Vector3d getCenter() const {return _C;}
 

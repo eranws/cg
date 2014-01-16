@@ -72,10 +72,13 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 				Color3d color = scene.trace_ray(r, 1.0);
 
-				color = std::min(color, COLOR_WHITE); //TODO: fix in scene
+				color[0] = std::min(color[0], 1.0);
+				color[1] = std::min(color[1], 1.0);
+				color[2] = std::min(color[2], 1.0);
+				//color = std::min(color, COLOR_WHITE); //TODO: fix in scene
 
 				//TODO: optimize double->char conversion, and img pixel access (see BImage.h)
-				color *= 255;
+				color /= COLOR_NORMALIZE;
 
 				img(j, i) = Bpixel(color[0], color[1], color[2]);
 
