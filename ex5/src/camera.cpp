@@ -44,7 +44,7 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 	verticalDir = -verticalDir;
 
-	for (int samples = 0; samples < _samples_per_pixel; samples++)
+	for (size_t samples = 0; samples < _samples_per_pixel; samples++)
 	{
 		float sx = 0.5;
 		float sy = 0.5;

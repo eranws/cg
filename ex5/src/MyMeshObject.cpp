@@ -122,7 +122,7 @@ void MyMeshObject::calculateBoundingSphere()
 void MyMeshObject::set_texture_map(BImage* image)
 {
 	_diffuseTexture = image;
-	for (int i=0; i<_polygons.size(); i++)
+	for (size_t i=0; i<_polygons.size(); i++)
 	{
 		_polygons[i].set_texture_map(image);
 	}

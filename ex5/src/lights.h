@@ -41,7 +41,7 @@ public:
 	{
 
 		int numRays = ceil(std::max(_radius, 1.0));
-		for(size_t i = 0; i < numRays; i++)
+		for(int i = 0; i < numRays; i++)
 		{
 			Vector3d randVec = Vector3d(rand(), rand(), rand()).normalize();
 			_shadowRays.push_back(randVec);
