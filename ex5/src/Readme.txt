@@ -29,7 +29,8 @@ We created two scenes with our lens object:
 Scene4: A model of Glasses with an ellipsoid behind. (to run in type "make scene4")
 Scene5: We showcase the magnifying ability of our lens by replacing the front sphere in scene2 with our lens. (to run it type "make scene5")
 
-The lens was difficult to implement correctly, we feel that a small bonus might be appropriate (especially since we submitted without an extension).
+The lens was difficult to implement correctly, and due to its importance in optics and photography, we feel that a small bonus might be appropriate (especially since we submitted without an extension).
+
 Thanks (:
 
 
