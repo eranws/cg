@@ -7,24 +7,24 @@
 */
 #include "polygon.h"
 
-Polygon::Polygon(vector<Point3d>& vertices) : Object(), _textured(false), _vertices(vertices), _externalNormal(false)
+Polygon::Polygon(vector<Point3d>& vertices) : Object(), _vertices(vertices), _externalNormal(false)
 {
 	triangulate();
 }
 
-Polygon::Polygon(vector<Point3d>& vertices, Vector3d& normal) : Object(), _textured(false), _vertices(vertices), _normal(normal), _externalNormal(true)
+Polygon::Polygon(vector<Point3d>& vertices, Vector3d& normal) : Object(), _vertices(vertices), _normal(normal), _externalNormal(true)
 {
 	triangulate();
 }
 
-Polygon::Polygon(vector<Point3d>& vertices, vector<Point2d> textices) : Object(), _textured(true), _textices(textices), _vertices(vertices), _externalNormal(false)
+Polygon::Polygon(vector<Point3d>& vertices, vector<Point2d> textices) : Object(), _textices(textices), _vertices(vertices), _externalNormal(false)
 {
 	
 	triangulate();
 }
 
 Polygon::Polygon(vector<Point3d>& vertices, vector<Point2d> textices,
-				 Vector3d& normal) : Object(), _textured(true), _textices(textices), _vertices(vertices),  _normal(normal), _externalNormal(true)
+				 Vector3d& normal) : Object(), _textices(textices), _vertices(vertices),  _normal(normal), _externalNormal(true)
 {
 	triangulate();
 }
@@ -80,7 +80,7 @@ void Polygon::triangulate()
 	for (size_t i = 2; i < _vertices.size(); i++)
 	{
 		Triangle* t;
-		if (_textured)
+		if (!_textices.empty())
 		{
 			 t = new Triangle(p0, _vertices[i-1], _vertices[i], _textices[0], _textices[i-1], _textices[i]);
 		}
@@ -104,8 +104,17 @@ Color3d Polygon::textureDiffuse(const Point3d& P, const Point2d& tex, int triInd
 
 	double u1 = tex[0], v1 = tex[1];
 
-	double u = _triangles[triIndex]->t0()[X] * (1 - u1 - v1) + _triangles[triIndex]->tu()[X] *u1 + _triangles[triIndex]->tv()[X] * v1;
-	double v = _triangles[triIndex]->t0()[Y] * (1 - u1 - v1) + _triangles[triIndex]->tu()[Y] *u1 + _triangles[triIndex]->tv()[Y] * v1;
+	double u,v;
+	if (_textices.empty()) // Does the polygon have a texture map coordinates  //
+	{
+		u = u1;
+		v = v1;
+	}
+	else
+	{
+		u = _triangles[triIndex]->t0()[X] * (1 - u1 - v1) + _triangles[triIndex]->tu()[X] *u1 + _triangles[triIndex]->tv()[X] * v1;
+		v = _triangles[triIndex]->t0()[Y] * (1 - u1 - v1) + _triangles[triIndex]->tu()[Y] *u1 + _triangles[triIndex]->tv()[Y] * v1;
+	}
 
 	BImage* texture = const_cast<BImage*>(getDiffuseTexture()); //HACK, BImage doesn't support const operations...
 	

@@ -56,13 +56,6 @@ private:
 	Point2d _tu;  // The texture map coordinate of p1 //
 	Point2d _tv;  // The texture map coordinate of p2 //
 
-	bool  _textured;
-
-	// Used for checking if a point is inside the triangle  //
-	double _uu;
-	double _uv;
-	double _vv;
-	double _d;
 };
 
 #endif /* _TRIANGLE_HH */

@@ -19,13 +19,11 @@ void Triangle::init()
 
 Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2) : _p0(p0), _p1(p1) ,_p2(p2)
 {
-	_textured = false;
 	init();
 }
 
 Triangle::Triangle(Point3d p0, Point3d p1, Point3d p2, Point2d t0, Point2d t1,	Point2d t2) : _p0(p0), _p1(p1) ,_p2(p2), _t0(t0), _tu(t1) ,_tv(t2)
 {
-	_textured = true;
 	init();
 }
 

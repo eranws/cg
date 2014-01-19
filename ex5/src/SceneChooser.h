@@ -21,6 +21,8 @@
 /** Create a new scene according to the scene index and parameters. */
 void setupScene(Scene** scene, size_t scene_index, size_t refRays, double cutoff)
 {
+	srand(0); // initialize random seed for getting same results
+
 	Scene* res;
 	if (scene_index == 0)
 	{

@@ -21,7 +21,6 @@ Ellipsoid::~Ellipsoid()
 bool Ellipsoid::getRoots(const Ray& ray, double* t0, double* t1) const
 {
 	//Compute A, B and C coefficients
-
 	using OpenMesh::dot;
 	double a = dot(ray.D(), ray.D()); //should be 1
 	double b = 2 * dot(ray.D(), ray.O() - _C);
@@ -56,19 +55,13 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 {
 	int retVal = 0;
 
+	//transform ray and ellipsoid to canonical represntation
 	Ray ray((inRay.O() - _C) * _scaleInv + _C, inRay.D() * _scaleInv);
-
-
 
 
 	double t0, t1;
 	if (!getRoots(ray, &t0, &t1))
 		return 0;
-
-	if (t0 > t1)
-	{
-		std::swap(t0, t1); // if t0 is bigger than t1 swap them around
-	}
 
 	if (t0 > EPS)
 	{
@@ -81,19 +74,23 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 		t = t1;
 	}
 
-	if (t > tMax)
+	if (t > tMax) //avoid further computation aince we look for the closest object
 	{
 		retVal = 0;
 	}
 
 	if (retVal == 1)
 	{
+
 		P = ray(t);
+
+		//tranform back to original cartesian representation
 		P -= _C;
 		P *= _scale;
 		P += _C;
 
-		N = (P - _C) * _scaleInv;
+		N = (P - _C);
+		N *= _scaleInv;
 		N.normalize();
 
 		texColor = _diffuse;
@@ -102,6 +99,8 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 			texColor *= textureDiffuse(N);
 		}
 
+		
+
 	}
 
 	return retVal;
@@ -109,6 +108,7 @@ int Ellipsoid::intersect(Ray& inRay, double tMax, double& t, Point3d& P, Vector3
 
 Color3d Ellipsoid::textureDiffuse(const Point3d& P) const
 {
+	//sample texture from the given sphere
 	float theta = atan(P[X] / P[Z]);
 	float phi   = atan(P[Y] / Point2d(P[X],P[Z]).length());
 

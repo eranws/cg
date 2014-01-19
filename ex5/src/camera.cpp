@@ -32,17 +32,11 @@ Camera::Camera(Point3d& pos, Point3d& coi, Vector3d& up, double fov, size_t samp
 
 void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene& scene) const
 {
+
+	//these can be computed in advance, but we sticked to the given api...
 	const int m = img.getWidth();
 	const int n = img.getHeight();
 	const float aspectRatio = float(n)/m;
-
-//	Vector3d centerRay = _coi - _position; //Z
-//	double centerRayLength = centerRay.length();
-
-//	Vector3d verticalDir = _up.normalized();
-//	Vector3d horizontalDir = OpenMesh::cross(centerRay, _up).normalize();
-
-//	verticalDir = -verticalDir;
 
 	Vector3d centerRay = (_coi - _position).normalize();
 	Vector3d horizontal = (centerRay % _up).normalize();
@@ -54,6 +48,8 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 	for (size_t samples = 0; samples < _samples_per_pixel; samples++)
 	{
+		// if number of samples == 1: shoot a ray through the pixel center
+		// else shoot few random rays
 		float sx = 0.5;
 		float sy = 0.5;
 		if (_samples_per_pixel > 1)
@@ -65,30 +61,22 @@ void Camera::render(size_t row_start, size_t number_of_rows, BImage& img, Scene&
 
 		for (size_t i = row_start; i < row_start + number_of_rows; i++)
 		{
-//			double yr = (float(i + sy) / n) * 2 - 1;  // -1 < yr < 1
-//			yr *= centerRayLength * tan(_fov_h) * aspectRatio;  // sceneBottom < yr < sceneTop
-
 			for (int j = 0; j < m; j++)
 			{
-//				double xr = (float(j + sx) / m) * 2 - 1;  // -1 < xr < 1
-//				xr *= centerRayLength * tan(_fov_h); // sceneLeft < xr < sceneRight
-
-//				Point3d dir = centerRay + (0.5 + horizontalDir * xr + verticalDir * yr;
+				//create a ray that passes through the current pixel
 				Vector3d dir = (j + sx - img.getWidth() * 0.5)*dx + (i + sy - img.getHeight() * 0.5)*dy + centerRay;
-
 				Ray r(_position, dir);
 
+				//trace ray
 				Color3d color = scene.trace_ray(r, 1.0);
 
-
+				//avoid overflow on saturated pixels
 				color[0] = std::min(color[0], 1.0);
 				color[1] = std::min(color[1], 1.0);
 				color[2] = std::min(color[2], 1.0);
-				//color = std::min(color, COLOR_WHITE); //TODO: fix in scene
 
-				//TODO: optimize double->char conversion, and img pixel access (see BImage.h)
-				color /= COLOR_NORMALIZE;
-
+				//write on the image object
+				color *= 255;
 				img(j, i) = Bpixel(color[0], color[1], color[2]);
 
 			}

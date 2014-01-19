@@ -23,18 +23,18 @@ struct Scene4 : public Scene
 	void defineLights()
 	{
 		Scene & scene = *this;
-		Point3d pos(-4,15,-1);
+		Point3d pos(0,5,0);
 		Color3d color(1,1,1);
-		PointLight  * p = new PointLight(pos,color, 5);
+		PointLight  * p = new PointLight(pos,color, 1.5);
 		scene.add_light(p);
 
-		Point3d pos2(1,4,-1);
-		PointLight  * p2 = new PointLight(pos,color, 1);
+		Point3d pos2(1,1,-3);
+		PointLight  * p2 = new PointLight(pos,color);
 		scene.add_light(p2);
 
 		Point3d pos1(-1,13,0);
 		Color3d color1(1,1,1);
-		PointLight  * p1 = new PointLight(pos1,color1, 7);
+		PointLight  * p1 = new PointLight(pos1,color1);
 		scene.add_light(p1);
 	}
 	
@@ -42,7 +42,9 @@ struct Scene4 : public Scene
 	{
 		Scene & scene = *this;
 #if !WITHOUT_TEXTURES
-		BImage * w = new BImage("textures/warning.bmp");
+
+		BImage * warnTex = new BImage("textures/warning.bmp");
+		BImage * woodTex = new BImage("textures/wood.bmp");
 #endif
 		
 		/* define some colors */
@@ -53,15 +55,16 @@ struct Scene4 : public Scene
 		Color3d blue(0,0,1.0);
 		
 		
-		Point3d center(1,2,-1);
+		//Ellipsoid
+		Point3d center(-1,2,1);
 		double radius = 0.5;
-		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(0.5, 1, 0.5));
+		Ellipsoid * sp = new Ellipsoid(center,radius, Vector3d(4, 1, 1));
 		sp->diffuse() = white;
-		sp->reflection() = black;
-		sp->specular() = white;
-		sp->shining() = 16;
+		//sp->reflection() = black;
+		//sp->specular() = white;
+		//sp->shining() = 2;
 #if !WITHOUT_TEXTURES
-		sp->set_texture_map(w);
+		sp->set_texture_map(warnTex);
 #endif
 		scene.add_object(sp);
 
@@ -137,17 +140,24 @@ struct Scene4 : public Scene
 		plane[1] = Point3d(-x,y,z);
 		plane[2] = Point3d(x,y,z);
 		plane[3] = Point3d(x,y,-z);
-		Polygon * poly = new Polygon(plane);
+			
+		vector<Point2d> plane_uv(4);
+		plane_uv[0] = Point2d(0,1);
+		plane_uv[1] = Point2d(1,1);
+		plane_uv[2] = Point2d(1,0);
+		plane_uv[3] = Point2d(0,0);
+
+		Polygon * poly = new Polygon(plane, plane_uv);
 		//poly->diffuse() = red * 0.5 + white * 0.5;
 //		poly->reflection() = (blue + red) * 0.5 + white * 0.5;
 		poly->ambient() = red;
-//		poly->specular()  = white;
-		poly->diffuse() = white/2 + red/2;
-		poly->reflection() = white/16;
+		//poly->specular()  = white;
+		poly->diffuse() = white/2;
+		poly->reflection() = white/8;
 		poly->specular() = white/4;
 		poly->shining() = 2;
 
-		poly->set_texture_map(w);
+		poly->set_texture_map(woodTex);
 
 		scene.add_object(poly);
 	}

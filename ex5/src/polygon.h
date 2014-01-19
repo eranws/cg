@@ -58,7 +58,6 @@ private:
 
 
 private:
-  bool              _textured;  // Does the polygon have a texture map coordinates  //
   vector<Point2d>   _textices;  // The polygon's texture map coordinates            //
   vector<Point3d>   _vertices;  // The polygon's vertices                           //
   vector<Triangle*> _triangles; // The polygon's triangles                          //

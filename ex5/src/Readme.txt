@@ -13,7 +13,7 @@ The parameters for scene 3: ex5 1 1 1 2
 
 Sphere lights:
 We implemented sphere lights simply by adding a radius member to the PointLight class.
-A PointLight is instanciated from this class with radius EPSILON.
+A PointLight is instantiated from this class with radius EPSILON.
 We implemented shadow rays by defining 6 fixed point on the sphere 
 (corresponding with the 6 touching points of a bounding box), and added more random shadow rays 
 as a function of the light radius - This will make results more accurate, since the larger the light is,
@@ -78,6 +78,8 @@ HDRS	=  	camera.h        \
 Texture Files:
 textures/checkerboard_lg.bmp
 textures/warning.bmp
+textures/wood.bmp
+
 
 
 Mesh files:

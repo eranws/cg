@@ -58,6 +58,7 @@ HDRS	=  	camera.h        \
 # list EXTRAS (shaders, etc.)
 EXTRAS =	textures/checkerboard_lg.bmp    \
             textures/warning.bmp            \
+            textures/wood.bmp            	\
             meshes/girl_face.obj			\
 			Readme.txt						\
 			Makefile
