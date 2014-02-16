@@ -16,8 +16,8 @@ const int TEXTURE_MIRROR = 3;
 const int TEXTURE_BRICK = 4;
 
 
-vec3 light1 = vec3(3.0, 2.0, -1.0);
-vec3 light2 = vec3(-3.0, 0.0, -1.0);
+vec3 light1 = vec3(3.0, 2.0, 1.0);
+vec3 light2 = vec3(-3.0, 0.0, 1.0);
 
 vec3 ambientColor = vec3(1.0, 1.0, 1.0);
 vec3 specularColor = vec3(1.0, 1.0, 1.0); // Specular color
@@ -61,8 +61,8 @@ void phongShading(float texture_spec_coeff)
 	float dist2 = distance(viewPosition.xyz, light2);
 
 
-	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
-	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
+	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(l1, n));
+	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(l2, n));
 
 	//Specular
 	vec3 v = normalize(cameraPosition - viewPosition);
@@ -110,7 +110,7 @@ vec2 sphereMap(vec3 posOnSphere)
 	float u = (theta + MY_PI) / (2 * MY_PI);
 	float v = (phi + MY_PI/2)  / MY_PI;
 	fragTexCoord.x = 1.0 - u;
-	fragTexCoord.y = v;
+	fragTexCoord.y = 1.0 - v;
 
 	return fragTexCoord;
 }

@@ -49,8 +49,8 @@ void main()
 	float dist2 = distance(viewPosition.xyz, light2);
 
 	//Diffuse
-	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
-	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
+	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(l1, n));
+	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(l2, n));
 	
 	//Specular
 	vec3 v = normalize(eye - viewPosition);
