@@ -3,8 +3,8 @@
 
 uniform float specExp = 200.0;
 	
-uniform vec3 light1 = vec3(3.0, 2.0, -1.0);
-uniform vec3 light2 = vec3(-3.0, 0.0, -1.0);
+uniform vec3 light1 = vec3(3.0, 2.0, 1.0);
+uniform vec3 light2 = vec3(-3.0, 0.0, 1.0);
 
 //uniform vec3 light1 = vec3(1.0, 0.8, 1.0);
 //uniform vec3 light2 = vec3(-1.0, -0.7, 1.0);
@@ -34,7 +34,6 @@ void main()
 	//Ambient
 	vec3 ambient = ka * ambientColor;
 
-
 	vec3 l1 = normalize(light1 - viewPosition);
 	vec3 l2 = normalize(light2 - viewPosition);
 	vec3 n = normalize(viewNormal);
@@ -43,8 +42,8 @@ void main()
 	float dist2 = distance(viewPosition.xyz, light2);
 
 	//Diffuse
-	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(-l1, n));
-	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(-l2, n));
+	vec3 diffuse1 = lightColor1 * kd * max(0.0, dot(l1, n));
+	vec3 diffuse2 = lightColor2 * kd * max(0.0, dot(l2, n));
 	
 	//Specular
 	vec3 v = normalize(eye - viewPosition);

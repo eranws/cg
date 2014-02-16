@@ -68,7 +68,7 @@ void Model::genModelVerticesFaces()
 			glm::vec4 position((p[0] - _center[0]) / _maxV, (p[1] - _center[1]) / _maxV, (p[2] - _center[2]) / _maxV, 1.0f);
 			vertices[i++] = position;
 			MyMesh::Normal n = _mesh.normal(h_it);
-			glm::vec4 normal(n[0], n[1], n[2], 1.0);
+			glm::vec4 normal(n[0], n[1], n[2], 0.0);
 			vertices[i++] = normal;
 
 		}
@@ -84,8 +84,10 @@ void Model::genModelVerticesFaces()
 		float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
 		for (size_t i = 0; i < vertices.size(); i++)
 		{
-			vertices[i] *= (1 + arcballNormalizeOffset);
-			vertices[i][3] = 1.0;
+			if(i % 2 == 0) { //do this only for vertices, not normals
+				vertices[i] *= (1 + arcballNormalizeOffset);
+				vertices[i][3] = 1.0;
+			}
 		}
 	}
 
@@ -123,7 +125,7 @@ void Model::genModelVertices()
 		glm::vec4 position((p[0] - _center[0]) / _maxV, (p[1] - _center[1]) / _maxV, (p[2] - _center[2]) / _maxV, 1.0f);
 		vertices[i++] = position;
 		MyMesh::Normal n = _mesh.normal(vertexIter);
-		glm::vec4 normal(n[0], n[1], n[2], 1.0);
+		glm::vec4 normal(n[0], n[1], n[2], 0.0);
 		vertices[i++] = normal;
 	}
 	_mesh.release_face_normals();
@@ -155,8 +157,10 @@ void Model::genModelVertices()
 		float arcballNormalizeOffset = std::max(upperRightOffset, lowerLeftOffset);
 		for (size_t i = 0; i < vertices.size(); i++)
 		{
-			vertices[i] *= (1 + arcballNormalizeOffset);
-			vertices[i][3] = 1.0;
+			if(i % 2 == 0) { //do this only for vertices, not normals
+				vertices[i] *= (1 + arcballNormalizeOffset);
+				vertices[i][3] = 1.0;
+			}
 		}
 	}
 
