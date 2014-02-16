@@ -109,7 +109,7 @@ vec2 sphereMap(vec3 posOnSphere)
 
 	float u = (theta + MY_PI) / (2 * MY_PI);
 	float v = (phi + MY_PI/2)  / MY_PI;
-	fragTexCoord.x = 1.0 - u;
+	fragTexCoord.x = u;
 	fragTexCoord.y = 1.0 - v;
 
 	return fragTexCoord;
@@ -118,7 +118,7 @@ vec2 sphereMap(vec3 posOnSphere)
 void mirrorTexture()
 {
 	// Set texture coordinates using spherical mapping:
-	vec3 posOnSphere = reflect(cameraPosition - viewPosition.xyz, n) ;
+	vec3 posOnSphere = normalize(reflect(cameraPosition + vec3(0, 0, -3) - viewPosition.xyz, n)) ;
 	vec2 fragTexCoord = sphereMap(posOnSphere.xyz);
 	vec4 diffuse = texture(my_colormap, fragTexCoord);
 	outColor = vec4(diffuse.xyz, 1.0);
